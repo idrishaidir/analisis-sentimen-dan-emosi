@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tweet Scraper</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <h1>🕵️‍♂️ Twitter Scraper</h1>
+
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %} {% for category, message in messages %}
+      <div class="flash {{ category }}">{{ message }}</div>
+      {% endfor %} {% endif %} {% endwith %}
+
+      <form action="/" method="post">
+        <label for="auth_token">Auth Token:</label>
+        <input
+          type="text"
+          name="auth_token"
+          placeholder="Masukkan auth token"
+          required
+        />
+
+        <label for="keyword">Kata Kunci:</label>
+        <input
+          type="text"
+          name="keyword"
+          placeholder="Contoh: indonesia"
+          required
+        />
+
+        <label for="since">Sejak (YYYY-MM-DD):</label>
+        <input type="date" name="since" required />
+
+        <label for="until">Sampai (YYYY-MM-DD):</label>
+        <input type="date" name="until" required />
+
+        <label for="limit">Jumlah Tweet:</label>
+        <input
+          type="number"
+          name="limit"
+          min="1"
+          placeholder="Contoh: 100"
+          required
+        />
+
+        <button type="submit">Mulai Scraping</button>
+      </form>
+      <a href="{{ url_for('result') }}" class="btn btn-info mt-3"
+        >📊 Lihat Visualisasi Hasil</a
+      >
+    </div>
+  </body>
+</html>

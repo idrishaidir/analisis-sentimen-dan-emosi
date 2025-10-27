@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Hasil Analisis</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    />
+  </head>
+  <body class="bg-light">
+    <div class="container mt-4">
+      <h2 class="text-center mb-4">📊 Hasil Analisis Sentimen & Emosi</h2>
+
+      <div class="card p-4 shadow-sm">
+        <h5>🗂 File: {{ file_name }}</h5>
+        <div class="row mt-4">
+          <div class="col-md-6">
+            <h5 class="text-center">Sentimen</h5>
+            <canvas id="sentimentChart"></canvas>
+          </div>
+          <div class="col-md-6">
+            <h5 class="text-center">Emosi</h5>
+            <canvas id="emotionChart"></canvas>
+          </div>
+        </div>
+        <div class="text-center mt-4">
+          <a href="{{ url_for('index') }}" class="btn btn-secondary"
+            >⬅ Kembali</a
+          >
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const sentimentData = {{ sentiment_counts|tojson }};
+      const emotionData = {{ emotion_counts|tojson }}:
+
+      new Chart(document.getElementById("sentimentChart"), {
+        type: 'pie',
+        data: {
+          labels: Object.keys(sentimentData),
+          datasets: [{
+            data: Object.values(sentimentData),
+            backgroundColor: ['#ff6384', '#ffcd56', '#36a2eb']
+          }]
+        }
+      });
+
+      new Chart(document.getElementById("emotionChart"), {
+        type: 'bar',
+        data: {
+          labels: Object.keys(emotionData),
+          datasets: [{
+            label: 'Jumlah Emosi',
+            data: Object.values(emotionData),
+            backgroundColor: '#4bc0c0'
+          }]
+        },
+        options: {
+          scales: {
+            y: { beginAtZero: true }
+          }
+        }
+      });
+    </script>
+  </body>
+</html>
