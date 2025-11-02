@@ -1,0 +1,242 @@
+/* Reset dasar */
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+p,
+ul {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  line-height: 1.6;
+  background-color: #ffffff;
+  color: #333;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* =================================== */
+/* Flash Message Styles (Baru) */
+/* =================================== */
+.flash-wrapper {
+  margin-bottom: 1.5rem;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.flash {
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.flash.success {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.flash.error {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+/* =================================== */
+/* Navbar Styles (Sama seperti halaman lain) */
+/* =================================== */
+.navbar {
+  background-color: #5d001e; /* Warna maroon */
+  color: white;
+  padding: 1rem 0;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.container-nav {
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: white;
+  text-decoration: none;
+}
+
+.logo img {
+  width: 40px;
+  margin-right: 10px;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+}
+
+.nav-links li {
+  margin-left: 2rem;
+}
+
+.nav-links a {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  padding-bottom: 5px;
+  border-bottom: 2px solid transparent;
+  transition: border-bottom 0.3s;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+  border-bottom: 2px solid white;
+}
+
+/* =================================== */
+/* Result Container Styles */
+/* =================================== */
+.result-container {
+  width: 90%;
+  max-width: 1000px;
+  margin: 4rem auto;
+  text-align: center;
+}
+
+.result-container h2 {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.result-container h3 {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #555;
+  margin-bottom: 0.5rem;
+}
+
+.result-container p {
+  font-size: 1.1rem;
+  color: #666;
+  margin-bottom: 2rem;
+}
+
+/* Word Cloud Styles (DIUBAH) */
+.wordcloud-wrapper {
+  margin-bottom: 3rem;
+}
+
+.wordcloud-wrapper h4 {
+  font-size: 1.3rem;
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+/* Ganti style list kata dengan style untuk gambar */
+.wordcloud-image-container {
+  background-color: #fbebee; /* Pink muda */
+  border-radius: 20px;
+  padding: 1rem; /* Kurangi padding agar gambar lebih pas */
+  max-width: 800px;
+  margin: 0 auto;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  /* Beri tinggi minimum jika gambar gagal dimuat */
+  min-height: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.wordcloud-image-container img {
+  width: 100%;
+  height: auto;
+  border-radius: 15px; /* Bulatkan sedikit gambar di dalam container */
+  /* Pastikan gambar tidak pecah jika terlalu besar */
+  object-fit: contain;
+}
+
+.wordcloud-image-container p {
+  color: #555;
+  padding: 2rem;
+  font-style: italic;
+  margin: 0;
+}
+
+/* Charts Grid Styles */
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.chart-card {
+  background-color: #fbebee; /* Pink muda */
+  border-radius: 20px;
+  padding: 1.5rem;
+}
+
+.chart-card h4 {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Link Kembali */
+.back-link {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #5d001e;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.back-link span {
+  transition: margin-left 0.3s;
+}
+
+.back-link:hover span {
+  margin-left: 8px;
+}
+
+/* =================================== */
+/* Footer Styles (Sama seperti halaman lain) */
+/* =================================== */
+.footer {
+  text-align: center;
+  padding: 2rem 0;
+  background-color: #f9f9ff; /* Sedikit diubah agar tidak sama persis */
+  color: #aaa;
+  border-top: 1px solid #eee;
+  margin-top: 4rem;
+}
+
+/* =================================== */
+/* Responsive */
+/* =================================== */
+@media (max-width: 768px) {
+  .charts-grid {
+    grid-template-columns: 1fr; /* Stack charts on mobile */
+  }
+
+  .result-container h2 {
+    font-size: 2rem;
+  }
+
+  .result-container h3 {
+    font-size: 1.5rem;
+  }
+}

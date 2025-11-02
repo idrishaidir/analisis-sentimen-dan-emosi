@@ -3,58 +3,108 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tweet Scraper</title>
+    <title>moodify - Every Text Has A Voice</title>
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='style.css') }}"
     />
   </head>
   <body>
-    <div class="container">
-      <h1>🕵️‍♂️ Twitter Scraper</h1>
+    <nav class="navbar">
+      <div class="container-nav">
+        <a href="{{ url_for('index') }}" class="logo">
+          <img
+            src="{{ url_for('static', filename='assets/logo.png') }}"
+            alt="moodify Logo"
+          />
+          moodify
+        </a>
+        <ul class="nav-links">
+          <li><a href="{{ url_for('index') }}" class="active">HOME</a></li>
+          <li><a href="{{ url_for('analisis') }}">ANALISIS</a></li>
+          <li><a href="#">TUTORIAL</a></li>
+        </ul>
+      </div>
+    </nav>
 
-      {% with messages = get_flashed_messages(with_categories=true) %} {% if
-      messages %} {% for category, message in messages %}
-      <div class="flash {{ category }}">{{ message }}</div>
-      {% endfor %} {% endif %} {% endwith %}
+    <header class="hero">
+      <div class="container-hero">
+        <div class="hero-image">
+          <img
+            src="{{ url_for('static', filename='assets/logo_bg_putih.png') }}"
+            alt="Hero Illustration"
+          />
+        </div>
+        <div class="hero-text">
+          <h1>Every Text Has A Voice</h1>
+          <p>
+            Analisis emosi dan opini pengguna X hanya dengan satu kata kunci.
+          </p>
+          <a href="{{ url_for('analisis') }}" class="cta-link">
+            Masukkan kata kunci
+            <span>&rarr;</span>
+          </a>
+        </div>
+      </div>
+    </header>
 
-      <form action="/" method="post">
-        <label for="auth_token">Auth Token:</label>
-        <input
-          type="text"
-          name="auth_token"
-          placeholder="Masukkan auth token"
-          required
-        />
+    <section class="why">
+      <div class="container-why">
+        <h2>Mengapa moodify?</h2>
+        <p>
+          Di tengah derasnya percakapan di media sosial, sulit rasanya memahami
+          bagaimana perasaan orang-orang di balik setiap kata yang mereka tulis.
+          Moodify hadir untuk menjembatani itu semua — membantu kamu membaca
+          emosi di balik teks secara sederhana dan menyenangkan. Melalui
+          analisis sentimen, Moodify mengubah ribuan cuitan menjadi gambaran
+          suasana hati publik. Kamu bisa tahu apakah topik tertentu sedang
+          membuat orang senang, kecewa, marah, atau justru campur aduk. Bukan
+          sekadar data, Moodify ingin mengajak kamu memahami perasaan kolektif
+          di dunia digital, karena setiap teks selalu punya cerita dan emosi di
+          dalamnya.
+        </p>
+      </div>
+    </section>
 
-        <label for="keyword">Kata Kunci:</label>
-        <input
-          type="text"
-          name="keyword"
-          placeholder="Contoh: indonesia"
-          required
-        />
+    <section class="features">
+      <div class="container-features">
+        <div class="feature-item">
+          <img
+            src="{{ url_for('static', filename='assets/emosi.png') }}"
+            alt="Baca emosi"
+          />
+          <h3>Baca emosi di balik kata.</h3>
+          <p>
+            Moodify membantu kamu mengurai suasana hati publik dari setiap tweet
+            yang dibagikan.
+          </p>
+        </div>
+        <div class="feature-item">
+          <img
+            src="{{ url_for('static', filename='assets/talk.png') }}"
+            alt="Cari tahu"
+          />
+          <h3>Cari tahu apa yang sedang dibicarakan.</h3>
+          <p>
+            Cukup masukkan kata kunci dan dapatkan data tren sentimen yang
+            muncul.
+          </p>
+        </div>
+        <div class="feature-item">
+          <img
+            src="{{ url_for('static', filename='assets/mood.png') }}"
+            alt="Satu aplikasi"
+          />
+          <h3>Satu aplikasi, sejuta mood.</h3>
+          <p>Moodify mengubah teks menjadi suara emosi digital.</p>
+        </div>
+      </div>
+    </section>
 
-        <label for="since">Sejak (YYYY-MM-DD):</label>
-        <input type="date" name="since" required />
-
-        <label for="until">Sampai (YYYY-MM-DD):</label>
-        <input type="date" name="until" required />
-
-        <label for="limit">Jumlah Tweet:</label>
-        <input
-          type="number"
-          name="limit"
-          min="1"
-          placeholder="Contoh: 100"
-          required
-        />
-
-        <button type="submit">Mulai Scraping</button>
-      </form>
-      <a href="{{ url_for('result') }}" class="btn btn-info mt-3"
-        >📊 Lihat Visualisasi Hasil</a
-      >
-    </div>
+    <footer class="footer">
+      <div class="container-footer">
+        <p>&copy; 2025 moodify, Inc.</p>
+      </div>
+    </footer>
   </body>
 </html>

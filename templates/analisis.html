@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mulai Analisis - moodify</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='form-style.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="container-nav">
+        <a href="{{ url_for('index') }}" class="logo">
+          <img
+            src="{{ url_for('static', filename='assets/logo.png') }}"
+            alt="moodify Logo"
+          />
+          moodify
+        </a>
+        <ul class="nav-links">
+          <li><a href="{{ url_for('index') }}">HOME</a></li>
+          <li>
+            <a href="{{ url_for('analisis') }}" class="active">ANALISIS</a>
+          </li>
+          <li><a href="#">TUTORIAL</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="analysis-container">
+      <h2>Mulai Analisis Sentimen dan Emosi</h2>
+      <p class="subtitle">
+        Lihat Apa yang Orang Rasakan dari Kata-Kata Mereka.
+      </p>
+      <form action="{{ url_for('analisis') }}" method="post">
+        <div class="form-group-inline">
+          <label for="auth_token">Masukkan auth token</label>
+          <div class="input-with-icon">
+            <input type="text" id="auth_token" name="auth_token" required />
+            <i class="fas fa-search"></i>
+          </div>
+          <a href="#" class="tutorial-link"
+            >Mengalami kesulitan? tutorial <span>&rarr;</span></a
+          >
+        </div>
+
+        <hr class="divider" />
+
+        <div class="form-group">
+          <div class="label-icon-wrapper">
+            <label>Pilih Rentang Waktu</label>
+            <i class="fas fa-mouse-pointer"></i>
+          </div>
+
+          <label for="since" class="sub-label">Sejak Tanggal:</label>
+          <input type="date" id="since" name="since" required />
+
+          <label for="until" class="sub-label">Sampai Tanggal:</label>
+          <input type="date" id="until" name="until" required />
+        </div>
+
+        <div class="form-group">
+          <label for="limit">Jumlah tweet yang ingin dianalisis:</label>
+          <input type="number" id="limit" name="limit" min="1" required />
+        </div>
+
+        <div class="form-group">
+          <label for="keyword">Masukkan kata kunci:</label>
+          <input type="text" id="keyword" name="keyword" required />
+        </div>
+
+        <button type="submit" class="submit-link">
+          Lihat Hasil Analisis dan Emosi
+        </button>
+      </form>
+    </div>
+
+    <footer class="footer">
+      <div class="container-footer">
+        <p>&copy; 2025 moodify, Inc.</p>
+      </div>
+    </footer>
+  </body>
+</html>
