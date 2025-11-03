@@ -1,0 +1,7 @@
+flask
+pandas
+torch
+transformers
+nltk
+Sastrawi
+wordcloud
