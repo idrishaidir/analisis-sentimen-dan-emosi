@@ -49,7 +49,7 @@ img {
 
 .logo img {
   border-radius: 50%;
-  width: 40px; /* Sesuaikan ukuran logo */
+  width: 40px;
   margin-right: 10px;
 }
 
@@ -76,9 +76,8 @@ img {
   border-bottom: 2px solid white;
 }
 
-/* Hero Section */
 .hero {
-  background-color: #fdfafb; /* Warna putih gading sedikit */
+  background-color: #fdfafb;
 }
 
 .container-hero {
@@ -175,7 +174,7 @@ img {
 }
 
 .feature-item img {
-  width: 100px; /* Sesuaikan ukuran ikon fitur */
+  width: 100px;
   height: 100px;
   margin-bottom: 1rem;
 }

@@ -11,7 +11,7 @@ app = Flask(__name__)
 app.secret_key = "secret123"
 
 # =========================================================
-# 🌐 ROUTES
+# ROUTES
 # =========================================================
 @app.route("/")
 def index():
@@ -38,11 +38,9 @@ def analisis():
             flash("⚠️ Jumlah tweet harus berupa angka!", "error")
             return redirect(url_for("analisis"))
 
-        # Cukup panggil satu fungsi ini!
         success, message = scraping_tweets(keyword, since, until, auth_token, limit)
         
         if success:
-            # Redirect ke hasil (pesan flash sudah dihapus)
             return redirect(url_for("result"))
         else:
             flash(f"⚠️ Gagal memproses data: {message}", "error")
@@ -53,7 +51,7 @@ def analisis():
 
 @app.route("/result")
 def result():
-    """Menampilkan halaman visualisasi hasil (DENGAN WORDCLOUD)"""
+    """Menampilkan halaman visualisasi hasil (DENGAN JUMLAH TWEET)"""
     output_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tweets-data", "output")
     
     if not os.path.exists(output_dir):
@@ -66,6 +64,8 @@ def result():
 
     latest_file = max([os.path.join(output_dir, f) for f in csv_files], key=os.path.getmtime)
     df = pd.read_csv(latest_file)
+
+    tweet_count = len(df)
 
     sentiment_counts = df["sentimen"].value_counts().to_dict()
     emotion_counts = df["emosi"].value_counts().to_dict()
@@ -107,11 +107,17 @@ def result():
         sentiment_counts=sentiment_counts,
         emotion_counts=emotion_counts,
         keyword=keyword, 
-        wordcloud_url=wordcloud_url_for_template
+        wordcloud_url=wordcloud_url_for_template,
+        tweet_count=tweet_count
     )
 
+@app.route("/tutorial")
+def tutorial():
+    """Menampilkan halaman tutorial"""
+    return render_template("tutorial.html")
+
 # =========================================================
-# 🚀 RUN
+# RUN
 # =========================================================
 if __name__ == "__main__":
     print("📂 Current working directory:", os.getcwd())

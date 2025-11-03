@@ -5,12 +5,10 @@ import re
 import time
 import shutil
 
-# Import preprocessing functions from the same directory
 from .preprocessing import preprocessText
-# Import prediction functions from the same directory
+
 from .models import predict_sentimen, predict_emosi
 
-# Ini adalah fungsi analyze_sentiment_emotion dari app.py lama Anda
 def analyze_sentiment_emotion(cleaned_path):
     try:
         print(f"🔍 Membaca file hasil preprocessing: {cleaned_path}")
@@ -39,7 +37,6 @@ def analyze_sentiment_emotion(cleaned_path):
 
 
 def scraping_tweets(keyword, since, until, auth_token, limit=100):
-    # Dapatkan folder root proyek (naik 1 level dari utils/)
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) 
     tweets_dir = os.path.join(base_dir, "tweets-data")
     output_dir = os.path.join(tweets_dir, "output")
@@ -67,7 +64,7 @@ def scraping_tweets(keyword, since, until, auth_token, limit=100):
     print("📄 Akan menyimpan ke:", absolute_output)
     
     try:
-        subprocess.run(command, check=True, cwd=base_dir) # Jalankan dari root proyek
+        subprocess.run(command, check=True, cwd=base_dir)
         
         for i in range(5):
             if os.path.exists(absolute_output):

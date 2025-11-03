@@ -3,6 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='assets/logo_bg_putih.png') }}"
+    />
     <title>moodify - Every Text Has A Voice</title>
     <link
       rel="stylesheet"
@@ -22,7 +27,7 @@
         <ul class="nav-links">
           <li><a href="{{ url_for('index') }}" class="active">HOME</a></li>
           <li><a href="{{ url_for('analisis') }}">ANALISIS</a></li>
-          <li><a href="#">TUTORIAL</a></li>
+          <li><a href="{{ url_for('tutorial') }}">TUTORIAL</a></li>
         </ul>
       </div>
     </nav>

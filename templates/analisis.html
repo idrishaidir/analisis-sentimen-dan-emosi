@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mulai Analisis - moodify</title>
     <link
+      rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='assets/logo.png') }}"
+    />
+
+    <link
       rel="stylesheet"
       href="{{ url_for('static', filename='form-style.css') }}"
     />
@@ -28,57 +34,81 @@
           <li>
             <a href="{{ url_for('analisis') }}" class="active">ANALISIS</a>
           </li>
-          <li><a href="#">TUTORIAL</a></li>
+          <li><a href="{{ url_for('tutorial') }}">TUTORIAL</a></li>
         </ul>
       </div>
     </nav>
 
     <div class="analysis-container">
-      <h2>Mulai Analisis Sentimen dan Emosi</h2>
-      <p class="subtitle">
-        Lihat Apa yang Orang Rasakan dari Kata-Kata Mereka.
-      </p>
-      <form action="{{ url_for('analisis') }}" method="post">
-        <div class="form-group-inline">
-          <label for="auth_token">Masukkan auth token</label>
-          <div class="input-with-icon">
-            <input type="text" id="auth_token" name="auth_token" required />
-            <i class="fas fa-search"></i>
+      <div id="form-wrapper">
+        <h2>Mulai Analisis Sentimen dan Emosi</h2>
+        <p class="subtitle">
+          Lihat Apa yang Orang Rasakan dari Kata-Kata Mereka.
+        </p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %} {% if
+        messages %}
+        <div class="flash-wrapper">
+          {% for category, message in messages %}
+          <div class="flash {{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+        {% endif %} {% endwith %}
+
+        <form
+          action="{{ url_for('analisis') }}"
+          method="post"
+          id="analysis-form"
+        >
+          <div class="form-group-inline">
+            <label for="auth_token">Masukkan auth token</label>
+            <div class="input-with-icon">
+              <input type="text" id="auth_token" name="auth_token" required />
+              <i class="fas fa-search"></i>
+            </div>
+            <a href="{{ url_for('tutorial') }}" class="tutorial-link"
+              >Mengalami kesulitan? tutorial <span>&rarr;</span></a
+            >
           </div>
-          <a href="#" class="tutorial-link"
-            >Mengalami kesulitan? tutorial <span>&rarr;</span></a
-          >
-        </div>
 
-        <hr class="divider" />
+          <hr class="divider" />
 
-        <div class="form-group">
-          <div class="label-icon-wrapper">
-            <label>Pilih Rentang Waktu</label>
-            <i class="fas fa-mouse-pointer"></i>
+          <div class="form-group">
+            <div class="label-icon-wrapper">
+              <label>Pilih Rentang Waktu</label>
+              <i class="fas fa-mouse-pointer"></i>
+            </div>
+
+            <label for="since" class="sub-label">Sejak Tanggal:</label>
+            <input type="date" id="since" name="since" required />
+
+            <label for="until" class="sub-label">Sampai Tanggal:</label>
+            <input type="date" id="until" name="until" required />
           </div>
 
-          <label for="since" class="sub-label">Sejak Tanggal:</label>
-          <input type="date" id="since" name="since" required />
+          <div class="form-group">
+            <label for="limit">Jumlah tweet yang ingin dianalisis:</label>
+            <input type="number" id="limit" name="limit" min="1" required />
+          </div>
 
-          <label for="until" class="sub-label">Sampai Tanggal:</label>
-          <input type="date" id="until" name="until" required />
-        </div>
+          <div class="form-group">
+            <label for="keyword">Masukkan kata kunci:</label>
+            <input type="text" id="keyword" name="keyword" required />
+          </div>
 
-        <div class="form-group">
-          <label for="limit">Jumlah tweet yang ingin dianalisis:</label>
-          <input type="number" id="limit" name="limit" min="1" required />
-        </div>
-
-        <div class="form-group">
-          <label for="keyword">Masukkan kata kunci:</label>
-          <input type="text" id="keyword" name="keyword" required />
-        </div>
-
-        <button type="submit" class="submit-link">
-          Lihat Hasil Analisis dan Emosi
-        </button>
-      </form>
+          <button type="submit" class="submit-link">
+            Lihat Hasil Analisis dan Emosi
+          </button>
+        </form>
+      </div>
+      <div id="loading-wrapper" style="display: none">
+        <div class="spinner"></div>
+        <h3>Mohon tunggu sebentar...</h3>
+        <p>
+          Kami sedang mengumpulkan dan menganalisis tweet untuk Anda. Ini
+          mungkin memakan waktu 1-2 menit.
+        </p>
+      </div>
     </div>
 
     <footer class="footer">
@@ -86,5 +116,16 @@
         <p>&copy; 2025 moodify, Inc.</p>
       </div>
     </footer>
+
+    <script>
+      document
+        .getElementById("analysis-form")
+        .addEventListener("submit", function () {
+          if (this.checkValidity()) {
+            document.getElementById("form-wrapper").style.display = "none";
+            document.getElementById("loading-wrapper").style.display = "flex";
+          }
+        });
+    </script>
   </body>
 </html>

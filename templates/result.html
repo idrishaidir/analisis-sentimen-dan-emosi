@@ -4,7 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Hasil Analisis - moodify</title>
+    <link
+      rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='assets/logo.png') }}"
+    />
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='result-style.css') }}"
@@ -23,22 +30,20 @@
         <ul class="nav-links">
           <li><a href="{{ url_for('index') }}">HOME</a></li>
           <li><a href="{{ url_for('analisis') }}">ANALISIS</a></li>
-          <li><a href="#">TUTORIAL</a></li>
+          <li><a href="{{ url_for('tutorial') }}">TUTORIAL</a></li>
         </ul>
       </div>
     </nav>
 
     <div class="result-container">
       <h2>Hasil Analisis Sentimen dan Emosi</h2>
-      <h3>Kata Kunci: {{ keyword }}</h3>
 
       <div class="wordcloud-wrapper">
-        <h4>Apa yang Lagi Banyak Dibicarakan?</h4>
-
+        <h4>{{ keyword }} dengan jumlah tweet {{ tweet_count }}</h4>
         <div class="wordcloud-image-container">
           {% if wordcloud_url %}
           <img
-            src="{{ url_for('static', filename=wordcloud_url) }}"
+            src="{{ url_for('static', filename=wordcloud_url) }}?v={{ range(1, 10000) | random }}"
             alt="Kata Yang Sering Muncul"
           />
           {% else %}
@@ -73,19 +78,41 @@
       const sentimentData = {{ sentiment_counts|tojson }};
       const emotionData = {{ emotion_counts|tojson }};
 
-      // Warna kustom untuk palet
-      const sentimentColors = ['#ff6384', '#ffcd56', '#36a2eb'];
+      // Warna-warna
+      const sentimentColors = ['#28a745', '#dc3545', '#ffc107']; // [Positif, Negatif, Netral]
       const emotionColors = [
-          '#FFC300', // Senang
-          '#36A2EB', // Sedih
           '#FF6384', // Marah
           '#4BC0C0', // Takut
-          '#9966FF', // Jijik
-          '#FF9F40', // Terkejut
+          '#36A2EB', // Sedih
+          '#FFC300', // Senang
+          '#9966FF', // Cinta
           '#C9CBCF'  // Netral
       ];
 
-      // Chart Sentimen (Pie)
+      function generateLegendWithValues(chart) {
+        const data = chart.data;
+        if (data.labels.length && data.datasets.length) {
+          const { labels } = data;
+          const { data: values, backgroundColor } = data.datasets[0];
+
+          return labels.map((label, i) => {
+            const value = values[i];
+
+            if (value === 0) {
+              return null;
+            }
+
+            return {
+              text: `${label} (${value})`,
+              fillStyle: backgroundColor[i],
+              hidden: false,
+              index: i
+            };
+          }).filter(item => item !== null);
+        }
+        return [];
+      }
+
       new Chart(document.getElementById("sentimentChart"), {
         type: 'pie',
         data: {
@@ -94,10 +121,19 @@
             data: Object.values(sentimentData),
             backgroundColor: sentimentColors
           }]
+        },
+        options: {
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: {
+                generateLabels: generateLegendWithValues
+              }
+            },
+          }
         }
       });
 
-      // Chart Emosi (Pie)
       new Chart(document.getElementById("emotionChart"), {
         type: 'pie',
         data: {
@@ -107,6 +143,16 @@
             data: Object.values(emotionData),
             backgroundColor: emotionColors
           }]
+        },
+        options: {
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: {
+                generateLabels: generateLegendWithValues
+              }
+            },
+          }
         }
       });
     </script>

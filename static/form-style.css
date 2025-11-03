@@ -1,4 +1,3 @@
-/* Reset dasar */
 body,
 h1,
 h2,
@@ -22,7 +21,7 @@ img {
 }
 
 /* =================================== */
-/* Navbar Styles (Disalin dari style.css) */
+/* Navbar Styles */
 /* =================================== */
 .navbar {
   background-color: #5d001e; /* Warna maroon */
@@ -52,6 +51,7 @@ img {
 .logo img {
   width: 40px;
   margin-right: 10px;
+  border-radius: 50%;
 }
 
 .nav-links {
@@ -78,7 +78,7 @@ img {
 }
 
 /* =================================== */
-/* Form Analysis Styles (Baru) */
+/* Form Analysis Styles*/
 /* =================================== */
 .analysis-container {
   width: 90%;
@@ -143,8 +143,8 @@ input[type="number"] {
   width: 100%;
   padding: 12px 15px;
   border: none;
-  background-color: #fbebee; /* Warna pink muda */
-  border-radius: 30px; /* Sangat bulat */
+  background-color: #fbebee;
+  border-radius: 30px;
   box-sizing: border-box;
   font-size: 1rem;
 }
@@ -154,7 +154,7 @@ input[type="number"] {
 }
 
 .input-with-icon input {
-  padding-right: 40px; /* Ruang untuk ikon */
+  padding-right: 40px;
 }
 
 .input-with-icon i {
@@ -212,31 +212,54 @@ input[type="number"] {
 }
 
 /* =================================== */
-/* Flash Message Styles (Baru) */
+/* Style untuk Konten Loading*/
 /* =================================== */
-.flash-wrapper {
-  margin-bottom: 1.5rem;
-}
-.flash {
-  padding: 10px;
-  border-radius: 5px;
-  margin-bottom: 10px;
+
+#loading-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
+  min-height: 50vh;
+  padding: 2rem;
+}
+
+#loading-wrapper h3 {
+  font-size: 2rem;
   font-weight: bold;
+  color: #333;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
 }
 
-.flash.success {
-  background-color: #d4edda;
-  color: #155724;
+#loading-wrapper p {
+  font-size: 1.1rem;
+  color: #555;
+  max-width: 400px;
 }
 
-.flash.error {
-  background-color: #f8d7da;
-  color: #721c24;
+.spinner {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 5px solid #fbebee;
+  border-top-color: #5d001e;
+
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* =================================== */
-/* Footer Styles (Disalin dari style.css) */
+/* Footer Styles */
 /* =================================== */
 .footer {
   text-align: center;

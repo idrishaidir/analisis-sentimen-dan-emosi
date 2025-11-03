@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tutorial - moodify</title>
+    <link
+      rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='assets/logo.png') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='tutorial-style.css') }}"
+    />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="container-nav">
+        <a href="{{ url_for('index') }}" class="logo">
+          <img
+            src="{{ url_for('static', filename='assets/logo.png') }}"
+            alt="moodify Logo"
+          />
+          moodify
+        </a>
+        <ul class="nav-links">
+          <li><a href="{{ url_for('index') }}">HOME</a></li>
+          <li><a href="{{ url_for('analisis') }}">ANALISIS</a></li>
+          <li>
+            <a href="{{ url_for('tutorial') }}" class="active">TUTORIAL</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="tutorial-container">
+      <h2>Cara Mendapatkan Auth Token X</h2>
+      <p>
+        Ikuti 5 langkah mudah ini untuk mendapatkan token autentikasi dari akun
+        X (Twitter) Anda.
+      </p>
+
+      <div class="tutorial-steps">
+        <div class="step">
+          <div class="step-text">
+            <h3>1. Buka Akun X</h3>
+            <p>
+              Login dan buka halaman utama akun X (Twitter) Anda di browser.
+            </p>
+          </div>
+          <div class="step-image">
+            <img
+              src="{{ url_for('static', filename='assets/beranda_x.png') }}"
+              alt="Buka Akun X"
+            />
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-text">
+            <h3>2. Buka Inspect</h3>
+            <p>
+              Klik kanan di mana saja pada halaman, lalu pilih "Inspect". Anda
+              juga bisa menggunakan shortcut keyboard
+              <strong>Ctrl+Shift+I</strong>.
+            </p>
+          </div>
+          <div class="step-image">
+            <img
+              src="{{ url_for('static', filename='assets/inspect_x.png') }}"
+              alt="Klik Inspect"
+            />
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-text">
+            <h3>3. Cari Menu Application</h3>
+            <p>
+              Di panel 'Inspect' yang muncul, cari dan klik tab "Application".
+              (Mungkin tersembunyi di bawah panah »).
+            </p>
+          </div>
+          <div class="step-image">
+            <img
+              src="{{ url_for('static', filename='assets/application.png') }}"
+              alt="Menu Application"
+            />
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-text">
+            <h3>4. Temukan Auth Token</h3>
+            <p>
+              Di menu sebelah kiri, buka "Cookies" > "https://x.com". Di daftar
+              yang muncul, cari nama <strong>auth_token</strong> dan klik. Salin
+              (copy) kode panjang di bagian "Cookie Value".
+            </p>
+          </div>
+          <div class="step-image">
+            <img
+              src="{{ url_for('static', filename='assets/auth_token.png') }}"
+              alt="Salin Auth Token"
+            />
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-text">
+            <h3>5. Tempel Token</h3>
+            <p>
+              Kembali ke halaman Analisis, dan tempel (paste) kode yang sudah
+              Anda salin ke dalam input "Masukkan auth token".
+            </p>
+          </div>
+          <div class="step-image">
+            <img
+              src="{{ url_for('static', filename='assets/input.png') }}"
+              alt="Tempel Token"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <div class="container-footer">
+        <p>&copy; 2025 moodify, Inc.</p>
+      </div>
+    </footer>
+  </body>
+</html>
