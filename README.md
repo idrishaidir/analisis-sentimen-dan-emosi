@@ -60,8 +60,7 @@ proyek-anda/
 |   ├── preprocessing.py  # Fungsi cleaning & normalisasi kamus
 |   ├── models.py         # Fungsi load & predict model
 |  └── scraping.py       # Fungsi scraping & analisis utama
-└── app.py
-├── kamus_gaul.csv
+└── tweets-data
 
 
 ---
@@ -130,4 +129,5 @@ flask run
 ```
 
 Buka `http://127.0.0.1:5000` di browser Anda.
+
 
