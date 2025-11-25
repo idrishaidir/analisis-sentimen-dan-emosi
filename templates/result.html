@@ -4,33 +4,53 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Hasil Analisis - moodify</title>
-    <link
-      rel="icon"
-      type="image/png"
-      href="{{ url_for('static', filename='assets/logo.png') }}"
-    />
-
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/logo.png') }}"/>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='result-style.css') }}"/>
+    <style>
+        /* Tabs Container */
+        .tabs-container { margin-top: 3rem; background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid #eee; }
+        .tabs-header { display: flex; background: #f9f9f9; border-bottom: 1px solid #eee; }
+        .tab-btn { flex: 1; padding: 1.2rem; border: none; background: none; font-size: 1.1rem; font-weight: bold; color: #777; cursor: pointer; transition: 0.3s; }
+        .tab-btn:hover { background: #f0f0f0; color: #5d001e; }
+        .tab-btn.active { background: white; color: #5d001e; border-bottom: 3px solid #5d001e; }
+        
+        /* Table Styles */
+        .tab-content { display: none; padding: 1.5rem; animation: fadeIn 0.5s; }
+        .tab-content.active { display: block; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th { background-color: #5d001e; color: white; padding: 12px; text-align: left; }
+        td { padding: 12px; border-bottom: 1px solid #eee; color: #444; font-size: 0.95rem; vertical-align: top;}
+        tr:nth-child(even) { background-color: #fdfafb; }
+        tr:hover { background-color: #fbebee; }
+        
+        /* Badge Emosi/Sentimen */
+        .badge { padding: 5px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; text-transform: capitalize; display: inline-block;}
+        .badge.positif, .badge.senang, .badge.cinta { background: #d4edda; color: #155724; }
+        .badge.negatif, .badge.marah, .badge.jijik { background: #f8d7da; color: #721c24; }
+        .badge.netral { background: #e2e3e5; color: #383d41; }
+        .badge.takut, .badge.sedih { background: #cce5ff; color: #004085; }
 
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='result-style.css') }}"
-    />
+        /* Pagination */
+        .pagination-controls { display: flex; justify-content: center; margin-top: 1.5rem; gap: 10px; }
+        .page-btn { padding: 8px 15px; border: 1px solid #ddd; background: white; cursor: pointer; border-radius: 5px; }
+        .page-btn.active { background: #5d001e; color: white; border-color: #5d001e; }
+        .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
   </head>
   <body>
     <nav class="navbar">
       <div class="container-nav">
         <a href="{{ url_for('index') }}" class="logo">
-          <img
-            src="{{ url_for('static', filename='assets/logo.png') }}"
-            alt="moodify Logo"
-          />
-          moodify
+          <img src="{{ url_for('static', filename='assets/logo.png') }}" alt="moodify Logo"/>moodify
         </a>
         <ul class="nav-links">
           <li><a href="{{ url_for('index') }}">HOME</a></li>
-          <li><a href="{{ url_for('analisis') }}">ANALISIS</a></li>
+          <li><a href="{{ url_for('analisis') }}" class="active">ANALISIS</a></li>
           <li><a href="{{ url_for('tutorial') }}">TUTORIAL</a></li>
+          <li><a href="{{ url_for('history') }}">HISTORY</a></li>
         </ul>
       </div>
     </nav>
@@ -39,122 +59,156 @@
       <h2>Hasil Analisis Sentimen dan Emosi</h2>
 
       <div class="wordcloud-wrapper">
-        <h4>{{ keyword }} dengan jumlah tweet {{ tweet_count }}</h4>
+        <h4>{{ keyword }} ({{ tweet_count }} tweets)</h4>
         <div class="wordcloud-image-container">
           {% if wordcloud_url %}
-          <img
-            src="{{ url_for('static', filename=wordcloud_url) }}?v={{ range(1, 10000) | random }}"
-            alt="Kata Yang Sering Muncul"
-          />
-          {% else %}
-          <p>Tidak ada kata yang cukup untuk ditampilkan dalam word cloud.</p>
-          {% endif %}
+          <img src="{{ url_for('static', filename=wordcloud_url) }}?v={{ range(1, 10000) | random }}" alt="Wordcloud"/>
+          {% else %} <p>Data tidak cukup.</p> {% endif %}
         </div>
       </div>
 
       <div class="charts-grid">
-        <div class="chart-card">
-          <h4>Sentimen</h4>
-          <canvas id="sentimentChart"></canvas>
-        </div>
-        <div class="chart-card">
-          <h4>Emosi</h4>
-          <canvas id="emotionChart"></canvas>
-        </div>
+        <div class="chart-card"><h4>Sentimen</h4><canvas id="sentimentChart"></canvas></div>
+        <div class="chart-card"><h4>Emosi</h4><canvas id="emotionChart"></canvas></div>
       </div>
 
-      <a href="{{ url_for('analisis') }}" class="back-link"
-        >Lakukan Analisis Lain <span>&rarr;</span></a
-      >
+      <div class="tabs-container">
+          <div class="tabs-header">
+              <button class="tab-btn active" onclick="openTab('labeling')">🏷️ Hasil Pelabelan</button>
+              <button class="tab-btn" onclick="openTab('original')">📝 Tweet Murni (Asli)</button>
+          </div>
+
+          <div id="labeling" class="tab-content active">
+              <h3>Tabel Pelabelan Tweet</h3>
+              <p>Data hasil preprocessing yang telah diklasifikasikan oleh IndoBERT.</p>
+              <table>
+                  <thead>
+                      <tr>
+                          <th width="5%">No</th>
+                          <th width="65%">Teks (Preprocessed)</th>
+                          <th width="15%">Sentimen</th>
+                          <th width="15%">Emosi</th>
+                      </tr>
+                  </thead>
+                  <tbody id="table-body-label">
+                      </tbody>
+              </table>
+              <div class="pagination-controls" id="pagination-label"></div>
+          </div>
+
+          <div id="original" class="tab-content">
+              <h3>Tabel Tweet Murni</h3>
+              <p>Data mentah langsung dari X/Twitter sebelum dibersihkan.</p>
+              <table>
+                  <thead>
+                      <tr>
+                          <th width="5%">No</th>
+                          <th>Tweet Asli (Full Text)</th>
+                      </tr>
+                  </thead>
+                  <tbody id="table-body-original">
+                      </tbody>
+              </table>
+              <div class="pagination-controls" id="pagination-original"></div>
+          </div>
+      </div>
+      <br><br>
+      <a href="{{ url_for('analisis') }}" class="back-link">Lakukan Analisis Lain <span>&rarr;</span></a>
     </div>
 
     <footer class="footer">
-      <div class="container-footer">
-        <p>&copy; 2025 moodify, Inc.</p>
-      </div>
+      <div class="container-footer"><p>&copy; 2025 moodify, Inc.</p></div>
     </footer>
 
     <script>
-      const sentimentData = {{ sentiment_counts|tojson }};
-      const emotionData = {{ emotion_counts|tojson }};
+        // --- CHART LOGIC (TETAP SAMA) ---
+        const sentimentData = {{ sentiment_counts|tojson }};
+        const emotionData = {{ emotion_counts|tojson }};
+        // ... (Simpan logic chart.js kamu yang lama di sini) ...
+        // Agar tidak error, copy paste logic chart.js dari file result.html lama kamu ke sini
+        const sentimentColors = ['#28a745', '#dc3545', '#ffc107'];
+        const emotionColors = ['#FF6384', '#4BC0C0', '#36A2EB', '#FFC300', '#9966FF', '#C9CBCF'];
 
-      // Warna-warna
-      const sentimentColors = ['#28a745', '#dc3545', '#ffc107']; // [Positif, Negatif, Netral]
-      const emotionColors = [
-          '#FF6384', // Marah
-          '#4BC0C0', // Takut
-          '#36A2EB', // Sedih
-          '#FFC300', // Senang
-          '#9966FF', // Cinta
-          '#C9CBCF'  // Netral
-      ];
+        new Chart(document.getElementById("sentimentChart"), {
+            type: 'pie',
+            data: { labels: Object.keys(sentimentData), datasets: [{ data: Object.values(sentimentData), backgroundColor: sentimentColors }] }
+        });
+        new Chart(document.getElementById("emotionChart"), {
+            type: 'pie',
+            data: { labels: Object.keys(emotionData), datasets: [{ data: Object.values(emotionData), backgroundColor: emotionColors }] }
+        });
 
-      function generateLegendWithValues(chart) {
-        const data = chart.data;
-        if (data.labels.length && data.datasets.length) {
-          const { labels } = data;
-          const { data: values, backgroundColor } = data.datasets[0];
+        // --- LOGIC TAB & PAGINATION ---
+        const allTweets = {{ tweets|tojson }}; // Data dari Flask
+        const rowsPerPage = 10;
+        
+        function displayTable(type, page) {
+            const tbody = document.getElementById(type === 'labeling' ? 'table-body-label' : 'table-body-original');
+            const pagination = document.getElementById(type === 'labeling' ? 'pagination-label' : 'pagination-original');
+            
+            tbody.innerHTML = "";
+            pagination.innerHTML = "";
 
-          return labels.map((label, i) => {
-            const value = values[i];
+            const start = (page - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+            const paginatedItems = allTweets.slice(start, end);
+            const totalPages = Math.ceil(allTweets.length / rowsPerPage);
 
-            if (value === 0) {
-              return null;
-            }
+            paginatedItems.forEach((tweet, index) => {
+                const row = document.createElement("tr");
+                const num = start + index + 1;
+                
+                if (type === 'labeling') {
+                    row.innerHTML = `
+                        <td>${num}</td>
+                        <td>${tweet.text}</td>
+                        <td><span class="badge ${tweet.sentimen.toLowerCase()}">${tweet.sentimen}</span></td>
+                        <td><span class="badge ${tweet.emosi.toLowerCase()}">${tweet.emosi}</span></td>
+                    `;
+                } else {
+                    row.innerHTML = `
+                        <td>${num}</td>
+                        <td>${tweet.full_text}</td>
+                    `;
+                }
+                tbody.appendChild(row);
+            });
 
-            return {
-              text: `${label} (${value})`,
-              fillStyle: backgroundColor[i],
-              hidden: false,
-              index: i
-            };
-          }).filter(item => item !== null);
+            // Tombol Prev
+            const prevBtn = document.createElement("button");
+            prevBtn.innerText = "Prev";
+            prevBtn.className = "page-btn";
+            prevBtn.disabled = page === 1;
+            prevBtn.onclick = () => displayTable(type, page - 1);
+            pagination.appendChild(prevBtn);
+
+            // Indikator Halaman
+            const pageInfo = document.createElement("span");
+            pageInfo.innerText = ` Hal ${page} dari ${totalPages} `;
+            pageInfo.style.alignSelf = "center";
+            pagination.appendChild(pageInfo);
+
+            // Tombol Next
+            const nextBtn = document.createElement("button");
+            nextBtn.innerText = "Next";
+            nextBtn.className = "page-btn";
+            nextBtn.disabled = page === totalPages;
+            nextBtn.onclick = () => displayTable(type, page + 1);
+            pagination.appendChild(nextBtn);
         }
-        return [];
-      }
 
-      new Chart(document.getElementById("sentimentChart"), {
-        type: 'pie',
-        data: {
-          labels: Object.keys(sentimentData),
-          datasets: [{
-            data: Object.values(sentimentData),
-            backgroundColor: sentimentColors
-          }]
-        },
-        options: {
-          plugins: {
-            legend: {
-              position: 'top',
-              labels: {
-                generateLabels: generateLegendWithValues
-              }
-            },
-          }
+        function openTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(tabName).classList.add('active');
+            // Cari tombol yang mentrigger dan tambahkan active (manual selection logic)
+            event.currentTarget.classList.add('active');
         }
-      });
 
-      new Chart(document.getElementById("emotionChart"), {
-        type: 'pie',
-        data: {
-          labels: Object.keys(emotionData),
-          datasets: [{
-            label: 'Jumlah Emosi',
-            data: Object.values(emotionData),
-            backgroundColor: emotionColors
-          }]
-        },
-        options: {
-          plugins: {
-            legend: {
-              position: 'top',
-              labels: {
-                generateLabels: generateLegendWithValues
-              }
-            },
-          }
-        }
-      });
+        // Load awal
+        displayTable('labeling', 1);
+        displayTable('original', 1);
     </script>
   </body>
 </html>

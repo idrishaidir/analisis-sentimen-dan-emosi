@@ -6,3 +6,7 @@ tweets-data/
 
 # alt
 kamus_gaul.csv
+
+app-old.py
+app-old2.py
+__pycache__/

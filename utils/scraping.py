@@ -87,7 +87,8 @@ def scraping_tweets(keyword, since, until, auth_token, limit=100):
         df = df[df["full_text"].str.lower() != "full_text"]
         df = df[["full_text"]].dropna().reset_index(drop=True)
         df["text"] = df["full_text"].apply(preprocessText)
-        cleaned_df = df[["text"]]
+        # cleaned_df = df[["text"]]
+        cleaned_df = df[["full_text", "text"]]
         cleaned_path = os.path.join(output_dir, f"{safe_keyword}_cleaned.csv")
         cleaned_df.to_csv(cleaned_path, index=False, encoding="utf-8")
         
