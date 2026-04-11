@@ -46,17 +46,13 @@ def load_kamus():
 kamus_dict = load_kamus()
 
 
-# --- Fungsi Normalisasi dari Anda ---
 def normalize(text, kamus):
-    """Mengganti kata gaul/singkatan berdasarkan kamus."""
     if not kamus:
         return text
     tokens_kamus = text.split()
     tokens_normalized_kamus = [kamus.get(token, token) for token in tokens_kamus]
     return ' '.join(tokens_normalized_kamus)
 
-
-# --- Fungsi-fungsi pembantu token ---
 def tokenizingText(text):
     return word_tokenize(text)
 
@@ -72,18 +68,12 @@ def stemmingText(tokens):
 def toSentence(tokens):
     return " ".join(tokens)
 
-
-# ---  Fungsi PreprocessText Utama ---
 def preprocessText(text):
-    """
-    Pipeline lengkap untuk membersihkan dan memproses teks.
-    """
     text = text.lower()
     text = re.sub(r"http\S+|www.\S+", "", text)
     text = re.sub(r"@\w+|#", "", text)
     text = re.sub(r"\d+", "", text)
     
-    #Normalisasi kata gaul
     text = normalize(text, kamus_dict)
     
     text = text.translate(str.maketrans("", "", string.punctuation))

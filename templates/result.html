@@ -59,7 +59,7 @@
       <h2>Hasil Analisis Sentimen dan Emosi</h2>
 
       <div class="wordcloud-wrapper">
-        <h4>{{ keyword }} ({{ tweet_count }} tweets)</h4>
+        <!-- <h4>{{ keyword }} ({{ tweet_count }} tweets)</h4> -->
         <div class="wordcloud-image-container">
           {% if wordcloud_url %}
           <img src="{{ url_for('static', filename=wordcloud_url) }}?v={{ range(1, 10000) | random }}" alt="Wordcloud"/>
@@ -121,12 +121,10 @@
     </footer>
 
     <script>
-        // --- CHART LOGIC (TETAP SAMA) ---
         const sentimentData = {{ sentiment_counts|tojson }};
         const emotionData = {{ emotion_counts|tojson }};
-        // ... (Simpan logic chart.js kamu yang lama di sini) ...
-        // Agar tidak error, copy paste logic chart.js dari file result.html lama kamu ke sini
-        const sentimentColors = ['#28a745', '#dc3545', '#ffc107'];
+
+        const sentimentColors = ['#dc3545','#28a745', '#ffc107'];
         const emotionColors = ['#FF6384', '#4BC0C0', '#36A2EB', '#FFC300', '#9966FF', '#C9CBCF'];
 
         new Chart(document.getElementById("sentimentChart"), {
@@ -139,7 +137,7 @@
         });
 
         // --- LOGIC TAB & PAGINATION ---
-        const allTweets = {{ tweets|tojson }}; // Data dari Flask
+        const allTweets = {{ tweets|tojson }};
         const rowsPerPage = 10;
         
         function displayTable(type, page) {
@@ -202,7 +200,6 @@
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             
             document.getElementById(tabName).classList.add('active');
-            // Cari tombol yang mentrigger dan tambahkan active (manual selection logic)
             event.currentTarget.classList.add('active');
         }
 

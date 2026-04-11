@@ -76,9 +76,6 @@ img {
   border-bottom: 2px solid white;
 }
 
-.hero {
-  background-color: #fdfafb;
-}
 
 .container-hero {
   width: 90%;
@@ -153,10 +150,6 @@ img {
 }
 
 /* Features Section */
-.features {
-  padding: 4rem 0;
-  background-color: #fdfafb;
-}
 
 .container-features {
   width: 90%;
