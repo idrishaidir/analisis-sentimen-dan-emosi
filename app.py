@@ -6,15 +6,158 @@ import datetime
 from collections import Counter
 from wordcloud import WordCloud
 from utils.scraping import scraping_tweets
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, UserMixin
+from datetime import datetime
+from flask_mail import Mail, Message
+import secrets
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 
 app = Flask(__name__)
 app.secret_key = "secret123"
+
+# verifikasi email
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'ma9552905@gmail.com'
+app.config['MAIL_PASSWORD'] = 'qtbx bpnr keit mcyz'
+mail = Mail(app)
+
+# Inisialisasi Database
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:@localhost/moodify_db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
+
+# Tabel Users
+class User(UserMixin, db.Model):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(150), unique=True, nullable=False)
+    password = db.Column(db.String(255), nullable=True)
+    is_verified = db.Column(db.Boolean, default=False)
+    verification_token = db.Column(db.String(255), nullable=True)
+    histories = db.relationship('AnalysisHistory', backref='owner', lazy=True)
+
+# Tabel Analysis History
+class AnalysisHistory(db.Model):
+    __tablename__ = 'analysis_history'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    keyword = db.Column(db.String(255), nullable=False)
+    filename = db.Column(db.String(255), nullable=False)
+    tweet_count = db.Column(db.Integer, nullable=False)
+    date_created = db.Column(db.DateTime, default=datetime.utcnow)
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        username = request.form.get("username")
+        email = request.form.get("email")
+        password = request.form.get("password")
+        
+        # Cek apakah email sudah terdaftar
+        user_exists = User.query.filter_by(email=email).first()
+        if user_exists:
+            flash("❌ Email sudah digunakan!", "error")
+            return redirect(url_for("register"))
+
+        # Buat token verifikasi unik
+        token = secrets.token_hex(16)
+        hashed_pw = generate_password_hash(password, method='pbkdf2:sha256')
+
+        new_user = User(
+            username=username,
+            email=email,
+            password=hashed_pw,
+            verification_token=token,
+            is_verified=False
+        )
+        
+        db.session.add(new_user)
+        db.session.commit()
+
+        # Kirim Email Verifikasi
+        msg = Message('Verifikasi Akun moodify', sender='noreply@moodify.com', recipients=[email])
+        link = url_for('verify_email', token=token, _external=True)
+        msg.body = f'Halo {username}, silakan klik link berikut untuk verifikasi akun kamu: {link}'
+        mail.send(msg)
+
+        flash("✅ Registrasi berhasil! Silakan cek email kamu untuk verifikasi.", "success")
+        return redirect(url_for("login"))
+
+    return render_template("register.html")
+
+@app.route("/verify/<token>")
+def verify_email(token):
+    user = User.query.filter_by(verification_token=token).first()
+    if user:
+        user.is_verified = True
+        user.verification_token = None # Hapus token setelah digunakan
+        db.session.commit()
+        flash("🎉 Email berhasil diverifikasi! Silakan login.", "success")
+    else:
+        flash("⚠️ Token verifikasi tidak valid atau sudah kadaluarsa.", "error")
+    return redirect(url_for("login"))
+
+# Inisialisasi Login Manager
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login' # Mengarahkan user ke route login jika belum terautentikasi
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    # Jika user sudah login, arahkan langsung ke halaman analisis
+    if current_user.is_authenticated:
+        return redirect(url_for('analisis'))
+
+    if request.method == "POST":
+        email = request.form.get("email")
+        password = request.form.get("password")
+        remember = True if request.form.get("remember") else False
+
+        # 1. Cari user berdasarkan email
+        user = User.query.filter_by(email=email).first()
+
+        # 2. Validasi keberadaan user dan kecocokan password
+        if not user or not check_password_hash(user.password, password):
+            flash("❌ Email atau password salah!", "error")
+            return redirect(url_for("login"))
+
+        # 3. Cek apakah email sudah diverifikasi
+        if not user.is_verified:
+            flash("⚠️ Akun kamu belum diverifikasi. Silakan cek email kamu!", "error")
+            return redirect(url_for("login"))
+
+        # 4. Login berhasil
+        login_user(user, remember=remember)
+        flash(f"👋 Selamat datang kembali, {user.username}!", "success")
+        
+        # Arahkan ke halaman yang sebelumnya ingin diakses (next page) atau ke analisis
+        next_page = request.args.get('next')
+        return redirect(next_page) if next_page else redirect(url_for('analisis'))
+
+    return render_template("login.html")
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    flash("✅ Kamu telah berhasil keluar.", "success")
+    return redirect(url_for("index"))
 
 @app.route("/")
 def index():
     return render_template("index.html")
 
 @app.route("/analisis", methods=["GET", "POST"])
+@login_required
 def analisis():
     if request.method == "POST":
         auth_token = request.form.get("auth_token")
@@ -36,25 +179,18 @@ def analisis():
         success, message = scraping_tweets(keyword, since, until, auth_token, limit)
         
         if success:
-            if 'history' not in session:
-                session['history'] = []
+            # Simpan riwayat ke MySQL secara permanen
+            new_record = AnalysisHistory(
+                user_id=current_user.id, # Ambil ID dari user yang sedang login
+                keyword=keyword,
+                filename=file_name,
+                tweet_count=int(limit)
+            )
+            db.session.add(new_record)
+            db.session.commit()
             
-            safe_keyword = keyword.replace(" ", "_")
-            file_name = f"{safe_keyword}_label.csv"
-            current_time = datetime.datetime.now().strftime("%d-%m-%Y %H:%M")
-            
-            history_item = {
-                'keyword': keyword,
-                'date': current_time,
-                'file': file_name,
-                'limit': limit
-            }
-
-            session['history'] = [h for h in session['history'] if h['keyword'] != keyword]
-            session['history'].insert(0, history_item)
-            session.modified = True
-
             return redirect(url_for("result", file=file_name))
+        
         else:
             flash(f"⚠️ Gagal memproses data: {message}", "error")
             return redirect(url_for("analisis"))
@@ -138,9 +274,11 @@ def result():
     )
 
 @app.route("/history")
+@login_required
 def history():
-    history_data = session.get('history', [])
-    return render_template("history.html", history=history_data)
+    # Ambil data dari database berdasarkan user yang sedang login
+    user_history = AnalysisHistory.query.filter_by(user_id=current_user.id).order_by(AnalysisHistory.date_created.desc()).all()
+    return render_template("history.html", history=user_history)
 
 @app.route("/tutorial")
 def tutorial():
