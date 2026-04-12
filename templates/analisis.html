@@ -31,9 +31,17 @@
         </a>
         <ul class="nav-links">
           <li><a href="{{ url_for('index') }}">HOME</a></li>
-          <li><a href="{{ url_for('analisis') }}" class="active">ANALISIS</a></li>
           <li><a href="{{ url_for('tutorial') }}">TUTORIAL</a></li>
-          <li><a href="{{ url_for('history') }}">HISTORY</a></li>
+
+          {% if current_user.is_authenticated %}
+            <li><a href="{{ url_for('analisis') }}" class="active">ANALISIS</a></li>
+            <li><a href="{{ url_for('history') }}">HISTORY</a></li>
+            <li><a href="{{ url_for('logout') }}" style="color: #ffb3b3;">LOGOUT ({{ current_user.username }})</a></li>
+          
+          {% else %}
+            <li><a href="{{ url_for('login') }}">LOGIN</a></li>
+            <li><a href="{{ url_for('register') }}">REGISTER</a></li>
+          {% endif %}
         </ul>
       </div>
     </nav>
