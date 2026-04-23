@@ -7,12 +7,11 @@ from collections import Counter
 from wordcloud import WordCloud
 from utils.scraping import scraping_tweets
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, UserMixin
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from datetime import datetime
 from flask_mail import Mail, Message
 import secrets
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 
 app = Flask(__name__)
 app.secret_key = "secret123"
@@ -21,8 +20,8 @@ app.secret_key = "secret123"
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'email-lau-@gmail.com'
-app.config['MAIL_PASSWORD'] = 'mikir-kids'
+app.config['MAIL_USERNAME'] = 'chill_aja@gmail.com'
+app.config['MAIL_PASSWORD'] = 'mikir kids'
 mail = Mail(app)
 
 # Inisialisasi Database
@@ -80,9 +79,40 @@ def register():
         db.session.commit()
 
         # Kirim Email Verifikasi
-        msg = Message('Verifikasi Akun moodify', sender='noreply@moodify.com', recipients=[email])
+        msg = Message('hallo! verifikasi akun moodify kamu yuk ✨', 
+                    sender='noreply@moodify.com', 
+                    recipients=[email])
+
         link = url_for('verify_email', token=token, _external=True)
-        msg.body = f'Halo {username}, silakan klik link berikut untuk verifikasi akun kamu: {link}'
+
+        # Desain Email HTML (Gen Z + Humble Style)
+        msg.html = f"""
+        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; border: 1px solid #eee; border-radius: 15px; overflow: hidden;">
+            <div style="background-color: #5d001e; padding: 20px; text-align: center;">
+                <h1 style="color: white; margin: 0; font-size: 24px;">moodify</h1>
+            </div>
+            <div style="padding: 30px; color: #333; line-height: 1.6;">
+                <p style="font-size: 18px;">Hii, <b>{username}</b>! 👋</p>
+                <p>Makasih banyak ya udah mau mampir dan join di <b>moodify</b>. Kita seneng banget kamu ada di sini!</p>
+                <p>Biar akun kamu makin <i>gacor</i> dan semua fitur analisisnya kebuka, tolong verifikasi email kamu dulu ya. Lowkey excited banget nih nungguin kamu mulai analisis emosi publik bareng kita. 🫶</p>
+                
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="{link}" style="background-color: #5d001e; color: white; padding: 12px 25px; text-decoration: none; border-radius: 30px; font-weight: bold; display: inline-block;">
+                        Gas, Verifikasi Akun! 🚀
+                    </a>
+                </div>
+                
+                <p style="font-size: 14px; color: #777;">Kalau tombolnya nggak jalan, kamu bisa copas link ini ke browser ya:<br>
+                <a href="{link}" style="color: #5d001e;">{link}</a></p>
+                
+                <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;">
+                <p style="font-size: 12px; color: #aaa; text-align: center;">
+                    dikirim dengan penuh kasih sayang oleh tim moodify 🕊️<br>
+                    &copy; 2026 moodify, Inc.
+                </p>
+            </div>
+        </div>
+        """
         mail.send(msg)
 
         flash("✅ Registrasi berhasil! Silakan cek email kamu untuk verifikasi.", "success")
@@ -179,16 +209,21 @@ def analisis():
         success, message = scraping_tweets(keyword, since, until, auth_token, limit)
         
         if success:
-            # Simpan riwayat ke MySQL secara permanen
+            # 1. Definisikan dulu nama filenya di sini
+            safe_keyword = keyword.replace(" ", "_")
+            file_name = f"{safe_keyword}_label.csv"
+            
+            # 2. Baru kemudian masukkan variabel file_name ke dalam database
             new_record = AnalysisHistory(
-                user_id=current_user.id, # Ambil ID dari user yang sedang login
+                user_id=current_user.id, 
                 keyword=keyword,
-                filename=file_name,
+                filename=file_name, # Sekarang variabel ini sudah terdefinisi
                 tweet_count=int(limit)
             )
             db.session.add(new_record)
             db.session.commit()
             
+            # 3. Terakhir, gunakan file_name untuk mengalihkan halaman
             return redirect(url_for("result", file=file_name))
         
         else:
@@ -280,6 +315,36 @@ def history():
     # Ambil data dari database berdasarkan user yang sedang login
     user_history = AnalysisHistory.query.filter_by(user_id=current_user.id).order_by(AnalysisHistory.date_created.desc()).all()
     return render_template("history.html", history=user_history)
+
+@app.route("/delete_history/<int:history_id>", methods=["POST"])
+@login_required
+def delete_history(history_id):
+    # 1. Cari data riwayat berdasarkan ID
+    history_record = AnalysisHistory.query.get_or_404(history_id)
+    
+    # 2. Validasi Keamanan: Pastikan yang menghapus adalah pemilik aslinya
+    if history_record.user_id != current_user.id:
+        flash("❌ Kamu tidak memiliki izin untuk menghapus riwayat ini.", "error")
+        return redirect(url_for("history"))
+        
+    try:
+        # 3. Buat path untuk file fisik (.csv) dan hapus jika filenya ada
+        output_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tweets-data", "output")
+        file_path = os.path.join(output_dir, history_record.filename)
+        
+        if os.path.exists(file_path):
+            os.remove(file_path) # Perintah untuk menghapus file fisik
+        
+        # 4. Hapus data dari database MySQL
+        db.session.delete(history_record)
+        db.session.commit()
+        
+        flash(f"✅ Riwayat analisis '{history_record.keyword}' berhasil dihapus secara permanen.", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"⚠️ Gagal menghapus riwayat: {e}", "error")
+        
+    return redirect(url_for("history"))
 
 @app.route("/tutorial")
 def tutorial():

@@ -59,14 +59,24 @@
         {% if history %}
             <div class="history-grid">
                 {% for item in history %}
-                <a href="{{ url_for('result', file=item.file) }}" class="history-card">
-                    <div class="history-icon"><i class="fas fa-history"></i></div>
-                    <div class="history-keyword">{{ item.keyword }}</div>
-                    <div class="history-meta">
-                        <span><i class="far fa-clock"></i> {{ item.date }}</span> • 
-                        <span><i class="fab fa-twitter"></i> {{ item.limit }} Tweet</span>
-                    </div>
-                </a>
+                <div class="history-card" style="padding-bottom: 10px;">
+                    
+                    <a href="{{ url_for('result', file=item.filename) }}" style="text-decoration: none; color: inherit; display: flex; flex-direction: column; align-items: center; width: 100%;">
+                        <div class="history-icon"><i class="fas fa-history"></i></div>
+                        <div class="history-keyword">{{ item.keyword }}</div>
+                        <div class="history-meta">
+                            <span><i class="far fa-clock"></i> {{ item.date_created.strftime('%d-%m-%Y %H:%M') }}</span> • 
+                            <span><i class="fab fa-twitter"></i> {{ item.tweet_count }} Tweet</span>
+                        </div>
+                    </a>
+
+                    <form action="{{ url_for('delete_history', history_id=item.id) }}" method="POST" style="margin-top: 15px; width: 100%;" onsubmit="return confirm('Apakah kamu yakin ingin menghapus riwayat ini? Data dari database dan file sistem akan dihapus permanen.');">
+                        <button type="submit" style="width: 100%; padding: 8px; background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s ease;">
+                            <i class="fas fa-trash"></i> Hapus
+                        </button>
+                    </form>
+                    
+                </div>
                 {% endfor %}
             </div>
         {% else %}
