@@ -41,8 +41,8 @@ def scraping_tweets(keyword, since, until, auth_token, limit=100):
     tweets_dir = os.path.join(base_dir, "tweets-data")
     output_dir = os.path.join(tweets_dir, "output")
     
-    if os.path.exists(output_dir):
-        shutil.rmtree(output_dir)
+    # if os.path.exists(output_dir):
+    #     shutil.rmtree(output_dir)
     os.makedirs(output_dir, exist_ok=True)
     
     safe_keyword = re.sub(r"[^\w\s-]", "", keyword).strip().replace(" ", "_")
@@ -85,10 +85,14 @@ def scraping_tweets(keyword, since, until, auth_token, limit=100):
             df.rename(columns={possible_text_col: "full_text"}, inplace=True)
             
         df = df[df["full_text"].str.lower() != "full_text"]
-        df = df[["full_text"]].dropna().reset_index(drop=True)
+        # df = df[["full_text"]].dropna().reset_index(drop=True)
+        df = df.dropna(subset=["full_text"]).reset_index(drop=True)
         df["text"] = df["full_text"].apply(preprocessText)
-        # cleaned_df = df[["text"]]
-        cleaned_df = df[["full_text", "text"]]
+        
+        # Ambil kolom tanggal dan username jika tersedia dari Twitter
+        available_cols = [col for col in ["created_at", "username", "full_text", "text"] if col in df.columns]
+        cleaned_df = df[available_cols]
+        
         cleaned_path = os.path.join(output_dir, f"{safe_keyword}_cleaned.csv")
         cleaned_df.to_csv(cleaned_path, index=False, encoding="utf-8")
         

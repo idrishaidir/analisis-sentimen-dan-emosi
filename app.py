@@ -2,13 +2,12 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 import os
 import pandas as pd
 import time
-import datetime 
 from collections import Counter
 from wordcloud import WordCloud
 from utils.scraping import scraping_tweets
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask_mail import Mail, Message
 import secrets
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -16,12 +15,15 @@ from werkzeug.security import generate_password_hash, check_password_hash
 app = Flask(__name__)
 app.secret_key = "secret123"
 
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=60)
+app.config['REMEMBER_COOKIE_DURATION'] = timedelta(days=7)
+
 # verifikasi email
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'chill_aja@gmail.com'
-app.config['MAIL_PASSWORD'] = 'mikir kids'
+app.config['MAIL_USERNAME'] = 'kentang@gmail.com'
+app.config['MAIL_PASSWORD'] = 'apk nya dikatain kentang ajggg'
 mail = Mail(app)
 
 # Inisialisasi Database
@@ -136,6 +138,11 @@ def verify_email(token):
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login' # Mengarahkan user ke route login jika belum terautentikasi
+
+@app.before_request
+def make_session_permanent():
+    # Ini akan me-reset timer (misal 30 menit) setiap kali user mengklik/memuat halaman
+    session.permanent = True
 
 @login_manager.user_loader
 def load_user(user_id):

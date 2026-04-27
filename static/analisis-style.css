@@ -1,0 +1,231 @@
+/* =========================================
+   TEMA: Navy & Cream (analisis-style.css)
+   ========================================= */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@300;400;500;600&display=swap');
+
+:root {
+    --bg-cream: #F3EFE6;
+    --navy-dark: #2D3250;
+    --font-heading: 'Playfair Display', serif;
+    --font-body: 'Poppins', sans-serif;
+}
+
+body {
+    background-color: var(--bg-cream);
+    color: var(--navy-dark);
+    font-family: var(--font-body);
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- NAVBAR KAPSUL --- */
+.navbar-pill {
+    margin: 20px auto;
+    width: 95%;
+    max-width: 1200px;
+    border: 1px solid var(--navy-dark);
+    border-radius: 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 30px;
+    box-sizing: border-box;
+}
+
+.logo { display: flex; align-items: center; font-size: 1.5rem; font-weight: 700; color: var(--navy-dark); text-decoration: none; }
+.logo img { width: 35px; margin-right: 10px; border-radius: 50%; }
+
+.nav-links { list-style: none; display: flex; margin: 0; padding: 0; align-items: center; }
+.nav-links li { margin: 0 15px; }
+.nav-links a { color: var(--navy-dark); text-decoration: none; font-weight: 600; font-size: 0.9rem; text-transform: uppercase; transition: 0.3s; }
+.nav-links a:hover { opacity: 0.7; }
+
+.nav-btn { background-color: var(--navy-dark); color: var(--bg-cream) !important; padding: 8px 25px; border-radius: 30px; }
+.nav-btn.outline { background-color: transparent; color: var(--navy-dark) !important; }
+
+/* --- HEADER ANALISIS --- */
+.analisis-header {
+    text-align: center;
+    margin: 40px auto;
+}
+
+.analisis-header h1 {
+    font-family: var(--font-heading);
+    font-size: 3rem;
+    color: var(--navy-dark);
+    margin-bottom: 10px;
+}
+
+.analisis-header p {
+    font-size: 1.1rem;
+    color: var(--navy-dark);
+    opacity: 0.8;
+}
+
+/* --- FORM ANALISIS --- */
+.analisis-container {
+    width: 95%;
+    max-width: 900px;
+    margin: 0 auto 50px;
+}
+
+.analisis-card {
+    background-color: var(--navy-dark);
+    padding: 50px;
+    border-radius: 20px;
+    color: var(--bg-cream);
+    box-shadow: 0 15px 35px rgba(45, 50, 80, 0.15);
+}
+
+.form-section {
+    margin-bottom: 35px;
+}
+
+.form-section:last-child {
+    margin-bottom: 0;
+}
+
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+    display: block;
+}
+
+.form-row {
+    display: flex;
+    gap: 30px;
+}
+
+.form-col {
+    flex: 1;
+}
+
+.form-col label {
+    display: block;
+    font-size: 0.95rem;
+    margin-bottom: 8px;
+    opacity: 0.9;
+}
+
+/* Styling Input */
+input[type="text"],
+input[type="number"],
+input[type="date"] {
+    width: 100%;
+    padding: 15px 20px;
+    border-radius: 12px;
+    border: none;
+    background-color: var(--bg-cream);
+    color: var(--navy-dark);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+input:focus {
+    outline: 3px solid rgba(243, 239, 230, 0.4);
+}
+
+/* --- BAGIAN BAWAH FORM --- */
+.tutorial-link-wrapper {
+    text-align: right;
+    margin: 20px 0;
+}
+
+.tutorial-link-wrapper a {
+    color: var(--navy-dark);
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tutorial-link-wrapper a:hover {
+    text-decoration: underline;
+}
+
+.btn-submit-large {
+    width: 100%;
+    padding: 18px;
+    background-color: var(--navy-dark);
+    color: var(--bg-cream);
+    border: none;
+    border-radius: 15px;
+    font-family: var(--font-body);
+    font-size: 1.2rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-submit-large:hover {
+    background-color: #1a1d30;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(45, 50, 80, 0.2);
+}
+
+/* Flash Messages */
+.flash-wrapper { margin-bottom: 20px; }
+.flash { padding: 15px; border-radius: 12px; text-align: center; font-weight: 500; }
+.flash.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+.flash.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+
+/* Responsive HP */
+@media (max-width: 768px) {
+    .form-row { flex-direction: column; gap: 20px; }
+    .analisis-card { padding: 30px; }
+    .analisis-header h1 { font-size: 2.2rem; }
+}
+
+/* --- LOADING OVERLAY --- */
+.loading-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(243, 239, 230, 0.95); /* Warna cream transparan */
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s ease;
+}
+
+.loading-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.spinner {
+    width: 70px; 
+    height: 70px;
+    border: 6px solid rgba(45, 50, 80, 0.1); 
+    border-top-color: var(--navy-dark);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
+.loading-text { 
+    font-family: var(--font-heading); 
+    font-size: 2.2rem; 
+    color: var(--navy-dark); 
+    margin-bottom: 10px;
+}
+
+.loading-subtext { 
+    font-family: var(--font-body); 
+    color: #555; 
+    font-size: 1.1rem;
+    text-align: center;
+}

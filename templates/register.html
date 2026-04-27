@@ -1,92 +1,88 @@
 <!DOCTYPE html>
 <html lang="id">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Daftar - moodify</title>
+    <title>Buat Akun - moodify</title>
+    
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/logo.png') }}" />
-    <link rel="stylesheet" href="{{ url_for('static', filename='form-style.css') }}" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-  </head>
-  <body>
-    <nav class="navbar">
-      <div class="container-nav">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='auth-style.css') }}" />
+</head>
+<body>
+    <nav class="navbar-pill">
         <a href="{{ url_for('index') }}" class="logo">
-          <img src="{{ url_for('static', filename='assets/logo.png') }}" alt="moodify Logo" /> moodify
+            <img src="{{ url_for('static', filename='assets/logo.png') }}" alt="moodify Logo" /> moodify
         </a>
+        
         <ul class="nav-links">
-            <li><a href="{{ url_for('index') }}">HOME</a></li>
-            <li><a href="{{ url_for('tutorial') }}">TUTORIAL</a></li>
-
-            {% if current_user.is_authenticated %}
-                <li><a href="{{ url_for('analisis') }}">ANALISIS</a></li>
-                <li><a href="{{ url_for('history') }}">HISTORY</a></li>
-                <li><a href="{{ url_for('logout') }}" style="color: #ffb3b3;">LOGOUT ({{ current_user.username }})</a></li>
+            <li><a href="{{ url_for('index') }}">Beranda</a></li>
+            <li><a href="{{ url_for('tutorial') }}">Panduan</a></li>
             
-            {% else %}
-                <li><a href="{{ url_for('login') }}">LOGIN</a></li>
-                <li><a href="{{ url_for('register') }}" class="active">REGISTER</a></li>
+            {% if current_user.is_authenticated %}
+                <li><a href="{{ url_for('analisis') }}">Analisis</a></li>
+                <li><a href="{{ url_for('history') }}">Riwayat</a></li>
             {% endif %}
         </ul>
-      </div>
+        
+        <ul class="nav-links">
+            {% if current_user.is_authenticated %}
+                <li><span style="font-size: 0.85rem; color: var(--navy-dark); font-weight: 600;">Halo, {{ current_user.username }}</span></li>
+                <li><a href="{{ url_for('logout') }}" class="nav-btn outline" style="border: 1px solid var(--navy-dark);" onclick="return confirm('Apakah kamu yakin ingin keluar dari akun ini?');">Log Out</a></li>
+            {% else %}
+                <li><a href="{{ url_for('login') }}" class="nav-btn outline">Masuk</a></li>
+                <li><a href="{{ url_for('register') }}" class="nav-btn">Buat Akun</a></li>
+            {% endif %}
+        </ul>
     </nav>
 
-    <div class="analysis-container">
-      <div id="form-wrapper">
-        <h2>Buat Akun Baru</h2>
-        <p class="subtitle">Daftar sekarang untuk menyimpan riwayat analisis emosi publik.</p>
-
+    <div class="auth-wrapper">
         {% with messages = get_flashed_messages(with_categories=true) %} 
-          {% if messages %}
-            <div class="flash-wrapper" style="margin-bottom: 20px;">
-              {% for category, message in messages %}
-                <div class="flash {{ category }}" style="padding: 10px; border-radius: 5px; background-color: {% if category == 'error' %}#f8d7da{% else %}#d4edda{% endif %}; color: {% if category == 'error' %}#721c24{% else %}#155724{% endif %}; margin-bottom: 10px;">
-                  {{ message }}
+            {% if messages %}
+                <div class="flash-wrapper">
+                    {% for category, message in messages %}
+                        <div class="flash {{ category }}">{{ message }}</div>
+                    {% endfor %}
                 </div>
-              {% endfor %}
-            </div>
-          {% endif %} 
+            {% endif %} 
         {% endwith %}
 
-        <form action="{{ url_for('register') }}" method="post">
-          <div class="form-group">
-            <label for="username">Nama Pengguna</label>
-            <div class="input-with-icon">
-              <input type="text" id="username" name="username" placeholder="Nama kamu" required />
-              <i class="fas fa-user"></i>
+        <div class="auth-card">
+            <form action="{{ url_for('register') }}" method="POST">
+                <div class="form-group">
+                    <label>Username</label>
+                    <div class="input-wrapper">
+                        <input type="text" name="username" placeholder="Enter Your Username" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Email</label>
+                    <div class="input-wrapper">
+                        <input type="email" name="email" placeholder="Enter Your Email" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Password</label>
+                    <div class="input-wrapper">
+                        <input type="password" name="password" placeholder="Enter Your Password" required>
+                        <i class="fas fa-eye"></i>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit">BUAT AKUN</button>
+            </form>
+            
+            <div class="auth-footer">
+                Sudah punya akun? <a href="{{ url_for('login') }}">Masuk</a>
             </div>
-          </div>
-
-          <div class="form-group">
-            <label for="email">Email</label>
-            <div class="input-with-icon">
-              <input type="email" id="email" name="email" placeholder="contoh@email.com" required />
-              <i class="fas fa-envelope"></i>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="password">Kata Sandi</label>
-            <div class="input-with-icon">
-              <input type="password" id="password" name="password" placeholder="Buat kata sandi yang kuat" required />
-              <i class="fas fa-lock"></i>
-            </div>
-          </div>
-
-          <button type="submit" class="submit-link" style="margin-top: 1rem;">Daftar Akun</button>
-        </form>
-
-        <hr class="divider" />
-        <p style="text-align: center; color: #555;">
-          Sudah punya akun? <a href="{{ url_for('login') }}" style="color: #5d001e; font-weight: bold; text-decoration: none;">Masuk di sini</a>
-        </p>
-      </div>
+        </div>
     </div>
-
-    <footer class="footer">
-      <div class="container-footer">
-        <p>&copy; 2026 moodify, Inc.</p>
-      </div>
-    </footer>
-  </body>
+</body>
 </html>

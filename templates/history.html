@@ -4,89 +4,87 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Riwayat Analisis - moodify</title>
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/logo.png') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
-    <style>
-        .history-container { width: 90%; max-width: 1000px; margin: 4rem auto; text-align: center; }
-        .history-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); 
-            gap: 1.5rem; 
-            margin-top: 2rem; 
-        }
-        .history-card {
-            background: white; border: 1px solid #eee; border-radius: 15px;
-            padding: 1.5rem; text-decoration: none; color: #333;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.3s, box-shadow 0.3s;
-            display: flex; flex-direction: column; align-items: center;
-        }
-        .history-card:hover { transform: translateY(-5px); box-shadow: 0 8px 15px rgba(93, 0, 30, 0.15); border-color: #5d001e; }
-        .history-icon { font-size: 2rem; color: #5d001e; margin-bottom: 1rem; }
-        .history-keyword { font-size: 1.2rem; font-weight: bold; margin-bottom: 0.5rem; text-transform: capitalize; }
-        .history-meta { font-size: 0.9rem; color: #777; }
-        .empty-state { padding: 3rem; color: #777; background: #fbebee; border-radius: 15px; }
-    </style>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/logo.png') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='history-style.css') }}">
 </head>
 <body>
-    <nav class="navbar">
-        <div class="container-nav">
-            <a href="{{ url_for('index') }}" class="logo">
-                <img src="{{ url_for('static', filename='assets/logo.png') }}" alt="moodify Logo"> moodify
-            </a>
-            <ul class="nav-links">
-                <li><a href="{{ url_for('index') }}">HOME</a></li>
-                <li><a href="{{ url_for('tutorial') }}">TUTORIAL</a></li>
-
-                {% if current_user.is_authenticated %}
-                    <li><a href="{{ url_for('analisis') }}">ANALISIS</a></li>
-                    <li><a href="{{ url_for('history') }}" class="active">HISTORY</a></li>
-                    <li><a href="{{ url_for('logout') }}" style="color: #ffb3b3;">LOGOUT ({{ current_user.username }})</a></li>
-                
-                {% else %}
-                    <li><a href="{{ url_for('login') }}">LOGIN</a></li>
-                    <li><a href="{{ url_for('register') }}">REGISTER</a></li>
-                {% endif %}
-            </ul>
-        </div>
+    <nav class="navbar-pill">
+        <a href="{{ url_for('index') }}" class="logo">
+            <img src="{{ url_for('static', filename='assets/logo.png') }}" alt="moodify Logo" /> moodify
+        </a>
+        <ul class="nav-links">
+            <li><a href="{{ url_for('index') }}">Beranda</a></li>
+            <li><a href="{{ url_for('tutorial') }}">Panduan</a></li>
+            
+            {% if current_user.is_authenticated %}
+                <li><a href="{{ url_for('analisis') }}">Analisis</a></li>
+                <li><a href="{{ url_for('history') }}" style="font-weight: 800;">Riwayat</a></li>
+            {% endif %}
+        </ul>
+        
+        <ul class="nav-links">
+            <li><span style="font-size: 0.85rem; color: var(--navy-dark); font-weight: 600;">Halo, {{ current_user.username }}</span></li>
+            <li><a href="{{ url_for('logout') }}" class="nav-btn outline" style="border: 1px solid var(--navy-dark);" onclick="return confirm('Apakah kamu yakin ingin keluar dari akun ini?');">Log Out</a></li>
+        </ul>
     </nav>
 
+    <div class="history-header">
+        <h1>Riwayat Analisis Kamu</h1>
+        <p>Lihat kembali semua hasil penelusuran yang sudah tersimpan di akunmu.</p>
+    </div>
+
     <div class="history-container">
-        <h2>Riwayat Analisis Sesi Ini</h2>
-        <p>Lihat kembali hasil analisis yang baru saja kamu lakukan.</p>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %} 
+            {% if messages %}
+                <div class="flash-wrapper">
+                    {% for category, message in messages %}
+                        <div class="flash {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %} 
+        {% endwith %}
 
         {% if history %}
             <div class="history-grid">
                 {% for item in history %}
-                <div class="history-card" style="padding-bottom: 10px;">
+                <div class="history-card">
+                    <div class="history-keyword">{{ item.keyword }}</div>
                     
-                    <a href="{{ url_for('result', file=item.filename) }}" style="text-decoration: none; color: inherit; display: flex; flex-direction: column; align-items: center; width: 100%;">
-                        <div class="history-icon"><i class="fas fa-history"></i></div>
-                        <div class="history-keyword">{{ item.keyword }}</div>
-                        <div class="history-meta">
-                            <span><i class="far fa-clock"></i> {{ item.date_created.strftime('%d-%m-%Y %H:%M') }}</span> • 
-                            <span><i class="fab fa-twitter"></i> {{ item.tweet_count }} Tweet</span>
-                        </div>
-                    </a>
+                    <div class="history-meta">
+                        <span><i class="far fa-clock"></i> {{ item.date_created.strftime('%d %B %Y - %H:%M') }}</span>
+                        <span><i class="fab fa-twitter"></i> {{ item.tweet_count }} Tweet Dianalisis</span>
+                    </div>
 
-                    <form action="{{ url_for('delete_history', history_id=item.id) }}" method="POST" style="margin-top: 15px; width: 100%;" onsubmit="return confirm('Apakah kamu yakin ingin menghapus riwayat ini? Data dari database dan file sistem akan dihapus permanen.');">
-                        <button type="submit" style="width: 100%; padding: 8px; background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s ease;">
-                            <i class="fas fa-trash"></i> Hapus
-                        </button>
-                    </form>
-                    
+                    <div class="card-actions">
+                        <a href="{{ url_for('result', file=item.filename) }}" class="btn-view">
+                            <i class="fas fa-chart-pie"></i> Lihat Hasil
+                        </a>
+                        
+                        <form action="{{ url_for('delete_history', history_id=item.id) }}" method="POST" style="display: flex; flex: 1;" onsubmit="return confirm('Apakah kamu yakin ingin menghapus riwayat ini? File data akan dihapus permanen.');">
+                            <button type="submit" class="btn-delete" title="Hapus Riwayat">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </form>
+                    </div>
                 </div>
                 {% endfor %}
             </div>
         {% else %}
             <div class="empty-state">
-                <h3>Belum ada riwayat</h3>
-                <p>Kamu belum melakukan analisis apapun di sesi ini.</p>
-                <a href="{{ url_for('analisis') }}" style="color: #5d001e; font-weight: bold;">Mulai Analisis Sekarang &rarr;</a>
+                <h3>Belum ada riwayat analisis</h3>
+                <p>Kamu belum pernah menyimpan analisis sentimen apapun di akun ini.</p>
+                <a href="{{ url_for('analisis') }}" class="btn-outline-navy">Mulai Analisis Pertamamu</a>
             </div>
         {% endif %}
     </div>
-    
-    </body>
+
+</body>
 </html>
