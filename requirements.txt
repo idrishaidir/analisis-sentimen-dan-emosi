@@ -5,3 +5,7 @@ transformers
 nltk
 Sastrawi
 wordcloud
+flask-sqlalchemy
+mysql-connector-python
+flask-login
+Flask-Mail

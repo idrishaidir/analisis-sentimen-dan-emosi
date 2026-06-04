@@ -1,145 +1,175 @@
 <!DOCTYPE html>
 <html lang="id">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hasil Analisis - moodify</title>
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/logo.png') }}"/>
+    
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/logo.png') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='result-style.css') }}">
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='result-style.css') }}"/>
-    <style>
-        /* Tabs Container */
-        .tabs-container { margin-top: 3rem; background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid #eee; }
-        .tabs-header { display: flex; background: #f9f9f9; border-bottom: 1px solid #eee; }
-        .tab-btn { flex: 1; padding: 1.2rem; border: none; background: none; font-size: 1.1rem; font-weight: bold; color: #777; cursor: pointer; transition: 0.3s; }
-        .tab-btn:hover { background: #f0f0f0; color: #5d001e; }
-        .tab-btn.active { background: white; color: #5d001e; border-bottom: 3px solid #5d001e; }
-        
-        /* Table Styles */
-        .tab-content { display: none; padding: 1.5rem; animation: fadeIn 0.5s; }
-        .tab-content.active { display: block; }
-        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-        th { background-color: #5d001e; color: white; padding: 12px; text-align: left; }
-        td { padding: 12px; border-bottom: 1px solid #eee; color: #444; font-size: 0.95rem; vertical-align: top;}
-        tr:nth-child(even) { background-color: #fdfafb; }
-        tr:hover { background-color: #fbebee; }
-        
-        /* Badge Emosi/Sentimen */
-        .badge { padding: 5px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; text-transform: capitalize; display: inline-block;}
-        .badge.positif, .badge.senang, .badge.cinta { background: #d4edda; color: #155724; }
-        .badge.negatif, .badge.marah, .badge.jijik { background: #f8d7da; color: #721c24; }
-        .badge.netral { background: #e2e3e5; color: #383d41; }
-        .badge.takut, .badge.sedih { background: #cce5ff; color: #004085; }
-
-        /* Pagination */
-        .pagination-controls { display: flex; justify-content: center; margin-top: 1.5rem; gap: 10px; }
-        .page-btn { padding: 8px 15px; border: 1px solid #ddd; background: white; cursor: pointer; border-radius: 5px; }
-        .page-btn.active { background: #5d001e; color: white; border-color: #5d001e; }
-        .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    </style>
-  </head>
-  <body>
-    <nav class="navbar">
-      <div class="container-nav">
+</head>
+<body>
+    <nav class="navbar-pill">
         <a href="{{ url_for('index') }}" class="logo">
-          <img src="{{ url_for('static', filename='assets/logo.png') }}" alt="moodify Logo"/>moodify
+            <img src="{{ url_for('static', filename='assets/logo.png') }}" alt="moodify Logo" /> moodify
         </a>
         <ul class="nav-links">
-          <li><a href="{{ url_for('index') }}">HOME</a></li>
-          <li><a href="{{ url_for('analisis') }}" class="active">ANALISIS</a></li>
-          <li><a href="{{ url_for('tutorial') }}">TUTORIAL</a></li>
-          <li><a href="{{ url_for('history') }}">HISTORY</a></li>
+            <li><a href="{{ url_for('index') }}">Beranda</a></li>
+            <li><a href="{{ url_for('analisis') }}">Analisis</a></li>
+            <li><a href="{{ url_for('tutorial') }}">Panduan</a></li>
+            <li><a href="{{ url_for('history') }}">Riwayat</a></li>
         </ul>
-      </div>
+        <ul class="nav-links">
+            <li><span style="font-size: 0.85rem; color: var(--navy-dark); font-weight: 600;">Halo, {{ current_user.username }}</span></li>
+            <li><a href="{{ url_for('logout') }}" class="nav-btn outline" onclick="return confirm('Apakah kamu yakin ingin keluar dari akun ini?');">Log Out</a></li>
+        </ul>
     </nav>
 
-    <div class="result-container">
-      <h2>Hasil Analisis Sentimen dan Emosi</h2>
-
-      <div class="wordcloud-wrapper">
-        <h4>{{ keyword }} ({{ tweet_count }} tweets)</h4>
-        <div class="wordcloud-image-container">
-          {% if wordcloud_url %}
-          <img src="{{ url_for('static', filename=wordcloud_url) }}?v={{ range(1, 10000) | random }}" alt="Wordcloud"/>
-          {% else %} <p>Data tidak cukup.</p> {% endif %}
-        </div>
-      </div>
-
-      <div class="charts-grid">
-        <div class="chart-card"><h4>Sentimen</h4><canvas id="sentimentChart"></canvas></div>
-        <div class="chart-card"><h4>Emosi</h4><canvas id="emotionChart"></canvas></div>
-      </div>
-
-      <div class="tabs-container">
-          <div class="tabs-header">
-              <button class="tab-btn active" onclick="openTab('labeling')">🏷️ Hasil Pelabelan</button>
-              <button class="tab-btn" onclick="openTab('original')">📝 Tweet Murni (Asli)</button>
-          </div>
-
-          <div id="labeling" class="tab-content active">
-              <h3>Tabel Pelabelan Tweet</h3>
-              <p>Data hasil preprocessing yang telah diklasifikasikan oleh IndoBERT.</p>
-              <table>
-                  <thead>
-                      <tr>
-                          <th width="5%">No</th>
-                          <th width="65%">Teks (Preprocessed)</th>
-                          <th width="15%">Sentimen</th>
-                          <th width="15%">Emosi</th>
-                      </tr>
-                  </thead>
-                  <tbody id="table-body-label">
-                      </tbody>
-              </table>
-              <div class="pagination-controls" id="pagination-label"></div>
-          </div>
-
-          <div id="original" class="tab-content">
-              <h3>Tabel Tweet Murni</h3>
-              <p>Data mentah langsung dari X/Twitter sebelum dibersihkan.</p>
-              <table>
-                  <thead>
-                      <tr>
-                          <th width="5%">No</th>
-                          <th>Tweet Asli (Full Text)</th>
-                      </tr>
-                  </thead>
-                  <tbody id="table-body-original">
-                      </tbody>
-              </table>
-              <div class="pagination-controls" id="pagination-original"></div>
-          </div>
-      </div>
-      <br><br>
-      <a href="{{ url_for('analisis') }}" class="back-link">Lakukan Analisis Lain <span>&rarr;</span></a>
+    <div class="result-header">
+        <h1>Kami udah olah datanya, ini hasilnya!</h1>
+        <p>Berhasil menganalisis <strong>{{ tweet_count }}</strong> tweet tentang <strong>"{{ keyword }}"</strong>.</p>
+        <a href="{{ url_for('analisis') }}" class="btn-back"><i class="fas fa-arrow-left"></i> Kembali ke Analisis</a>
     </div>
 
-    <footer class="footer">
-      <div class="container-footer"><p>&copy; 2025 moodify, Inc.</p></div>
-    </footer>
+    <div class="dashboard-container">
+        
+        <div class="chart-card full-width" style="background-color: var(--navy-dark); color: var(--bg-cream); text-align: center;">
+            <h2 class="chart-title" style="color: var(--bg-cream); border-bottom: 1px solid rgba(255,255,255,0.2);">Kata Yang Sering Muncul</h2>
+            <div style="display: flex; justify-content: center; padding: 20px 0;">
+                {% if wordcloud_url %}
+                    <img src="{{ url_for('static', filename=wordcloud_url) }}" alt="Wordcloud" class="wordcloud-img" style="max-width: 800px; border: 4px solid var(--bg-cream);">
+                {% else %}
+                    <p style="color: #ccc; font-style: italic;">Wordcloud tidak tersedia untuk data ini.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <h2 class="chart-title" style="text-align: center;">Sentimen</h2>
+            <div class="chart-container">
+                <canvas id="sentimentChart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <h2 class="chart-title" style="text-align: center;">Emosi</h2>
+            <div class="chart-container">
+                <canvas id="emotionChart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-card full-width" style="padding: 0; background: transparent; box-shadow: none; border: none;">
+            <div class="tabs-container">
+                
+                <div class="tabs-header">
+                    <button class="tab-btn active" onclick="openTab(event, 'labeling')">🏷️ Hasil Pelabelan</button>
+                    <button class="tab-btn" onclick="openTab(event, 'original')">📝 Tweet Murni (Asli)</button>
+                </div>
+
+                <div id="labeling" class="tab-content active">
+                    <div class="table-wrapper">
+                        <table class="tweet-table">
+                            <thead>
+                                <tr>
+                                    <th width="5%">No</th>
+                                    <th width="65%">Teks (Preprocessed)</th>
+                                    <th width="15%">Sentimen</th>
+                                    <th width="15%">Emosi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body-label">
+                                </tbody>
+                        </table>
+                    </div>
+                    <div class="pagination-controls" id="pagination-label"></div>
+                </div>
+
+                <div id="original" class="tab-content">
+                    <div class="table-wrapper">
+                        <table class="tweet-table">
+                            <thead>
+                                <tr>
+                                    <th width="5%">No</th>
+                                    <th width="15%">Waktu</th>
+                                    <th width="15%">Username</th>
+                                    <th width="65%">Tweet Asli (Full Text)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body-original">
+                                </tbody>
+                        </table>
+                    </div>
+                    <div class="pagination-controls" id="pagination-original"></div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
 
     <script>
-        // --- CHART LOGIC (TETAP SAMA) ---
-        const sentimentData = {{ sentiment_counts|tojson }};
-        const emotionData = {{ emotion_counts|tojson }};
-        // ... (Simpan logic chart.js kamu yang lama di sini) ...
-        // Agar tidak error, copy paste logic chart.js dari file result.html lama kamu ke sini
-        const sentimentColors = ['#28a745', '#dc3545', '#ffc107'];
-        const emotionColors = ['#FF6384', '#4BC0C0', '#36A2EB', '#FFC300', '#9966FF', '#C9CBCF'];
+        // Data dari Flask Backend
+        const allTweets = {{ tweets | tojson }};
+        const sentimentData = {{ sentiment_counts | tojson }};
+        const emotionData = {{ emotion_counts | tojson }};
+        
+        // PETA WARNA (Harus sama untuk Chart & Tabel Badge)
+        const colorPalette = {
+            'Positif': '#2ecc71', // Hijau
+            'Negatif': '#e74c3c', // Merah
+            'Netral':  '#95a5a6', // Abu-abu
+            'Marah':   '#e74c3c', // Merah
+            'Takut':   '#34495e', // Biru gelap
+            'Sedih':   '#3498db', // Biru terang
+            'Senang':  '#f1c40f', // Kuning
+            'Cinta':   '#e84393'  // Pink
+        };
 
-        new Chart(document.getElementById("sentimentChart"), {
+        // Fungsi pembantu untuk mengambil warna dari Palette
+        function getColors(dataObject) {
+            return Object.keys(dataObject).map(key => {
+                // Gunakan format Title Case (Positif, Marah) untuk mencocokkan dengan key di palette
+                const formattedKey = key.charAt(0).toUpperCase() + key.slice(1).toLowerCase();
+                return colorPalette[formattedKey] || '#cccccc'; 
+            });
+        }
+
+        // 1. Chart Sentimen (Pie Chart)
+        new Chart(document.getElementById('sentimentChart').getContext('2d'), {
             type: 'pie',
-            data: { labels: Object.keys(sentimentData), datasets: [{ data: Object.values(sentimentData), backgroundColor: sentimentColors }] }
-        });
-        new Chart(document.getElementById("emotionChart"), {
-            type: 'pie',
-            data: { labels: Object.keys(emotionData), datasets: [{ data: Object.values(emotionData), backgroundColor: emotionColors }] }
+            data: {
+                labels: Object.keys(sentimentData),
+                datasets: [{
+                    data: Object.values(sentimentData),
+                    backgroundColor: getColors(sentimentData),
+                    borderWidth: 2, borderColor: '#ffffff'
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { family: "'Poppins', sans-serif" } } } } }
         });
 
-        // --- LOGIC TAB & PAGINATION ---
-        const allTweets = {{ tweets|tojson }}; // Data dari Flask
+        // 2. Chart Emosi (Pie Chart)
+        new Chart(document.getElementById('emotionChart').getContext('2d'), {
+            type: 'pie',
+            data: {
+                labels: Object.keys(emotionData),
+                datasets: [{
+                    data: Object.values(emotionData),
+                    backgroundColor: getColors(emotionData),
+                    borderWidth: 2, borderColor: '#ffffff'
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { family: "'Poppins', sans-serif" } } } } }
+        });
+
+        // 3. LOGIKA PAGINATION TABEL
         const rowsPerPage = 10;
         
         function displayTable(type, page) {
@@ -159,16 +189,26 @@
                 const num = start + index + 1;
                 
                 if (type === 'labeling') {
+                    // Penyesuaian nama class badge agar sesuai CSS (.badge.positif, .badge.marah)
+                    const sentimenClass = tweet.sentimen ? tweet.sentimen.toLowerCase() : 'netral';
+                    const emosiClass = tweet.emosi ? tweet.emosi.toLowerCase() : 'netral';
+                    const textBersih = tweet.text ? tweet.text : tweet.full_text;
+
                     row.innerHTML = `
                         <td>${num}</td>
-                        <td>${tweet.text}</td>
-                        <td><span class="badge ${tweet.sentimen.toLowerCase()}">${tweet.sentimen}</span></td>
-                        <td><span class="badge ${tweet.emosi.toLowerCase()}">${tweet.emosi}</span></td>
+                        <td style="font-size: 0.85rem;">${textBersih}</td>
+                        <td><span class="badge ${sentimenClass}">${tweet.sentimen}</span></td>
+                        <td><span class="badge ${emosiClass}">${tweet.emosi}</span></td>
                     `;
                 } else {
+                    const time = tweet.created_at ? tweet.created_at.substring(0, 10) : '-';
+                    const username = tweet.username ? '@' + tweet.username : 'Anonim';
+                    
                     row.innerHTML = `
                         <td>${num}</td>
-                        <td>${tweet.full_text}</td>
+                        <td style="font-size: 0.8rem; color: #666;">${time}</td>
+                        <td style="font-weight: 500;">${username}</td>
+                        <td style="font-size: 0.85rem;">${tweet.full_text}</td>
                     `;
                 }
                 tbody.appendChild(row);
@@ -176,7 +216,7 @@
 
             // Tombol Prev
             const prevBtn = document.createElement("button");
-            prevBtn.innerText = "Prev";
+            prevBtn.innerText = "Sebelumnya";
             prevBtn.className = "page-btn";
             prevBtn.disabled = page === 1;
             prevBtn.onclick = () => displayTable(type, page - 1);
@@ -184,31 +224,31 @@
 
             // Indikator Halaman
             const pageInfo = document.createElement("span");
-            pageInfo.innerText = ` Hal ${page} dari ${totalPages} `;
-            pageInfo.style.alignSelf = "center";
+            pageInfo.innerText = ` Hal ${page} dari ${totalPages || 1} `;
+            pageInfo.style.fontWeight = "600";
             pagination.appendChild(pageInfo);
 
             // Tombol Next
             const nextBtn = document.createElement("button");
-            nextBtn.innerText = "Next";
+            nextBtn.innerText = "Selanjutnya";
             nextBtn.className = "page-btn";
-            nextBtn.disabled = page === totalPages;
+            nextBtn.disabled = page === totalPages || totalPages === 0;
             nextBtn.onclick = () => displayTable(type, page + 1);
             pagination.appendChild(nextBtn);
         }
 
-        function openTab(tabName) {
+        // 4. LOGIKA PERPINDAHAN TAB
+        function openTab(evt, tabName) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             
             document.getElementById(tabName).classList.add('active');
-            // Cari tombol yang mentrigger dan tambahkan active (manual selection logic)
-            event.currentTarget.classList.add('active');
+            evt.currentTarget.classList.add('active');
         }
 
-        // Load awal
+        // Jalankan tabel pertama kali saat halaman dimuat
         displayTable('labeling', 1);
         displayTable('original', 1);
     </script>
-  </body>
+</body>
 </html>

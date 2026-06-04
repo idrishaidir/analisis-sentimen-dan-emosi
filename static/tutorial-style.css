@@ -1,168 +1,144 @@
-body,
-h1,
-h2,
-h3,
-p,
-ul {
-  margin: 0;
-  padding: 0;
+/* =========================================
+   TEMA UTAMA: Navy & Cream (tutorial-style.css)
+   ========================================= */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@300;400;500;600&display=swap');
+
+:root {
+    --bg-cream: #F3EFE6;
+    --navy-dark: #2D3250;
+    --font-heading: 'Playfair Display', serif;
+    --font-body: 'Poppins', sans-serif;
 }
 
 body {
-  font-family: Arial, sans-serif;
-  line-height: 1.6;
-  background-color: #ffffff;
-  color: #333;
+    background-color: var(--bg-cream);
+    color: var(--navy-dark);
+    font-family: var(--font-body);
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
-img {
-  max-width: 100%;
-  height: auto;
+/* --- NAVBAR KAPSUL --- */
+.navbar-pill {
+    margin: 20px auto;
+    width: 95%;
+    max-width: 1200px;
+    border: 1px solid var(--navy-dark);
+    border-radius: 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 30px;
+    box-sizing: border-box;
+    background-color: transparent;
 }
 
-/* =================================== */
-/* Navbar*/
-/* =================================== */
-.navbar {
-  background-color: #5d001e;
-  color: white;
-  padding: 1rem 0;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+.logo { display: flex; align-items: center; font-size: 1.5rem; font-weight: 700; color: var(--navy-dark); text-decoration: none; font-family: var(--font-body); }
+.logo img { width: 35px; margin-right: 10px; border-radius: 50%; }
+
+.nav-links { list-style: none; display: flex; margin: 0; padding: 0; align-items: center; }
+.nav-links li { margin: 0 15px; }
+.nav-links a { color: var(--navy-dark); text-decoration: none; font-weight: 600; font-size: 0.9rem; text-transform: uppercase; transition: all 0.3s ease; }
+.nav-links a:hover { opacity: 0.7; }
+
+.nav-btn { background-color: var(--navy-dark); color: var(--bg-cream) !important; padding: 8px 25px; border-radius: 30px; }
+.nav-btn.outline { background-color: transparent; color: var(--navy-dark) !important; }
+
+/* --- TUTORIAL HEADER --- */
+.tutorial-header {
+    text-align: center;
+    margin: 40px auto 50px;
+    max-width: 800px;
+    padding: 0 20px;
 }
 
-.container-nav {
-  width: 90%;
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.tutorial-header h1 {
+    font-family: var(--font-heading);
+    font-size: 3rem;
+    color: var(--navy-dark);
+    margin-bottom: 10px;
 }
 
-.logo {
-  display: flex;
-  align-items: center;
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: white;
-  text-decoration: none;
+.tutorial-header p {
+    font-size: 1.1rem;
+    opacity: 0.8;
 }
 
-.logo img {
-  width: 40px;
-  margin-right: 10px;
-  border-radius: 50%;
-}
-
-.nav-links {
-  list-style: none;
-  display: flex;
-}
-
-.nav-links li {
-  margin-left: 2rem;
-}
-
-.nav-links a {
-  color: white;
-  text-decoration: none;
-  font-weight: bold;
-  padding-bottom: 5px;
-  border-bottom: 2px solid transparent;
-  transition: border-bottom 0.3s;
-}
-
-.nav-links a:hover,
-.nav-links a.active {
-  border-bottom: 2px solid white;
-}
-
-/* =================================== */
-/* Konten Tutorial */
-/* =================================== */
+/* --- STEP CARDS --- */
 .tutorial-container {
-  width: 90%;
-  max-width: 900px;
-  margin: 4rem auto;
-  padding: 2rem;
+    flex: 1;
+    width: 95%;
+    max-width: 1000px;
+    margin: 0 auto 60px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
 }
 
-.tutorial-container h2 {
-  font-size: 2.5rem;
-  font-weight: bold;
-  text-align: center;
-  margin-bottom: 1rem;
-}
-
-.tutorial-container > p {
-  font-size: 1.2rem;
-  color: #555;
-  text-align: center;
-  margin-bottom: 3rem;
-}
-
-.tutorial-steps {
-  display: flex;
-  flex-direction: column;
-  gap: 3rem;
-}
-
-.step {
-  display: flex;
-  gap: 2rem;
-  align-items: center;
-  border: 1px solid #eee;
-  border-radius: 10px;
-  padding: 2rem;
-  background-color: #fdfafb;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-
-.step:nth-child(even) {
-  flex-direction: row-reverse;
+.step-card {
+    background-color: var(--navy-dark);
+    color: var(--bg-cream);
+    border-radius: 25px;
+    padding: 40px;
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    box-shadow: 0 10px 25px rgba(45, 50, 80, 0.1);
+    /* Memberikan efek border tipis yang elegan */
+    border: 3px solid rgba(243, 239, 230, 0.1); 
 }
 
 .step-text {
-  flex: 1;
+    flex: 1;
 }
 
-.step-text h3 {
-  font-size: 1.8rem;
-  color: #5d001e;
-  margin-bottom: 0.5rem;
+.step-text h2 {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    margin-bottom: 15px;
+    color: var(--bg-cream);
 }
 
 .step-text p {
-  font-size: 1.1rem;
+    font-size: 1rem;
+    line-height: 1.6;
+    opacity: 0.9;
 }
 
 .step-image {
-  flex: 1;
+    flex: 1.2;
 }
 
 .step-image img {
-  border-radius: 8px;
-  border: 1px solid #ddd;
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
 }
 
-/* =================================== */
-/* Footer*/
-/* =================================== */
-.footer {
-  text-align: center;
-  padding: 2rem 0;
-  background-color: #f9f9f9;
-  color: #aaa;
-  border-top: 1px solid #eee;
-  margin-top: 4rem;
+/* --- FOOTER --- */
+.footer-navy {
+    background-color: var(--navy-dark);
+    color: white;
+    padding: 60px 30px 40px;
+    margin-top: 60px;
+    border-radius: 40px 40px 0 0;
 }
 
-/* =================================== */
-/* Responsive */
-/* =================================== */
+.footer-content { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; }
+.footer-left { flex: 1; border-right: 1px solid rgba(255,255,255,0.2); padding-right: 40px; }
+.footer-left h2 { font-family: var(--font-heading); font-size: 2.5rem; line-height: 1.2; margin: 0; }
+.footer-right { flex: 1; padding-left: 40px; display: flex; flex-direction: column; justify-content: flex-end; }
+
+/* Responsive untuk layar kecil (HP) */
 @media (max-width: 768px) {
-  .step,
-  .step:nth-child(even) {
-    flex-direction: column-reverse;
-  }
+    .step-card { flex-direction: column; padding: 30px; text-align: center; }
+    .footer-content { flex-direction: column; gap: 30px; }
+    .footer-left { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.2); padding-right: 0; padding-bottom: 30px; }
+    .footer-right { padding-left: 0; }
 }

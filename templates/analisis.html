@@ -1,130 +1,113 @@
 <!DOCTYPE html>
 <html lang="id">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mulai Analisis - moodify</title>
-    <link
-      rel="icon"
-      type="image/png"
-      href="{{ url_for('static', filename='assets/logo.png') }}"
-    />
-
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='form-style.css') }}"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-    />
-  </head>
-  <body>
-    <nav class="navbar">
-      <div class="container-nav">
-        <a href="{{ url_for('index') }}" class="logo">
-          <img
-            src="{{ url_for('static', filename='assets/logo.png') }}"
-            alt="moodify Logo"
-          />
-          moodify
-        </a>
-        <ul class="nav-links">
-          <li><a href="{{ url_for('index') }}">HOME</a></li>
-          <li><a href="{{ url_for('analisis') }}" class="active">ANALISIS</a></li>
-          <li><a href="{{ url_for('tutorial') }}">TUTORIAL</a></li>
-          <li><a href="{{ url_for('history') }}">HISTORY</a></li>
-        </ul>
-      </div>
-    </nav>
-
-    <div class="analysis-container">
-      <div id="form-wrapper">
-        <h2>Mulai Analisis Sentimen dan Emosi</h2>
-        <p class="subtitle">
-          Lihat Apa yang Orang Rasakan dari Kata-Kata Mereka.
-        </p>
-
-        {% with messages = get_flashed_messages(with_categories=true) %} {% if
-        messages %}
-        <div class="flash-wrapper">
-          {% for category, message in messages %}
-          <div class="flash {{ category }}">{{ message }}</div>
-          {% endfor %}
-        </div>
-        {% endif %} {% endwith %}
-
-        <form
-          action="{{ url_for('analisis') }}"
-          method="post"
-          id="analysis-form"
-        >
-          <div class="form-group-inline">
-            <label for="auth_token">Masukkan auth token</label>
-            <div class="input-with-icon">
-              <input type="text" id="auth_token" name="auth_token" required />
-              <i class="fas fa-search"></i>
-            </div>
-            <a href="{{ url_for('tutorial') }}" class="tutorial-link"
-              >Mengalami kesulitan? tutorial <span>&rarr;</span></a
-            >
-          </div>
-
-          <hr class="divider" />
-
-          <div class="form-group">
-            <div class="label-icon-wrapper">
-              <label>Pilih Rentang Waktu</label>
-              <i class="fas fa-mouse-pointer"></i>
-            </div>
-
-            <label for="since" class="sub-label">Sejak Tanggal:</label>
-            <input type="date" id="since" name="since" required />
-
-            <label for="until" class="sub-label">Sampai Tanggal:</label>
-            <input type="date" id="until" name="until" required />
-          </div>
-
-          <div class="form-group">
-            <label for="limit">Jumlah tweet yang ingin dianalisis:</label>
-            <input type="number" id="limit" name="limit" min="1" required />
-          </div>
-
-          <div class="form-group">
-            <label for="keyword">Masukkan kata kunci:</label>
-            <input type="text" id="keyword" name="keyword" required />
-          </div>
-
-          <button type="submit" class="submit-link">
-            Lihat Hasil Analisis dan Emosi
-          </button>
-        </form>
-      </div>
-      <div id="loading-wrapper" style="display: none">
+    
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/logo.png') }}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='analisis-style.css') }}" />
+</head>
+<body>
+    <div class="loading-overlay" id="loadingOverlay">
         <div class="spinner"></div>
-        <h3>Mohon tunggu sebentar...</h3>
-        <p>
-          Kami sedang mengumpulkan dan menganalisis tweet untuk Anda. Ini
-          mungkin memakan waktu 1-2 menit.
-        </p>
-      </div>
+        <h2 class="loading-text">Sedang Menganalisis...</h2>
+        <p class="loading-subtext">Mohon tunggu sebentar, kami sedang mengumpulkan<br>dan membaca emosi dari tweet.</p>
     </div>
 
-    <footer class="footer">
-      <div class="container-footer">
-        <p>&copy; 2025 moodify, Inc.</p>
-      </div>
-    </footer>
+    <nav class="navbar-pill">
+        <a href="{{ url_for('index') }}" class="logo">
+            <img src="{{ url_for('static', filename='assets/logo.png') }}" alt="moodify Logo" /> moodify
+        </a>
+        <ul class="nav-links">
+            <li><a href="{{ url_for('index') }}">Beranda</a></li>
+            <li><a href="{{ url_for('analisis') }}" style="font-weight: 800;">Analisis</a></li>
+            <li><a href="{{ url_for('tutorial') }}">Panduan</a></li>
+            <li><a href="{{ url_for('history') }}">Riwayat</a></li>
+        </ul>
+        <ul class="nav-links">
+            <li><span style="font-size: 0.85rem; color: var(--navy-dark); font-weight: 600;">Halo, {{ current_user.username }}</span></li>
+            <li><a href="{{ url_for('logout') }}" class="nav-btn outline" style="border: 1px solid var(--navy-dark);" onclick="return confirm('Apakah kamu yakin ingin keluar dari akun ini?');">Log Out</a></li>
+        </ul>
+    </nav>
 
+    <div class="analisis-header">
+        <h1>Mulai Analisis Sentimen dan Emosi</h1>
+        <p>Lihat Apa yang Orang Rasakan dari Kata-Kata Mereka.</p>
+    </div>
+
+    <div class="analisis-container">
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-wrapper">
+                    {% for category, message in messages %}
+                        <div class="flash {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <form action="{{ url_for('analisis') }}" method="POST" id="analisisForm">
+            <div class="analisis-card">
+                
+                <div class="form-section">
+                    <label class="section-title">Masukkan Auth Token</label>
+                    <input type="text" name="auth_token" placeholder="Paste auth_token X Anda di sini" required>
+                </div>
+
+                <div class="form-section">
+                    <label class="section-title">Pilih Rentang Waktu</label>
+                    <div class="form-row">
+                        <div class="form-col">
+                            <label>Sejak Tanggal</label>
+                            <input type="date" name="since" required>
+                        </div>
+                        <div class="form-col">
+                            <label>Sampai Tanggal</label>
+                            <input type="date" name="until" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <label class="section-title">Pengaturan Analisis</label>
+                    <div class="form-row">
+                        <div class="form-col">
+                            <label>Jumlah tweet yang ingin dianalisis</label>
+                            <input type="number" name="limit" min="10" max="500" placeholder="Contoh: 100" required>
+                        </div>
+                        <div class="form-col">
+                            <label>Masukkan kata kunci</label>
+                            <input type="text" name="keyword" placeholder="Contoh: Timnas Indonesia" required>
+                        </div>
+                    </div>
+                </div>
+                
+            </div> <div class="tutorial-link-wrapper">
+                <a href="{{ url_for('tutorial') }}">Mengalami kesulitan? tutorial <i class="fas fa-arrow-right"></i></a>
+            </div>
+
+            <button type="submit" class="btn-submit-large" id="btnSubmit">
+                Lihat Hasil Analisis Sentimen dan Emosi
+            </button>
+        </form>
+    </div>
     <script>
-      document
-        .getElementById("analysis-form")
-        .addEventListener("submit", function () {
-          if (this.checkValidity()) {
-            document.getElementById("form-wrapper").style.display = "none";
-            document.getElementById("loading-wrapper").style.display = "flex";
-          }
+        document.getElementById('analisisForm').addEventListener('submit', function(e) {
+            // Cek apakah form sudah valid (semua input required sudah diisi)
+            if (this.checkValidity()) {
+                // Munculkan layar loading
+                document.getElementById('loadingOverlay').classList.add('active');
+                
+                // Ubah teks tombol
+                const btn = document.getElementById('btnSubmit');
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+                btn.style.opacity = '0.8';
+            }
         });
     </script>
-  </body>
+</body>
 </html>

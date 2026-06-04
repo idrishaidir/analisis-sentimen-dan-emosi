@@ -1,133 +1,107 @@
 <!DOCTYPE html>
 <html lang="id">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tutorial - moodify</title>
-    <link
-      rel="icon"
-      type="image/png"
-      href="{{ url_for('static', filename='assets/logo.png') }}"
-    />
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='tutorial-style.css') }}"
-    />
-  </head>
-  <body>
-    <nav class="navbar">
-      <div class="container-nav">
+    <title>Panduan - moodify</title>
+    
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/logo.png') }}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='tutorial-style.css') }}" />
+</head>
+<body>
+    <nav class="navbar-pill">
         <a href="{{ url_for('index') }}" class="logo">
-          <img
-            src="{{ url_for('static', filename='assets/logo.png') }}"
-            alt="moodify Logo"
-          />
-          moodify
+            <img src="{{ url_for('static', filename='assets/logo.png') }}" alt="moodify Logo" /> moodify
         </a>
         <ul class="nav-links">
-          <li><a href="{{ url_for('index') }}">HOME</a></li>
-          <li><a href="{{ url_for('analisis') }}">ANALISIS</a></li>
-          <li><a href="{{ url_for('tutorial') }}" class="active">TUTORIAL</a></li>
-          <li><a href="{{ url_for('history') }}">HISTORY</a></li>
+            <li><a href="{{ url_for('index') }}">Beranda</a></li>
+            <li><a href="{{ url_for('tutorial') }}" style="font-weight: 800;">Panduan</a></li>
+            
+            {% if current_user.is_authenticated %}
+                <li><a href="{{ url_for('analisis') }}">Analisis</a></li>
+                <li><a href="{{ url_for('history') }}">Riwayat</a></li>
+            {% endif %}
         </ul>
-      </div>
+        
+        <ul class="nav-links">
+            {% if current_user.is_authenticated %}
+                <li><span style="font-size: 0.85rem; color: var(--navy-dark);">Halo, {{ current_user.username }}</span></li>
+                <li><a href="{{ url_for('logout') }}" class="nav-btn">Log Out</a></li>
+            {% else %}
+                <li><a href="{{ url_for('login') }}" class="nav-btn outline">Masuk</a></li>
+                <li><a href="{{ url_for('register') }}" class="nav-btn">Buat Akun</a></li>
+            {% endif %}
+        </ul>
     </nav>
 
-    <div class="tutorial-container">
-      <h2>Cara Mendapatkan Auth Token X</h2>
-      <p>
-        Ikuti 5 langkah mudah ini untuk mendapatkan token autentikasi dari akun
-        X (Twitter) Anda.
-      </p>
-
-      <div class="tutorial-steps">
-        <div class="step">
-          <div class="step-text">
-            <h3>1. Buka Akun X</h3>
-            <p>
-              Login dan buka halaman utama akun X (Twitter) Anda di browser.
-            </p>
-          </div>
-          <div class="step-image">
-            <img
-              src="{{ url_for('static', filename='assets/beranda_x.png') }}"
-              alt="Buka Akun X"
-            />
-          </div>
-        </div>
-
-        <div class="step">
-          <div class="step-text">
-            <h3>2. Buka Inspect</h3>
-            <p>
-              Klik kanan di mana saja pada halaman, lalu pilih "Inspect". Anda
-              juga bisa menggunakan shortcut keyboard
-              <strong>Ctrl+Shift+I</strong>.
-            </p>
-          </div>
-          <div class="step-image">
-            <img
-              src="{{ url_for('static', filename='assets/inspect_x.png') }}"
-              alt="Klik Inspect"
-            />
-          </div>
-        </div>
-
-        <div class="step">
-          <div class="step-text">
-            <h3>3. Cari Menu Application</h3>
-            <p>
-              Di panel 'Inspect' yang muncul, cari dan klik tab "Application".
-              (Mungkin tersembunyi di bawah panah »).
-            </p>
-          </div>
-          <div class="step-image">
-            <img
-              src="{{ url_for('static', filename='assets/application.png') }}"
-              alt="Menu Application"
-            />
-          </div>
-        </div>
-
-        <div class="step">
-          <div class="step-text">
-            <h3>4. Temukan Auth Token</h3>
-            <p>
-              Di menu sebelah kiri, buka "Cookies" > "https://x.com". Di daftar
-              yang muncul, cari nama <strong>auth_token</strong> dan klik. Salin
-              (copy) kode panjang di bagian "Cookie Value".
-            </p>
-          </div>
-          <div class="step-image">
-            <img
-              src="{{ url_for('static', filename='assets/auth_token.png') }}"
-              alt="Salin Auth Token"
-            />
-          </div>
-        </div>
-
-        <div class="step">
-          <div class="step-text">
-            <h3>5. Tempel Token</h3>
-            <p>
-              Kembali ke halaman Analisis, dan tempel (paste) kode yang sudah
-              Anda salin ke dalam input "Masukkan auth token".
-            </p>
-          </div>
-          <div class="step-image">
-            <img
-              src="{{ url_for('static', filename='assets/input.png') }}"
-              alt="Tempel Token"
-            />
-          </div>
-        </div>
-      </div>
+    <div class="tutorial-header">
+        <h1>Cara Mendapatkan Auth Token</h1>
+        <p>Ikuti 5 langkah mudah ini untuk mendapatkan AUTH token X anda.</p>
     </div>
 
-    <footer class="footer">
-      <div class="container-footer">
-        <p>&copy; 2025 moodify, Inc.</p>
-      </div>
+    <div class="tutorial-container">
+        <div class="step-card">
+            <div class="step-text">
+                <h2>1. Buka Akun X</h2>
+                <p>Login dan buka halaman utama akun X (Twitter) Anda di browser.</p>
+            </div>
+            <div class="step-image">
+                <img src="{{ url_for('static', filename='assets/beranda_x.png') }}" alt="Beranda Akun X" />
+            </div>
+        </div>
+
+        <div class="step-card">
+            <div class="step-text">
+                <h2>2. Buka Inspect</h2>
+                <p>Klik kanan di mana saja pada halaman, lalu pilih "Inspect". Anda juga bisa menggunakan shortcut keyboard <strong>Ctrl+Shift+I</strong>.</p>
+            </div>
+            <div class="step-image">
+                <img src="{{ url_for('static', filename='assets/inspect_x.png') }}" alt="Inspect Elemen" />
+            </div>
+        </div>
+
+        <div class="step-card">
+            <div class="step-text">
+                <h2>3. Cari Menu Application</h2>
+                <p>Di panel 'Inspect' yang muncul, cari dan klik tab "Application". (Mungkin tersembunyi di bawah panah »).</p>
+            </div>
+            <div class="step-image">
+                <img src="{{ url_for('static', filename='assets/application.png') }}" alt="Menu Application" />
+            </div>
+        </div>
+
+        <div class="step-card">
+            <div class="step-text">
+                <h2>4. Temukan Auth Token</h2>
+                <p>Di menu sebelah kiri, buka "Cookies" > "https://x.com". Di daftar yang muncul, cari nama <strong>auth_token</strong> dan klik. Salin (copy) kode panjang di bagian "Cookie Value".</p>
+            </div>
+            <div class="step-image">
+                <img src="{{ url_for('static', filename='assets/auth_token.png') }}" alt="Copy Auth Token" />
+            </div>
+        </div>
+
+        <div class="step-card">
+            <div class="step-text">
+                <h2>5. Tempel Token</h2>
+                <p>Kembali ke halaman Analisis, dan tempel (paste) kode yang sudah Anda salin ke dalam input "Masukkan auth token".</p>
+            </div>
+            <div class="step-image">
+                <img src="{{ url_for('static', filename='assets/input.png') }}" alt="Paste Auth Token" />
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer-navy">
+        <div class="footer-content">
+            <div class="footer-left">
+                <h2>Every Text Has<br>A Voice</h2>
+            </div>
+            <div class="footer-right">
+                <p style="margin: 0; font-size: 0.9rem; opacity: 0.8;">&copy; 2026 moodify, Inc. All rights reserved.</p>
+            </div>
+        </div>
     </footer>
-  </body>
+</body>
 </html>

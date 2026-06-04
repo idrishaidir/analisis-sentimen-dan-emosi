@@ -2,27 +2,200 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 import os
 import pandas as pd
 import time
-import datetime 
 from collections import Counter
 from wordcloud import WordCloud
-
-# Pastikan struktur folder utils benar
 from utils.scraping import scraping_tweets
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from datetime import datetime, timedelta
+from flask_mail import Mail, Message
+import secrets
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
-app.secret_key = "secret123" # Pastikan ini ada untuk fitur session/flash
+app.secret_key = "secret123"
 
-# =========================================================
-# ROUTES
-# =========================================================
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=60)
+app.config['REMEMBER_COOKIE_DURATION'] = timedelta(days=7)
+
+# verifikasi email
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'kentang@gmail.com'
+app.config['MAIL_PASSWORD'] = 'apk nya dikatain kentang ajggg'
+mail = Mail(app)
+
+# Inisialisasi Database
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:@localhost/moodify_db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
+
+# Tabel Users
+class User(UserMixin, db.Model):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(150), unique=True, nullable=False)
+    password = db.Column(db.String(255), nullable=True)
+    is_verified = db.Column(db.Boolean, default=False)
+    verification_token = db.Column(db.String(255), nullable=True)
+    histories = db.relationship('AnalysisHistory', backref='owner', lazy=True)
+
+# Tabel Analysis History
+class AnalysisHistory(db.Model):
+    __tablename__ = 'analysis_history'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    keyword = db.Column(db.String(255), nullable=False)
+    filename = db.Column(db.String(255), nullable=False)
+    tweet_count = db.Column(db.Integer, nullable=False)
+    date_created = db.Column(db.DateTime, default=datetime.utcnow)
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        username = request.form.get("username")
+        email = request.form.get("email")
+        password = request.form.get("password")
+        
+        # Cek apakah email sudah terdaftar
+        user_exists = User.query.filter_by(email=email).first()
+        if user_exists:
+            flash("❌ Email sudah digunakan!", "error")
+            return redirect(url_for("register"))
+
+        # Buat token verifikasi unik
+        token = secrets.token_hex(16)
+        hashed_pw = generate_password_hash(password, method='pbkdf2:sha256')
+
+        new_user = User(
+            username=username,
+            email=email,
+            password=hashed_pw,
+            verification_token=token,
+            is_verified=False
+        )
+        
+        db.session.add(new_user)
+        db.session.commit()
+
+        # Kirim Email Verifikasi
+        msg = Message('hallo! verifikasi akun moodify kamu yuk ✨', 
+                    sender='noreply@moodify.com', 
+                    recipients=[email])
+
+        link = url_for('verify_email', token=token, _external=True)
+
+        # Desain Email HTML (Gen Z + Humble Style)
+        msg.html = f"""
+        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; border: 1px solid #eee; border-radius: 15px; overflow: hidden;">
+            <div style="background-color: #5d001e; padding: 20px; text-align: center;">
+                <h1 style="color: white; margin: 0; font-size: 24px;">moodify</h1>
+            </div>
+            <div style="padding: 30px; color: #333; line-height: 1.6;">
+                <p style="font-size: 18px;">Hii, <b>{username}</b>! 👋</p>
+                <p>Makasih banyak ya udah mau mampir dan join di <b>moodify</b>. Kita seneng banget kamu ada di sini!</p>
+                <p>Biar akun kamu makin <i>gacor</i> dan semua fitur analisisnya kebuka, tolong verifikasi email kamu dulu ya. Lowkey excited banget nih nungguin kamu mulai analisis emosi publik bareng kita. 🫶</p>
+                
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="{link}" style="background-color: #5d001e; color: white; padding: 12px 25px; text-decoration: none; border-radius: 30px; font-weight: bold; display: inline-block;">
+                        Gas, Verifikasi Akun! 🚀
+                    </a>
+                </div>
+                
+                <p style="font-size: 14px; color: #777;">Kalau tombolnya nggak jalan, kamu bisa copas link ini ke browser ya:<br>
+                <a href="{link}" style="color: #5d001e;">{link}</a></p>
+                
+                <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;">
+                <p style="font-size: 12px; color: #aaa; text-align: center;">
+                    dikirim dengan penuh kasih sayang oleh tim moodify 🕊️<br>
+                    &copy; 2026 moodify, Inc.
+                </p>
+            </div>
+        </div>
+        """
+        mail.send(msg)
+
+        flash("✅ Registrasi berhasil! Silakan cek email kamu untuk verifikasi.", "success")
+        return redirect(url_for("login"))
+
+    return render_template("register.html")
+
+@app.route("/verify/<token>")
+def verify_email(token):
+    user = User.query.filter_by(verification_token=token).first()
+    if user:
+        user.is_verified = True
+        user.verification_token = None # Hapus token setelah digunakan
+        db.session.commit()
+        flash("🎉 Email berhasil diverifikasi! Silakan login.", "success")
+    else:
+        flash("⚠️ Token verifikasi tidak valid atau sudah kadaluarsa.", "error")
+    return redirect(url_for("login"))
+
+# Inisialisasi Login Manager
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login' # Mengarahkan user ke route login jika belum terautentikasi
+
+@app.before_request
+def make_session_permanent():
+    # Ini akan me-reset timer (misal 30 menit) setiap kali user mengklik/memuat halaman
+    session.permanent = True
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    # Jika user sudah login, arahkan langsung ke halaman analisis
+    if current_user.is_authenticated:
+        return redirect(url_for('analisis'))
+
+    if request.method == "POST":
+        email = request.form.get("email")
+        password = request.form.get("password")
+        remember = True if request.form.get("remember") else False
+
+        # 1. Cari user berdasarkan email
+        user = User.query.filter_by(email=email).first()
+
+        # 2. Validasi keberadaan user dan kecocokan password
+        if not user or not check_password_hash(user.password, password):
+            flash("❌ Email atau password salah!", "error")
+            return redirect(url_for("login"))
+
+        # 3. Cek apakah email sudah diverifikasi
+        if not user.is_verified:
+            flash("⚠️ Akun kamu belum diverifikasi. Silakan cek email kamu!", "error")
+            return redirect(url_for("login"))
+
+        # 4. Login berhasil
+        login_user(user, remember=remember)
+        flash(f"👋 Selamat datang kembali, {user.username}!", "success")
+        
+        # Arahkan ke halaman yang sebelumnya ingin diakses (next page) atau ke analisis
+        next_page = request.args.get('next')
+        return redirect(next_page) if next_page else redirect(url_for('analisis'))
+
+    return render_template("login.html")
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    flash("✅ Kamu telah berhasil keluar.", "success")
+    return redirect(url_for("index"))
+
 @app.route("/")
 def index():
-    """Menampilkan landing page (Home)"""
     return render_template("index.html")
 
 @app.route("/analisis", methods=["GET", "POST"])
+@login_required
 def analisis():
-    """Menampilkan dan memproses form analisis"""
     if request.method == "POST":
         auth_token = request.form.get("auth_token")
         keyword = request.form.get("keyword")
@@ -40,35 +213,26 @@ def analisis():
             flash("⚠️ Jumlah tweet harus berupa angka!", "error")
             return redirect(url_for("analisis"))
 
-        # Memanggil fungsi scraping
         success, message = scraping_tweets(keyword, since, until, auth_token, limit)
         
         if success:
-            # --- [BARU] LOGIKA MENYIMPAN RIWAYAT KE SESSION ---
-            if 'history' not in session:
-                session['history'] = []
-            
-            # Menyiapkan data untuk disimpan
+            # 1. Definisikan dulu nama filenya di sini
             safe_keyword = keyword.replace(" ", "_")
             file_name = f"{safe_keyword}_label.csv"
-            current_time = datetime.datetime.now().strftime("%d-%m-%Y %H:%M")
             
-            history_item = {
-                'keyword': keyword,
-                'date': current_time,
-                'file': file_name,
-                'limit': limit
-            }
-
-            # Cek duplikasi (hapus entry lama jika keyword sama agar update ke paling atas)
-            session['history'] = [h for h in session['history'] if h['keyword'] != keyword]
-            # Masukkan ke urutan pertama
-            session['history'].insert(0, history_item)
-            session.modified = True
-            # ---------------------------------------------------
-
-            # Redirect ke result dengan membawa nama file spesifik
+            # 2. Baru kemudian masukkan variabel file_name ke dalam database
+            new_record = AnalysisHistory(
+                user_id=current_user.id, 
+                keyword=keyword,
+                filename=file_name, # Sekarang variabel ini sudah terdefinisi
+                tweet_count=int(limit)
+            )
+            db.session.add(new_record)
+            db.session.commit()
+            
+            # 3. Terakhir, gunakan file_name untuk mengalihkan halaman
             return redirect(url_for("result", file=file_name))
+        
         else:
             flash(f"⚠️ Gagal memproses data: {message}", "error")
             return redirect(url_for("analisis"))
@@ -77,49 +241,41 @@ def analisis():
 
 
 @app.route("/result")
+@login_required
 def result():
-    """Menampilkan halaman visualisasi hasil, tabel data, dan dukungan history"""
     output_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tweets-data", "output")
     
-    # 1. Pastikan direktori output ada
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
         
-    # 2. [BARU] Cek apakah ada parameter ?file=... dari URL (dikirim dari halaman History)
     requested_file = request.args.get('file')
     
     if requested_file:
         target_file = os.path.join(output_dir, requested_file)
     else:
-        # Jika tidak ada parameter, cari file terbaru (Logika Lama)
         csv_files = [f for f in os.listdir(output_dir) if f.endswith("_label.csv")]
         if not csv_files:
             flash("❌ Belum ada hasil analisis!", "error")
             return redirect(url_for("analisis"))
         target_file = max([os.path.join(output_dir, f) for f in csv_files], key=os.path.getmtime)
 
-    # 3. Validasi file
     if not os.path.exists(target_file):
         flash("❌ File analisis tidak ditemukan (mungkin sudah dihapus).", "error")
         return redirect(url_for("analisis"))
 
-    # 4. Baca Data CSV
     try:
         df = pd.read_csv(target_file)
     except Exception as e:
         flash(f"❌ Gagal membaca file: {e}", "error")
         return redirect(url_for("analisis"))
 
-    # 5. Hitung Statistik
     tweet_count = len(df)
     sentiment_counts = df["sentimen"].value_counts().to_dict()
     emotion_counts = df["emosi"].value_counts().to_dict()
 
     file_basename = os.path.basename(target_file)
-    # Bersihkan nama file untuk jadi keyword yang enak dibaca
     keyword = file_basename.replace("_label.csv", "").replace("_", " ")
 
-    # 6. Word Cloud Logic
     all_text = " ".join(df["text"].fillna("").dropna().astype(str))
     word_counts = Counter(all_text.split()).most_common(50) 
     word_counts_dict = {word: count for word, count in word_counts if word != ""}
@@ -144,8 +300,6 @@ def result():
         except Exception as e:
             print(f"❌ Error saat membuat word cloud: {e}")
 
-    # 7. [BARU] Persiapan Data Tabel
-    # Fallback: jika file lama tidak punya 'full_text', pakai 'text'
     if 'full_text' not in df.columns:
         df['full_text'] = df['text'] 
     
@@ -159,23 +313,50 @@ def result():
         keyword=keyword, 
         wordcloud_url=wordcloud_url_for_template,
         tweet_count=tweet_count,
-        tweets=tweets_data # PENTING: Data untuk tabel
+        tweets=tweets_data
     )
 
 @app.route("/history")
+@login_required
 def history():
-    """[BARU] Menampilkan halaman riwayat"""
-    history_data = session.get('history', [])
-    return render_template("history.html", history=history_data)
+    # Ambil data dari database berdasarkan user yang sedang login
+    user_history = AnalysisHistory.query.filter_by(user_id=current_user.id).order_by(AnalysisHistory.date_created.desc()).all()
+    return render_template("history.html", history=user_history)
+
+@app.route("/delete_history/<int:history_id>", methods=["POST"])
+@login_required
+def delete_history(history_id):
+    # 1. Cari data riwayat berdasarkan ID
+    history_record = AnalysisHistory.query.get_or_404(history_id)
+    
+    # 2. Validasi Keamanan: Pastikan yang menghapus adalah pemilik aslinya
+    if history_record.user_id != current_user.id:
+        flash("❌ Kamu tidak memiliki izin untuk menghapus riwayat ini.", "error")
+        return redirect(url_for("history"))
+        
+    try:
+        # 3. Buat path untuk file fisik (.csv) dan hapus jika filenya ada
+        output_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tweets-data", "output")
+        file_path = os.path.join(output_dir, history_record.filename)
+        
+        if os.path.exists(file_path):
+            os.remove(file_path) # Perintah untuk menghapus file fisik
+        
+        # 4. Hapus data dari database MySQL
+        db.session.delete(history_record)
+        db.session.commit()
+        
+        flash(f"✅ Riwayat analisis '{history_record.keyword}' berhasil dihapus secara permanen.", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"⚠️ Gagal menghapus riwayat: {e}", "error")
+        
+    return redirect(url_for("history"))
 
 @app.route("/tutorial")
 def tutorial():
-    """Menampilkan halaman tutorial"""
     return render_template("tutorial.html")
 
-# =========================================================
-# RUN
-# =========================================================
 if __name__ == "__main__":
     print("📂 Current working directory:", os.getcwd())
     print("📄 File path:", os.path.abspath(__file__))
