@@ -130,4 +130,9 @@ flask run
 
 Buka `http://127.0.0.1:5000` di browser Anda.
 
+---
 
+<br/>
+<div align="center">
+  Dibuat dengan ❤️ oleh <h2>The Kentangs</h2> untuk Proyek Kuliah Semester 4
+</div>
