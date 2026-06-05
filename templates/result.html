@@ -115,12 +115,10 @@
     </div>
 
     <script>
-        // Data dari Flask Backend
         const allTweets = {{ tweets | tojson }};
         const sentimentData = {{ sentiment_counts | tojson }};
         const emotionData = {{ emotion_counts | tojson }};
         
-        // PETA WARNA (Harus sama untuk Chart & Tabel Badge)
         const colorPalette = {
             'Positif': '#2ecc71', // Hijau
             'Negatif': '#e74c3c', // Merah
@@ -132,16 +130,13 @@
             'Cinta':   '#e84393'  // Pink
         };
 
-        // Fungsi pembantu untuk mengambil warna dari Palette
         function getColors(dataObject) {
             return Object.keys(dataObject).map(key => {
-                // Gunakan format Title Case (Positif, Marah) untuk mencocokkan dengan key di palette
                 const formattedKey = key.charAt(0).toUpperCase() + key.slice(1).toLowerCase();
                 return colorPalette[formattedKey] || '#cccccc'; 
             });
         }
 
-        // 1. Chart Sentimen (Pie Chart)
         new Chart(document.getElementById('sentimentChart').getContext('2d'), {
             type: 'pie',
             data: {
@@ -155,7 +150,6 @@
             options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { family: "'Poppins', sans-serif" } } } } }
         });
 
-        // 2. Chart Emosi (Pie Chart)
         new Chart(document.getElementById('emotionChart').getContext('2d'), {
             type: 'pie',
             data: {
@@ -169,7 +163,6 @@
             options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { family: "'Poppins', sans-serif" } } } } }
         });
 
-        // 3. LOGIKA PAGINATION TABEL
         const rowsPerPage = 10;
         
         function displayTable(type, page) {
@@ -189,7 +182,6 @@
                 const num = start + index + 1;
                 
                 if (type === 'labeling') {
-                    // Penyesuaian nama class badge agar sesuai CSS (.badge.positif, .badge.marah)
                     const sentimenClass = tweet.sentimen ? tweet.sentimen.toLowerCase() : 'netral';
                     const emosiClass = tweet.emosi ? tweet.emosi.toLowerCase() : 'netral';
                     const textBersih = tweet.text ? tweet.text : tweet.full_text;
@@ -214,7 +206,6 @@
                 tbody.appendChild(row);
             });
 
-            // Tombol Prev
             const prevBtn = document.createElement("button");
             prevBtn.innerText = "Sebelumnya";
             prevBtn.className = "page-btn";
@@ -222,13 +213,11 @@
             prevBtn.onclick = () => displayTable(type, page - 1);
             pagination.appendChild(prevBtn);
 
-            // Indikator Halaman
             const pageInfo = document.createElement("span");
             pageInfo.innerText = ` Hal ${page} dari ${totalPages || 1} `;
             pageInfo.style.fontWeight = "600";
             pagination.appendChild(pageInfo);
 
-            // Tombol Next
             const nextBtn = document.createElement("button");
             nextBtn.innerText = "Selanjutnya";
             nextBtn.className = "page-btn";
@@ -237,7 +226,6 @@
             pagination.appendChild(nextBtn);
         }
 
-        // 4. LOGIKA PERPINDAHAN TAB
         function openTab(evt, tabName) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -246,7 +234,6 @@
             evt.currentTarget.classList.add('active');
         }
 
-        // Jalankan tabel pertama kali saat halaman dimuat
         displayTable('labeling', 1);
         displayTable('original', 1);
     </script>
