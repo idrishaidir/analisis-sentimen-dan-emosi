@@ -18,7 +18,6 @@ app.secret_key = "secret123"
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=60)
 app.config['REMEMBER_COOKIE_DURATION'] = timedelta(days=7)
 
-# verifikasi email
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
@@ -26,12 +25,10 @@ app.config['MAIL_USERNAME'] = 'kentang@gmail.com'
 app.config['MAIL_PASSWORD'] = 'taruh_password_disini'
 mail = Mail(app)
 
-# Inisialisasi Database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:@localhost/moodify_db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-# Tabel Users
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
@@ -40,9 +37,9 @@ class User(UserMixin, db.Model):
     password = db.Column(db.String(255), nullable=True)
     is_verified = db.Column(db.Boolean, default=False)
     verification_token = db.Column(db.String(255), nullable=True)
+    reset_token = db.Column(db.String(255), nullable=True)
     histories = db.relationship('AnalysisHistory', backref='owner', lazy=True)
 
-# Tabel Analysis History
 class AnalysisHistory(db.Model):
     __tablename__ = 'analysis_history'
     id = db.Column(db.Integer, primary_key=True)
@@ -59,13 +56,11 @@ def register():
         email = request.form.get("email")
         password = request.form.get("password")
         
-        # Cek apakah email sudah terdaftar
         user_exists = User.query.filter_by(email=email).first()
         if user_exists:
             flash("❌ Email sudah digunakan!", "error")
             return redirect(url_for("register"))
 
-        # Buat token verifikasi unik
         token = secrets.token_hex(16)
         hashed_pw = generate_password_hash(password, method='pbkdf2:sha256')
 
@@ -80,38 +75,41 @@ def register():
         db.session.add(new_user)
         db.session.commit()
 
-        # Kirim Email Verifikasi
         msg = Message('hallo! verifikasi akun moodify kamu yuk ✨', 
                     sender='noreply@moodify.com', 
                     recipients=[email])
 
         link = url_for('verify_email', token=token, _external=True)
 
-        # Desain Email HTML (Gen Z + Humble Style)
         msg.html = f"""
-        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; border: 1px solid #eee; border-radius: 15px; overflow: hidden;">
-            <div style="background-color: #5d001e; padding: 20px; text-align: center;">
-                <h1 style="color: white; margin: 0; font-size: 24px;">moodify</h1>
-            </div>
-            <div style="padding: 30px; color: #333; line-height: 1.6;">
-                <p style="font-size: 18px;">Hii, <b>{username}</b>! 👋</p>
-                <p>Makasih banyak ya udah mau mampir dan join di <b>moodify</b>. Kita seneng banget kamu ada di sini!</p>
-                <p>Biar akun kamu makin <i>gacor</i> dan semua fitur analisisnya kebuka, tolong verifikasi email kamu dulu ya. Lowkey excited banget nih nungguin kamu mulai analisis emosi publik bareng kita. 🫶</p>
+        <div style="font-family: 'Poppins', Arial, sans-serif; background-color: #F3EFE6; padding: 40px 20px;">
+            <div style="max-width: 600px; margin: auto; background-color: #ffffff; border: 1px solid #B0B5C1; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(45, 50, 80, 0.05);">
                 
-                <div style="text-align: center; margin: 30px 0;">
-                    <a href="{link}" style="background-color: #5d001e; color: white; padding: 12px 25px; text-decoration: none; border-radius: 30px; font-weight: bold; display: inline-block;">
-                        Gas, Verifikasi Akun! 🚀
-                    </a>
+                <div style="background-color: #2D3250; padding: 30px; text-align: center;">
+                    <h1 style="font-family: 'Playfair Display', Georgia, serif; color: #F3EFE6; margin: 0; font-size: 28px; font-weight: 700;">moodify</h1>
                 </div>
                 
-                <p style="font-size: 14px; color: #777;">Kalau tombolnya nggak jalan, kamu bisa copas link ini ke browser ya:<br>
-                <a href="{link}" style="color: #5d001e;">{link}</a></p>
-                
-                <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;">
-                <p style="font-size: 12px; color: #aaa; text-align: center;">
-                    dikirim dengan penuh kasih sayang oleh tim moodify 🕊️<br>
-                    &copy; 2026 moodify, Inc.
-                </p>
+                <div style="padding: 40px 30px; color: #2D3250; line-height: 1.6;">
+                    <p style="font-size: 18px; font-weight: 600;">Hii, {username}! 👋</p>
+                    <p>Makasih banyak ya udah mau mampir dan join di <b>moodify</b>. Kita seneng banget kamu ada di sini!</p>
+                    <p>Biar akun kamu makin <i>gacor</i> dan semua fitur analisisnya kebuka, tolong verifikasi email kamu dulu ya. Lowkey excited banget nih nungguin kamu mulai analisis emosi publik bareng kita. 🫶</p>
+                    
+                    <div style="text-align: center; margin: 40px 0;">
+                        <a href="{link}" style="background-color: #2D3250; color: #F3EFE6; padding: 15px 30px; text-decoration: none; border-radius: 30px; font-weight: 600; display: inline-block;">
+                            Gas, Verifikasi Akun! 🚀
+                        </a>
+                    </div>
+                    
+                    <p style="font-size: 14px; color: #666;">Kalau tombolnya nggak jalan, kamu bisa copas link ini ke browser ya:<br>
+                    <a href="{link}" style="color: #2D3250; font-weight: 600; word-break: break-all;">{link}</a></p>
+                    
+                    <hr style="border: 0; border-top: 1px solid #B0B5C1; margin: 30px 0;">
+                    
+                    <p style="font-size: 12px; color: #888; text-align: center; margin: 0;">
+                        dikirim dengan penuh kasih sayang oleh tim moodify 🕊️<br>
+                        &copy; 2026 moodify, Inc.
+                    </p>
+                </div>
             </div>
         </div>
         """
@@ -127,21 +125,19 @@ def verify_email(token):
     user = User.query.filter_by(verification_token=token).first()
     if user:
         user.is_verified = True
-        user.verification_token = None # Hapus token setelah digunakan
+        user.verification_token = None 
         db.session.commit()
         flash("🎉 Email berhasil diverifikasi! Silakan login.", "success")
     else:
         flash("⚠️ Token verifikasi tidak valid atau sudah kadaluarsa.", "error")
     return redirect(url_for("login"))
 
-# Inisialisasi Login Manager
 login_manager = LoginManager()
 login_manager.init_app(app)
-login_manager.login_view = 'login' # Mengarahkan user ke route login jika belum terautentikasi
+login_manager.login_view = 'login' 
 
 @app.before_request
 def make_session_permanent():
-    # Ini akan me-reset timer (misal 30 menit) setiap kali user mengklik/memuat halaman
     session.permanent = True
 
 @login_manager.user_loader
@@ -150,7 +146,6 @@ def load_user(user_id):
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    # Jika user sudah login, arahkan langsung ke halaman analisis
     if current_user.is_authenticated:
         return redirect(url_for('analisis'))
 
@@ -159,24 +154,19 @@ def login():
         password = request.form.get("password")
         remember = True if request.form.get("remember") else False
 
-        # 1. Cari user berdasarkan email
         user = User.query.filter_by(email=email).first()
 
-        # 2. Validasi keberadaan user dan kecocokan password
         if not user or not check_password_hash(user.password, password):
             flash("❌ Email atau password salah!", "error")
             return redirect(url_for("login"))
 
-        # 3. Cek apakah email sudah diverifikasi
         if not user.is_verified:
             flash("⚠️ Akun kamu belum diverifikasi. Silakan cek email kamu!", "error")
             return redirect(url_for("login"))
 
-        # 4. Login berhasil
         login_user(user, remember=remember)
         flash(f"👋 Selamat datang kembali, {user.username}!", "success")
         
-        # Arahkan ke halaman yang sebelumnya ingin diakses (next page) atau ke analisis
         next_page = request.args.get('next')
         return redirect(next_page) if next_page else redirect(url_for('analisis'))
 
@@ -216,21 +206,18 @@ def analisis():
         success, message = scraping_tweets(keyword, since, until, auth_token, limit)
         
         if success:
-            # 1. Definisikan dulu nama filenya di sini
             safe_keyword = keyword.replace(" ", "_")
             file_name = f"{safe_keyword}_label.csv"
             
-            # 2. Baru kemudian masukkan variabel file_name ke dalam database
             new_record = AnalysisHistory(
                 user_id=current_user.id, 
                 keyword=keyword,
-                filename=file_name, # Sekarang variabel ini sudah terdefinisi
+                filename=file_name,
                 tweet_count=int(limit)
             )
             db.session.add(new_record)
             db.session.commit()
             
-            # 3. Terakhir, gunakan file_name untuk mengalihkan halaman
             return redirect(url_for("result", file=file_name))
         
         else:
@@ -319,30 +306,25 @@ def result():
 @app.route("/history")
 @login_required
 def history():
-    # Ambil data dari database berdasarkan user yang sedang login
     user_history = AnalysisHistory.query.filter_by(user_id=current_user.id).order_by(AnalysisHistory.date_created.desc()).all()
     return render_template("history.html", history=user_history)
 
 @app.route("/delete_history/<int:history_id>", methods=["POST"])
 @login_required
 def delete_history(history_id):
-    # 1. Cari data riwayat berdasarkan ID
     history_record = AnalysisHistory.query.get_or_404(history_id)
     
-    # 2. Validasi Keamanan: Pastikan yang menghapus adalah pemilik aslinya
     if history_record.user_id != current_user.id:
         flash("❌ Kamu tidak memiliki izin untuk menghapus riwayat ini.", "error")
         return redirect(url_for("history"))
         
     try:
-        # 3. Buat path untuk file fisik (.csv) dan hapus jika filenya ada
         output_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tweets-data", "output")
         file_path = os.path.join(output_dir, history_record.filename)
         
         if os.path.exists(file_path):
-            os.remove(file_path) # Perintah untuk menghapus file fisik
+            os.remove(file_path) 
         
-        # 4. Hapus data dari database MySQL
         db.session.delete(history_record)
         db.session.commit()
         
@@ -361,3 +343,84 @@ if __name__ == "__main__":
     print("📂 Current working directory:", os.getcwd())
     print("📄 File path:", os.path.abspath(__file__))
     app.run(debug=True)
+
+@app.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password():
+    if request.method == "POST":
+        email = request.form.get("email")
+        user = User.query.filter_by(email=email).first()
+
+        if not user:
+            flash("❌ Email tidak terdaftar dalam sistem!", "error")
+            return redirect(url_for("forgot_password"))
+
+        token = secrets.token_hex(16)
+        user.reset_token = token
+        db.session.commit()
+
+        msg = Message('Reset password akun moodify kamu 🗝️', 
+                    sender='noreply@moodify.com', 
+                    recipients=[email])
+
+        link = url_for('reset_password', token=token, _external=True)
+
+        msg.html = f"""
+        <div style="font-family: 'Poppins', Arial, sans-serif; background-color: #F3EFE6; padding: 40px 20px;">
+            <div style="max-width: 600px; margin: auto; background-color: #ffffff; border: 1px solid #B0B5C1; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(45, 50, 80, 0.05);">
+                
+                <div style="background-color: #2D3250; padding: 30px; text-align: center;">
+                    <h1 style="font-family: 'Playfair Display', Georgia, serif; color: #F3EFE6; margin: 0; font-size: 28px; font-weight: 700;">moodify</h1>
+                </div>
+                
+                <div style="padding: 40px 30px; color: #2D3250; line-height: 1.6;">
+                    <p style="font-size: 18px; font-weight: 600;">Hii, {user.username}! 👋</p>
+                    <p>Ada permintaan untuk mereset password akun <b>moodify</b> kamu nih. Kalau ini memang kamu, silakan klik tombol di bawah untuk membuat password baru ya.</p>
+                    
+                    <div style="text-align: center; margin: 40px 0;">
+                        <a href="{link}" style="background-color: #2D3250; color: #F3EFE6; padding: 15px 30px; text-decoration: none; border-radius: 30px; font-weight: 600; display: inline-block;">
+                            Atur Ulang Password 🛠️
+                        </a>
+                    </div>
+                    
+                    <p style="font-size: 14px; color: #666;">Kalau kamu merasa tidak meminta ini, abaikan saja email ini ya. Keamanan akunmu lowkey tetap aman kok. 😉</p>
+                    <p style="font-size: 14px; color: #666;">Atau copas link ini ke browser:<br>
+                    <a href="{link}" style="color: #2D3250; font-weight: 600; word-break: break-all;">{link}</a></p>
+                    
+                    <hr style="border: 0; border-top: 1px solid #B0B5C1; margin: 30px 0;">
+                    
+                    <p style="font-size: 12px; color: #888; text-align: center; margin: 0;">
+                        dikirim oleh tim moodify dengan penuh perhatian 🕊️<br>
+                        &copy; 2026 moodify, Inc.
+                    </p>
+                </div>
+            </div>
+        </div>
+        """
+        mail.send(msg)
+
+        flash("📧 Link reset password telah dikirim ke email kamu. Silakan periksa inbox/spam!", "success")
+        return redirect(url_for("login"))
+
+    return render_template("forgot_password.html")
+
+
+@app.route("/reset-password/<token>", methods=["GET", "POST"])
+def reset_password(token):
+    user = User.query.filter_by(reset_token=token).first()
+    
+    if not user:
+        flash("⚠️ Token reset tidak valid atau sudah kadaluarsa.", "error")
+        return redirect(url_for("login"))
+
+    if request.method == "POST":
+        password_baru = request.form.get("password")
+        
+        hashed_pw = generate_password_hash(password_baru, method='pbkdf2:sha256')
+        user.password = hashed_pw
+        user.reset_token = None 
+        db.session.commit()
+
+        flash("🎉 Password berhasil diperbarui! Silakan login dengan password baru.", "success")
+        return redirect(url_for("login"))
+
+    return render_template("reset_password.html", token=token)

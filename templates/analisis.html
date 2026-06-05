@@ -97,12 +97,9 @@
     </div>
     <script>
         document.getElementById('analisisForm').addEventListener('submit', function(e) {
-            // Cek apakah form sudah valid (semua input required sudah diisi)
             if (this.checkValidity()) {
-                // Munculkan layar loading
                 document.getElementById('loadingOverlay').classList.add('active');
                 
-                // Ubah teks tombol
                 const btn = document.getElementById('btnSubmit');
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
                 btn.style.opacity = '0.8';

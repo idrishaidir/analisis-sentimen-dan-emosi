@@ -62,8 +62,8 @@
                 <div class="form-group" style="margin-bottom: 10px;">
                     <label>Password</label>
                     <div class="input-wrapper">
-                        <input type="password" name="password" placeholder="Enter Your Password" required>
-                        <i class="fas fa-eye"></i>
+                        <input type="password" name="password" id="password" placeholder="Enter Your Password" required>
+                        <i class="fas fa-eye" id="togglePassword" style="cursor: pointer;"></i>
                     </div>
                 </div>
 
@@ -72,7 +72,7 @@
                         <input type="checkbox" name="remember" id="remember" style="margin-right: 8px; accent-color: var(--navy-dark); width: 16px; height: 16px; cursor: pointer;">
                         <label for="remember" style="margin: 0; font-size: 0.85rem; font-weight: 500; cursor: pointer; color: var(--navy-dark);">Ingat Saya</label>
                     </div>
-                    <a href="#" class="forgot-pass" style="margin-top: 0;">Forgot Password</a>
+                    <a href="{{ url_for('forgot_password') }}" class="forgot-pass" style="margin-top: 0;">Forgot Password</a>
                 </div>
 
                 <button type="submit" class="btn-submit">LOGIN</button>
@@ -83,5 +83,18 @@
             </div>
         </div>
     </div>
+
+    <script>
+        const togglePassword = document.querySelector('#togglePassword');
+        const password = document.querySelector('#password');
+
+        togglePassword.addEventListener('click', function (e) {
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
+    </script>
 </body>
 </html>
