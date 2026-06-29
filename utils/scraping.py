@@ -53,7 +53,8 @@ def scraping_tweets(keyword, since, until, auth_token, limit=100):
     npx_path = r"C:\Program Files\nodejs\npx.cmd"
     
     command = [
-        npx_path, "-y", "tweet-harvest@2.6.1",
+        # npx_path, "-y", "tweet-harvest@2.6.1",
+        npx_path, "-y", "tweet-harvest@latest",
         "-o", relative_output, "-s", search_query,
         "--tab", "LATEST", "-l", str(limit),
         "--token", auth_token
@@ -77,7 +78,12 @@ def scraping_tweets(keyword, since, until, auth_token, limit=100):
             return False, f"File hasil scraping tidak ditemukan: {absolute_output}"
             
         print(f"✅ File ditemukan: {absolute_output}")
-        df = pd.read_csv(absolute_output, encoding="utf-8-sig")
+        # df = pd.read_csv(absolute_output, encoding="utf-8-sig")
+        try:
+            df = pd.read_csv(absolute_output, encoding="utf-8-sig")
+        except pd.errors.EmptyDataError:
+            print("❌ File CSV kosong (Tidak ada tweet yang ditemukan).")
+            return False, "Tidak ada tweet yang ditemukan untuk kata kunci dan tanggal tersebut."
         
         if "full_text" not in df.columns:
             possible_text_col = df.columns[0]

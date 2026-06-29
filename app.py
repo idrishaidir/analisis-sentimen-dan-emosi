@@ -7,13 +7,23 @@ from wordcloud import WordCloud
 from utils.scraping import scraping_tweets
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from flask_mail import Mail, Message
 import secrets
 from werkzeug.security import generate_password_hash, check_password_hash
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadTimeSignature
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 app = Flask(__name__)
 app.secret_key = "secret123"
+
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=["200 per day", "50 per hour"],
+    storage_uri="memory://"
+)
 
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=60)
 app.config['REMEMBER_COOKIE_DURATION'] = timedelta(days=7)
@@ -22,7 +32,7 @@ app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = 'kentang@gmail.com'
-app.config['MAIL_PASSWORD'] = 'taruh_password_disini'
+app.config['MAIL_PASSWORD'] = 'kentangtingtung'
 mail = Mail(app)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:@localhost/moodify_db'
@@ -38,6 +48,10 @@ class User(UserMixin, db.Model):
     is_verified = db.Column(db.Boolean, default=False)
     verification_token = db.Column(db.String(255), nullable=True)
     reset_token = db.Column(db.String(255), nullable=True)
+
+    failed_login_attempts = db.Column(db.Integer, default=0)
+    locked_until = db.Column(db.DateTime, nullable=True)
+
     histories = db.relationship('AnalysisHistory', backref='owner', lazy=True)
 
 class AnalysisHistory(db.Model):
@@ -47,9 +61,10 @@ class AnalysisHistory(db.Model):
     keyword = db.Column(db.String(255), nullable=False)
     filename = db.Column(db.String(255), nullable=False)
     tweet_count = db.Column(db.Integer, nullable=False)
-    date_created = db.Column(db.DateTime, default=datetime.utcnow)
+    date_created = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
 @app.route("/register", methods=["GET", "POST"])
+@limiter.limit("3 per hour", methods=["POST"])
 def register():
     if request.method == "POST":
         username = request.form.get("username")
@@ -61,14 +76,16 @@ def register():
             flash("❌ Email sudah digunakan!", "error")
             return redirect(url_for("register"))
 
-        token = secrets.token_hex(16)
+        serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+        token = serializer.dumps(email, salt='email-verify-salt')
+
         hashed_pw = generate_password_hash(password, method='pbkdf2:sha256')
 
         new_user = User(
             username=username,
             email=email,
             password=hashed_pw,
-            verification_token=token,
+            # verification_token=token,
             is_verified=False
         )
         
@@ -120,16 +137,78 @@ def register():
 
     return render_template("register.html")
 
+@app.route("/resend-verification", methods=["GET", "POST"])
+@limiter.limit("3 per hour", methods=["POST"])
+def resend_verification():
+    if request.method == "POST":
+        email = request.form.get("email")
+        user = User.query.filter_by(email=email).first()
+
+        # Praktik keamanan: Jangan beri tahu jika email TIDAK ada (mencegah enumerasi)
+        if not user:
+            flash("✅ Jika email terdaftar, link verifikasi baru telah dikirim.", "success")
+            return redirect(url_for("login"))
+
+        # Jika ternyata sudah diverifikasi, suruh langsung login
+        if user.is_verified:
+            flash("ℹ️ Akun kamu sudah diverifikasi. Silakan langsung login.", "success")
+            return redirect(url_for("login"))
+
+        # --- Generate Token Baru (Sama seperti di register) ---
+        serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+        token = serializer.dumps(user.email, salt='email-verify-salt')
+        link = url_for('verify_email', token=token, _external=True)
+
+        # --- Kirim Email (Format persis seperti di register) ---
+        msg = Message('Kirim Ulang: verifikasi akun moodify kamu ✨', 
+                    sender='noreply@moodify.com', 
+                    recipients=[email])
+
+        msg.html = f"""
+        <div style="font-family: 'Poppins', Arial, sans-serif; background-color: #F3EFE6; padding: 40px 20px;">
+            <div style="max-width: 600px; margin: auto; background-color: #ffffff; border: 1px solid #B0B5C1; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(45, 50, 80, 0.05);">
+                <div style="background-color: #2D3250; padding: 30px; text-align: center;">
+                    <h1 style="font-family: 'Playfair Display', Georgia, serif; color: #F3EFE6; margin: 0; font-size: 28px; font-weight: 700;">moodify</h1>
+                </div>
+                <div style="padding: 40px 30px; color: #2D3250; line-height: 1.6;">
+                    <p style="font-size: 18px; font-weight: 600;">Hii, {user.username}! 👋</p>
+                    <p>Ini adalah link verifikasi baru untuk akunmu. Link ini hanya berlaku selama <b>15 menit</b> ya.</p>
+                    <div style="text-align: center; margin: 40px 0;">
+                        <a href="{link}" style="background-color: #2D3250; color: #F3EFE6; padding: 15px 30px; text-decoration: none; border-radius: 30px; font-weight: 600; display: inline-block;">
+                            Gas, Verifikasi Akun! 🚀
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        """
+        mail.send(msg)
+
+        flash("✅ Link verifikasi baru telah dikirim! Silakan cek inbox/spam kamu.", "success")
+        return redirect(url_for("login"))
+
+    return render_template("resend_verification.html")
+
 @app.route("/verify/<token>")
 def verify_email(token):
-    user = User.query.filter_by(verification_token=token).first()
+    serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+    try:
+        email = serializer.loads(token, salt='email-verify-salt', max_age=900)
+    except SignatureExpired:
+        flash("⚠️ Link verifikasi sudah kadaluarsa (lebih dari 15 menit). Silakan daftar ulang atau minta link baru.", "error")
+        return redirect(url_for("login"))
+    except BadTimeSignature:
+        flash("⚠️ Token verifikasi tidak valid atau telah diubah.", "error")
+        return redirect(url_for("login"))
+
+    user = User.query.filter_by(email=email).first()
     if user:
         user.is_verified = True
-        user.verification_token = None 
+        # user.verification_token = None 
         db.session.commit()
         flash("🎉 Email berhasil diverifikasi! Silakan login.", "success")
     else:
-        flash("⚠️ Token verifikasi tidak valid atau sudah kadaluarsa.", "error")
+        flash("⚠️ Pengguna tidak ditemukan.", "error")
     return redirect(url_for("login"))
 
 login_manager = LoginManager()
@@ -145,6 +224,7 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 @app.route("/login", methods=["GET", "POST"])
+@limiter.limit("5 per minute", methods=["POST"])
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('analisis'))
@@ -159,10 +239,37 @@ def login():
         if not user or not check_password_hash(user.password, password):
             flash("❌ Email atau password salah!", "error")
             return redirect(url_for("login"))
+        
+        if user.locked_until and user.locked_until > datetime.now(timezone.utc):
+            sisa_waktu = int((user.locked_until - datetime.now(timezone.utc)).total_seconds())
+            menit, detik = divmod(sisa_waktu, 60)
+            flash(f"⚠️ Akun terkunci sementara karena terlalu banyak percobaan salah. Coba lagi dalam {menit}m {detik}s.", "error")
+            return redirect(url_for("login"))
+        
+        if not check_password_hash(user.password, password):
+            # Password Salah -> Tambah counter
+            user.failed_login_attempts += 1
+            
+            if user.failed_login_attempts >= 5:
+                # Kunci selama 3 Menit
+                user.locked_until = datetime.now(timezone.utc) + timedelta(minutes=3)
+                user.failed_login_attempts = 0 # Reset counter
+                flash("❌ Anda salah memasukkan password 5 kali. Akun ditangguhkan selama 3 menit.", "error")
+            else:
+                sisa_percobaan = 5 - user.failed_login_attempts
+                flash(f"❌ Email atau password salah! Sisa percobaan: {sisa_percobaan} kali", "error")
+                
+            db.session.commit()
+            return redirect(url_for("login"))
 
         if not user.is_verified:
             flash("⚠️ Akun kamu belum diverifikasi. Silakan cek email kamu!", "error")
             return redirect(url_for("login"))
+        
+        # Reset attemps login salah
+        user.failed_login_attempts = 0
+        user.locked_until = None
+        db.session.commit()
 
         login_user(user, remember=remember)
         flash(f"👋 Selamat datang kembali, {user.username}!", "success")
@@ -338,6 +445,11 @@ def delete_history(history_id):
 @app.route("/tutorial")
 def tutorial():
     return render_template("tutorial.html")
+
+@app.errorhandler(429)
+def ratelimit_handler(e):
+    flash("⚠️ Terlalu banyak aktivitas yang mencurigakan. Silakan tunggu beberapa saat.", "error")
+    return render_template("login.html", lockout_seconds=60), 429
 
 if __name__ == "__main__":
     print("📂 Current working directory:", os.getcwd())
