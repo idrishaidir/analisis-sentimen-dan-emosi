@@ -67,15 +67,26 @@
                     </div>
                 </div>
 
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-top: 5px;">
+                <!-- <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-top: 5px;">
                     <div style="display: flex; align-items: center;">
                         <input type="checkbox" name="remember" id="remember" style="margin-right: 8px; accent-color: var(--navy-dark); width: 16px; height: 16px; cursor: pointer;">
                         <label for="remember" style="margin: 0; font-size: 0.85rem; font-weight: 500; cursor: pointer; color: var(--navy-dark);">Ingat Saya</label>
                     </div>
                     <a href="{{ url_for('forgot_password') }}" class="forgot-pass" style="margin-top: 0;">Forgot Password</a>
+                </div> -->
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-top: 5px;">
+                    <div style="display: flex; align-items: center;">
+                        <input type="checkbox" name="remember" id="remember" style="margin-right: 8px; accent-color: var(--navy-dark); width: 16px; height: 16px; cursor: pointer;">
+                        <label for="remember" style="margin: 0; font-size: 0.85rem; font-weight: 500; cursor: pointer; color: var(--navy-dark);">Ingat Saya</label>
+                    </div>
+                    <div style="display: flex; flex-direction: column; text-align: right;">
+                        <a href="{{ url_for('forgot_password') }}" class="forgot-pass" style="margin-top: 0; margin-bottom: 5px;">Forgot Password</a>
+                        <a href="{{ url_for('resend_verification') }}" class="forgot-pass" style="margin-top: 0;">Belum Terima Email?</a>
+                    </div>
                 </div>
 
-                <button type="submit" class="btn-submit">LOGIN</button>
+                <button type="submit" class="btn-submit" id="loginBtn">LOGIN</button>
             </form>
 
             <div class="auth-footer">
@@ -83,7 +94,6 @@
             </div>
         </div>
     </div>
-
     <script>
         const togglePassword = document.querySelector('#togglePassword');
         const password = document.querySelector('#password');
@@ -96,5 +106,42 @@
             this.classList.toggle('fa-eye-slash');
         });
     </script>
+
+    {% if lockout_seconds %}
+    <script>
+        let timeLeft = {{ lockout_seconds }};
+        const loginBtn = document.getElementById('loginBtn');
+        
+        // Nonaktifkan tombol
+        loginBtn.disabled = true;
+        loginBtn.style.backgroundColor = '#95a5a6'; // Ubah warna jadi abu-abu
+        loginBtn.style.cursor = 'not-allowed';
+
+        // Buat elemen peringatan
+        const flashContainer = document.querySelector('.auth-card');
+        const timerAlert = document.createElement('div');
+        timerAlert.className = 'flash error';
+        timerAlert.style.marginBottom = '20px';
+        flashContainer.insertBefore(timerAlert, flashContainer.firstChild);
+
+        // Hitung mundur setiap detik
+        const countdown = setInterval(() => {
+            if (timeLeft <= 0) {
+                clearInterval(countdown);
+                timerAlert.style.display = 'none';
+                loginBtn.disabled = false;
+                loginBtn.style.backgroundColor = 'var(--navy-dark)'; // Kembali ke warna asal
+                loginBtn.style.cursor = 'pointer';
+                loginBtn.innerHTML = 'LOGIN';
+            } else {
+                let minutes = Math.floor(timeLeft / 60);
+                let seconds = timeLeft % 60;
+                timerAlert.innerHTML = `⚠️ Terlalu banyak percobaan. Coba lagi dalam <b>${minutes}m ${seconds}s</b>`;
+                loginBtn.innerHTML = `TUNGGU ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                timeLeft -= 1;
+            }
+        }, 1000);
+    </script>
+    {% endif %}
 </body>
 </html>
