@@ -1,20 +1,26 @@
 import os
-import subprocess
+import time
 import pandas as pd
 import re
-import time
-import shutil
+import urllib.parse
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
+
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 
 from .preprocessing import preprocessText
-
 from .models import predict_sentimen, predict_emosi
 
 def analyze_sentiment_emotion(cleaned_path):
     try:
-        print(f"🔍 Membaca file hasil preprocessing: {cleaned_path}")
+        print(f"🔍 Membaca file: {cleaned_path}")
         df = pd.read_csv(cleaned_path)
         if "text" not in df.columns:
-            print("❌ Kolom 'text' tidak ditemukan di file cleaned!")
             return False, "Kolom 'text' tidak ditemukan!"
 
         df["text"] = df["text"].fillna("")
@@ -23,97 +29,196 @@ def analyze_sentiment_emotion(cleaned_path):
         df["sentimen"] = df["text"].apply(predict_sentimen)
         df["emosi"] = df["text"].apply(predict_emosi)
 
-        base_dir = os.path.dirname(cleaned_path)
-        keyword = os.path.basename(cleaned_path).replace("_cleaned.csv", "")
-        labeled_path = os.path.join(base_dir, f"{keyword}_label.csv")
-
+        labeled_path = cleaned_path.replace("_cleaned.csv", "_label.csv")
         df.to_csv(labeled_path, index=False, encoding="utf-8")
-        print(f"✅ Hasil analisis tersimpan di: {labeled_path}")
+        
+        print(f"✅ Hasil tersimpan di: {labeled_path}")
         return True, labeled_path
-
     except Exception as e:
-        print(f"❌ TERJADI ERROR DI analyze_sentiment_emotion: {e}")
         return False, f"Error saat analisis: {e}"
 
 
-def scraping_tweets(keyword, since, until, auth_token, limit=100):
+def scraping_tweets(keyword, limit=100, chrome_profile_path=None):
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) 
-    tweets_dir = os.path.join(base_dir, "tweets-data")
-    output_dir = os.path.join(tweets_dir, "output")
-    
-    # if os.path.exists(output_dir):
-    #     shutil.rmtree(output_dir)
+    output_dir = os.path.join(base_dir, "tweets-data", "output")
     os.makedirs(output_dir, exist_ok=True)
     
     safe_keyword = re.sub(r"[^\w\s-]", "", keyword).strip().replace(" ", "_")
-    filename = f"{safe_keyword}.csv"
-    relative_output = os.path.join("output", filename)
-    absolute_output = os.path.join(output_dir, filename)
-    search_query = f"{keyword} since:{since} until:{until} lang:id"
-    npx_path = r"C:\Program Files\nodejs\npx.cmd"
     
-    command = [
-        # npx_path, "-y", "tweet-harvest@2.6.1",
-        npx_path, "-y", "tweet-harvest@latest",
-        "-o", relative_output, "-s", search_query,
-        "--tab", "LATEST", "-l", str(limit),
-        "--token", auth_token
-    ]
-    
-    print("🚀 Menjalankan:", " ".join(command))
-    print("📂 CWD:", tweets_dir)
-    print("📄 Akan menyimpan ke:", absolute_output)
-    
+    print("🚀 Menginisiasi Selenium WebDriver...")
+    # Konfigurasi Chrome untuk mengurangi deteksi otomatisasi
+    options = webdriver.ChromeOptions()
+    # options.add_argument('--headless')
+    if chrome_profile_path:
+        options.add_argument(f"--user-data-dir={chrome_profile_path}")
+        # Gunakan profile Chrome yang sudah login agar browser nyata dipakai
+        options.add_argument('--profile-directory=Default')
+    options.add_argument('--disable-gpu')
+    options.add_argument('--window-size=1920,1080')
+    options.add_argument('--start-maximized')
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
+    options.add_argument('--disable-blink-features=AutomationControlled')
+    options.add_argument('--disable-infobars')
+    options.add_argument('--disable-extensions')
+    options.add_argument('--disable-popup-blocking')
+    options.add_argument('--lang=en-US,en')
+    options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36')
+    options.add_experimental_option('excludeSwitches', ['enable-automation'])
+    options.add_experimental_option('useAutomationExtension', False)
+    options.add_experimental_option('prefs', {
+        'credentials_enable_service': False,
+        'profile.password_manager_enabled': False,
+        'intl.accept_languages': 'en-US,en'
+    })
+    options.add_argument('--log-level=3') # Sembunyikan log warning dari console
+
+    driver = None
     try:
-        subprocess.run(command, check=True, cwd=base_dir)
-        
-        for i in range(5):
-            if os.path.exists(absolute_output):
-                break
-            print(f"⏳ Menunggu file muncul... ({i+1}s)")
-            time.sleep(1)
-            
-        if not os.path.exists(absolute_output):
-            print("❌ File hasil scraping tidak ditemukan.")
-            return False, f"File hasil scraping tidak ditemukan: {absolute_output}"
-            
-        print(f"✅ File ditemukan: {absolute_output}")
-        # df = pd.read_csv(absolute_output, encoding="utf-8-sig")
+        driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+        wait = WebDriverWait(driver, 15)
+
+        # Sembunyikan properti webdriver dari deteksi
         try:
-            df = pd.read_csv(absolute_output, encoding="utf-8-sig")
-        except pd.errors.EmptyDataError:
-            print("❌ File CSV kosong (Tidak ada tweet yang ditemukan).")
-            return False, "Tidak ada tweet yang ditemukan untuk kata kunci dan tanggal tersebut."
+            driver.execute_cdp_cmd('Page.addScriptToEvaluateOnNewDocument', {
+                'source': '''
+                    Object.defineProperty(navigator, 'webdriver', {
+                        get: () => undefined
+                    });
+                    window.navigator.chrome = {
+                        runtime: {}
+                    };
+                    Object.defineProperty(navigator, 'permissions', {
+                        get: () => ({
+                            query: (parameters) => (
+                                parameters.name === 'notifications' ?
+                                Promise.resolve({ state: Notification.permission }) :
+                                Promise.resolve({ state: 'denied' })
+                            )
+                        })
+                    });
+                    Object.defineProperty(navigator, 'languages', {
+                        get: () => ['en-US', 'en']
+                    });
+                    Object.defineProperty(navigator, 'plugins', {
+                        get: () => [1, 2, 3, 4, 5]
+                    });
+                '''
+            })
+        except Exception:
+            pass
+
+        # 1. Buka Halaman Login X
+        print("🔐 Membuka halaman login X...")
+        driver.get("https://x.com/i/flow/login")
         
-        if "full_text" not in df.columns:
-            possible_text_col = df.columns[0]
-            print(f"⚠️ Kolom 'full_text' tidak ditemukan, gunakan kolom pertama: {possible_text_col}")
-            df.rename(columns={possible_text_col: "full_text"}, inplace=True)
+        # --- LOGIN MANUAL ---
+        print("\n" + "!"*50)
+        print("⚠️ HARAP LOGIN SECARA MANUAL DI BROWSER YANG TERBUKA.")
+        print("Setelah berhasil login dan masuk ke beranda X,")
+        print("kembalilah ke terminal ini dan TEKAN ENTER untuk lanjut!")
+        print("!"*50 + "\n")
+        
+        # Program akan berhenti di sini sampai Anda menekan Enter
+        input("Tekan ENTER setelah login berhasil...")
+        
+        # 5. Cek apakah sudah di beranda
+        print("✅ Melanjutkan proses scraping...")
+        
+        # 6. Membuka Halaman Pencarian
+        search_query = f"{keyword}"
+        print(f"🔍 Mencari tweet: {search_query}")
+        
+        encoded_query = urllib.parse.quote_plus(search_query)
+        # Gunakan f=live agar hasil yang diambil adalah tweet terbaru (bukan yang populer saja)
+        search_url = f"https://x.com/search?q={encoded_query}&src=typed_query&f=live"
+        driver.get(search_url)
+
+        limit = int(limit)
+
+        def scrape_current_page():
+            page_tweets = []
+            seen = set()
+            scroll_attempts = 0
+
+            while len(page_tweets) < limit and scroll_attempts < 15:
+                time.sleep(3)
+                articles = driver.find_elements(By.XPATH, '//article[@data-testid="tweet"]')
+
+                new_tweets_found = 0
+                for article in articles:
+                    if len(page_tweets) >= limit:
+                        break
+
+                    try:
+                        text_elem = article.find_element(By.XPATH, './/div[@data-testid="tweetText"]')
+                        tweet_text = text_elem.text.strip()
+
+                        if not tweet_text or tweet_text in seen:
+                            continue
+
+                        user_elem = article.find_element(By.XPATH, './/div[@data-testid="User-Name"]')
+                        username_text = user_elem.text.split('\n')[0] if '\n' in user_elem.text else "Unknown"
+
+                        try:
+                            time_elem = article.find_element(By.XPATH, './/time')
+                            created_at = time_elem.get_attribute("datetime")
+                        except:
+                            created_at = "Unknown Date"
+
+                        page_tweets.append({
+                            "created_at": created_at,
+                            "username": username_text,
+                            "full_text": tweet_text
+                        })
+                        seen.add(tweet_text)
+                        new_tweets_found += 1
+                    except Exception:
+                        continue
+
+                if new_tweets_found == 0:
+                    scroll_attempts += 1
+                else:
+                    scroll_attempts = 0
+
+                driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+
+            return page_tweets
+
+        print("⏳ Mulai mengumpulkan data... (Proses ini mungkin memakan waktu)")
+        tweets_data = scrape_current_page()
+
+        if not tweets_data:
+            print("⚠️ Tidak ada hasil dengan filter tanggal. Mencoba ulang tanpa since/until...")
+            search_query = f"{keyword} lang:id"
+            encoded_query = urllib.parse.quote_plus(search_query)
+            fallback_url = f"https://x.com/search?q={encoded_query}&src=typed_query&f=live"
+            driver.get(fallback_url)
+            tweets_data = scrape_current_page()
+
+        if not tweets_data:
+            return False, "Tidak ada tweet yang ditemukan untuk periode tersebut atau bot dicegat oleh X."
             
-        df = df[df["full_text"].str.lower() != "full_text"]
-        # df = df[["full_text"]].dropna().reset_index(drop=True)
-        df = df.dropna(subset=["full_text"]).reset_index(drop=True)
+        print(f"✅ Berhasil mengambil {len(tweets_data)} tweet menggunakan Selenium.")
+        
+        # 8. Konversi ke DataFrame dan Preprocessing
+        df = pd.DataFrame(tweets_data)
+        
+        print("⚙️ Preprocessing teks...")
         df["text"] = df["full_text"].apply(preprocessText)
         
-        # Ambil kolom tanggal dan username jika tersedia dari Twitter
-        available_cols = [col for col in ["created_at", "username", "full_text", "text"] if col in df.columns]
-        cleaned_df = df[available_cols]
-        
         cleaned_path = os.path.join(output_dir, f"{safe_keyword}_cleaned.csv")
-        cleaned_df.to_csv(cleaned_path, index=False, encoding="utf-8")
+        df.to_csv(cleaned_path, index=False, encoding="utf-8")
         
-        print(f"✅ Data bersih tersimpan di: {cleaned_path}")
-        print("\n📁 Isi folder output:")
-        print(os.listdir(output_dir))
+        # 9. Lanjut ke Model AI
+        return analyze_sentiment_emotion(cleaned_path)
         
-        success, labeled_path = analyze_sentiment_emotion(cleaned_path)
-        
-        if success:
-            print(f"🎉 Analisis sentimen & emosi selesai → {labeled_path}")
-            return True, labeled_path
-        else:
-            print(f"⚠️ Gagal melakukan analisis lanjutan! Error: {labeled_path}")
-            return False, labeled_path 
-        
-    except subprocess.CalledProcessError as e:
-        return False, f"Gagal menjalankan tweet-harvest: {e}"
+    except TimeoutException:
+        return False, "Gagal/Timeout saat login. Pastikan kredensial benar dan internet stabil."
+    except Exception as e:
+        return False, f"Terjadi kesalahan pada Selenium: {e}"
+    finally:
+        # PENTING: Tutup browser agar memori RAM tidak penuh
+        if driver is not None:
+            driver.quit()
+        print("🛑 Browser Selenium ditutup.")

@@ -18,6 +18,10 @@ from flask_limiter.util import get_remote_address
 app = Flask(__name__)
 app.secret_key = "secret123"
 
+# Path profil Chrome nyata untuk Selenium.
+# Buat folder ini dulu, login X secara manual sekali, lalu jalankan kembali aplikasi.
+CHROME_PROFILE_PATH = os.getenv("CHROME_PROFILE_PATH", r"C:\selenium-chrome-profile")
+
 limiter = Limiter(
     get_remote_address,
     app=app,
@@ -294,14 +298,13 @@ def index():
 @login_required
 def analisis():
     if request.method == "POST":
-        auth_token = request.form.get("auth_token")
+        
+        # Menangkap parameter pencarian
         keyword = request.form.get("keyword")
-        since = request.form.get("since")
-        until = request.form.get("until")
         limit = request.form.get("limit")
 
-        if not all([auth_token, keyword, since, until, limit]):
-            flash("❌ Semua field wajib diisi!", "error")
+        if not all([ keyword, limit]):
+            flash("❌ Semua field kredensial dan pencarian wajib diisi!", "error")
             return redirect(url_for("analisis"))
 
         try:
@@ -310,7 +313,12 @@ def analisis():
             flash("⚠️ Jumlah tweet harus berupa angka!", "error")
             return redirect(url_for("analisis"))
 
-        success, message = scraping_tweets(keyword, since, until, auth_token, limit)
+        # Mengirim parameter baru ke fungsi scraping dengan profile Chrome nyata
+        success, message = scraping_tweets(
+            keyword,
+            limit,
+            chrome_profile_path=CHROME_PROFILE_PATH
+        )
         
         if success:
             safe_keyword = keyword.replace(" ", "_")
@@ -320,13 +328,12 @@ def analisis():
                 user_id=current_user.id, 
                 keyword=keyword,
                 filename=file_name,
-                tweet_count=int(limit)
+                tweet_count=limit
             )
             db.session.add(new_record)
             db.session.commit()
             
             return redirect(url_for("result", file=file_name))
-        
         else:
             flash(f"⚠️ Gagal memproses data: {message}", "error")
             return redirect(url_for("analisis"))
