@@ -1,0 +1,275 @@
+/* =========================================
+   TEMA UTAMA: Navy & Cream (style.css)
+   ========================================= */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@300;400;500;600&display=swap');
+
+:root {
+    --bg-cream: #F3EFE6;
+    --navy-dark: #2D3250;
+    --font-heading: 'Playfair Display', serif;
+    --font-body: 'Poppins', sans-serif;
+}
+
+body {
+    background-color: var(--bg-cream);
+    color: var(--navy-dark);
+    font-family: var(--font-body);
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+/* --- NAVBAR KAPSUL (Sama dengan Auth) --- */
+.navbar-pill {
+    margin: 20px auto;
+    width: 95%;
+    max-width: 1200px;
+    border: 1px solid var(--navy-dark);
+    border-radius: 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 30px;
+    box-sizing: border-box;
+    background-color: transparent;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--navy-dark);
+    text-decoration: none;
+    font-family: var(--font-body);
+}
+
+.logo img { width: 35px; margin-right: 10px; border-radius: 50%; }
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+}
+
+.nav-links li { margin: 0 15px; }
+
+.nav-links a {
+    color: var(--navy-dark);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+}
+
+.nav-links a:hover { opacity: 0.7; }
+
+.nav-btn {
+    background-color: var(--navy-dark);
+    color: var(--bg-cream) !important;
+    padding: 8px 25px;
+    border-radius: 30px;
+}
+
+.nav-btn.outline {
+    background-color: transparent;
+    color: var(--navy-dark) !important;
+}
+
+/* --- HERO SECTION --- */
+.hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 60px auto;
+    padding: 0 30px;
+    min-height: 60vh;
+}
+
+.hero-text {
+    flex: 1;
+    padding-right: 50px;
+}
+
+.hero-text h1 {
+    font-family: var(--font-heading);
+    font-size: 4rem;
+    line-height: 1.1;
+    margin-bottom: 20px;
+    color: var(--navy-dark);
+}
+
+.hero-text p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 30px;
+    max-width: 450px;
+}
+
+.hero-text p strong { display: block; margin-bottom: 5px; }
+
+.btn-primary {
+    background-color: var(--navy-dark);
+    color: var(--bg-cream);
+    padding: 12px 35px;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: 0.3s;
+    display: inline-block;
+}
+
+.btn-primary:hover { opacity: 0.8; transform: translateY(-2px); }
+
+.hero-image {
+    flex: 1;
+    text-align: right;
+}
+
+.hero-image img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* --- TENTANG MOODIFY SECTION --- */
+.about-section {
+    max-width: 1200px;
+    margin: 80px auto;
+    padding: 0 30px;
+}
+
+.about-title {
+    text-align: center;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 2.5rem;
+    margin-bottom: 50px;
+}
+
+.about-content {
+    display: flex;
+    align-items: center;
+    gap: 60px;
+}
+
+.about-image {
+    flex: 1;
+    background-color: white;
+    border-radius: 40px;
+    padding: 40px;
+    position: relative;
+}
+
+/* Hiasan background putih bergelombang seperti di mockup */
+.about-image::before {
+    content: '';
+    position: absolute;
+    top: -30px;
+    left: -30px;
+    width: 150px;
+    height: 150px;
+    background-color: white;
+    border-radius: 50%;
+    z-index: -1;
+}
+
+.about-image img {
+    width: 100%;
+    display: block;
+}
+
+.about-text {
+    flex: 1;
+    font-size: 0.9rem;
+    line-height: 1.8;
+    text-align: justify;
+}
+
+.about-text p { margin-bottom: 20px; }
+
+/* --- FITUR (MENGAPA MOODIFY) SECTION --- */
+.features-section {
+    max-width: 1200px;
+    margin: 80px auto;
+    padding: 0 30px;
+}
+
+.features-card {
+    background-color: var(--navy-dark);
+    color: white;
+    border-radius: 30px;
+    padding: 60px 50px;
+}
+
+.features-title {
+    text-align: center;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 2rem;
+    margin-bottom: 50px;
+}
+
+.features-grid {
+    display: flex;
+    justify-content: space-between;
+    gap: 30px;
+}
+
+.feature-item { flex: 1; }
+
+.feature-number {
+    font-family: var(--font-body);
+    font-size: 2rem;
+    font-weight: 400;
+    margin-bottom: 15px;
+    border-bottom: 1px solid rgba(255,255,255,0.3);
+    padding-bottom: 10px;
+    display: inline-block;
+}
+
+.feature-desc {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    opacity: 0.9;
+}
+
+/* --- FOOTER --- */
+.footer-navy {
+    background-color: var(--navy-dark);
+    color: white;
+    padding: 60px 30px 40px;
+    margin-top: 100px;
+    border-radius: 40px 40px 0 0; /* Lengkungan atas */
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+}
+
+.footer-left {
+    flex: 1;
+    border-right: 1px solid rgba(255,255,255,0.2);
+    padding-right: 40px;
+}
+
+.footer-left h2 {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    line-height: 1.2;
+    margin: 0;
+}
+
+.footer-right {
+    flex: 1;
+    padding-left: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Panduan - moodify</title>
+    
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/logo.png') }}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='tutorial-style.css') }}" />
+</head>
+<body>
+    <nav class="navbar-pill">
+        <a href="{{ url_for('index') }}" class="logo">
+            <img src="{{ url_for('static', filename='assets/logo.png') }}" alt="moodify Logo" /> moodify
+        </a>
+        <ul class="nav-links">
+            <li><a href="{{ url_for('index') }}">Beranda</a></li>
+            <li><a href="{{ url_for('tutorial') }}" style="font-weight: 800;">Panduan</a></li>
+            
+            {% if current_user.is_authenticated %}
+                <li><a href="{{ url_for('analisis') }}">Analisis</a></li>
+                <li><a href="{{ url_for('history') }}">Riwayat</a></li>
+            {% endif %}
+        </ul>
+        
+        <ul class="nav-links">
+            {% if current_user.is_authenticated %}
+                <li><span style="font-size: 0.85rem; color: var(--navy-dark);">Halo, {{ current_user.username }}</span></li>
+                <li><a href="{{ url_for('logout') }}" class="nav-btn">Log Out</a></li>
+            {% else %}
+                <li><a href="{{ url_for('login') }}" class="nav-btn outline">Masuk</a></li>
+                <li><a href="{{ url_for('register') }}" class="nav-btn">Buat Akun</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <div class="tutorial-header">
+        <h1>Panduan Ekstraksi Data</h1>
+        <p>Ikuti 4 langkah interaktif ini untuk menjalankan analisis sentimen menggunakan sistem otomatisasi kami.</p>
+    </div>
+
+    <div class="tutorial-container">
+        <div class="step-card">
+            <div class="step-text">
+                <h2>1. Isi Parameter Analisis</h2>
+                <p>Buka halaman <strong>Analisis</strong>. Tentukan jumlah maksimal tweet yang ingin dianalisis dan ketik kata kunci yang ingin dicari. Setelah itu, klik tombol "Lihat Hasil Analisis Sentimen dan Emosi".</p>
+            </div>
+            <div class="step-image" style="text-align: center; font-size: 6rem; color: var(--bg-cream); opacity: 0.9;">
+                <img src="{{ url_for('static', filename='assets/Analisis.png') }}" alt="parameter analisis" />
+            </div>
+        </div>
+
+        <div class="step-card">
+            <div class="step-text">
+                <h2>2. Login via Akun Google (Wajib)</h2>
+                <p>Sistem akan otomatis membuka browser Google Chrome baru untuk mengakses X (Twitter). Di browser tersebut, lakukan login ke akun Anda. <strong>Sangat disarankan untuk memilih opsi "Sign in with Google"</strong>. Hindari mengetik username dan password secara manual karena sistem keamanan X sering kali memblokirnya.</p>
+            </div>
+            <div class="step-image" style="text-align: center; font-size: 6rem; color: var(--bg-cream); opacity: 0.9;">
+                <img src="{{ url_for('static', filename='assets/login_x_selenium.png') }}" alt="login selenium" />
+            </div>
+        </div>
+
+        <div class="step-card">
+            <div class="step-text">
+                <h2>3. Deteksi Otomatis</h2>
+                <p>Setelah Anda berhasil login dan melihat halaman <strong>Beranda (Home)</strong> X di browser, <strong>jangan tutup browser tersebut!</strong> Sistem kami akan mendeteksi keberhasilan login Anda secara otomatis dalam beberapa detik dan langsung memulai proses pencarian data.</p>
+            </div>
+            <div class="step-image" style="text-align: center; font-size: 6rem; color: var(--bg-cream); opacity: 0.9;">
+                <img src="{{ url_for('static', filename='assets/deteksi_otomatis.png') }}" alt="login selenium" />
+            </div>
+        </div>
+
+        <div class="step-card">
+            <div class="step-text">
+                <h2>4. Biarkan Robot Bekerja</h2>
+                <p>Sistem Selenium kami akan mengambil alih browser secara otomatis untuk mengumpulkan data tweet, membersihkannya, dan memasukkannya ke dalam Model IndoBERT. Anda cukup bersandar santai hingga browser tertutup sendiri dan hasil visualisasi (Wordcloud & Pie Chart) muncul di layar Anda!</p>
+            </div>
+            <div class="step-image" style="text-align: center; font-size: 6rem; color: var(--bg-cream); opacity: 0.9;">
+                <img src="{{ url_for('static', filename='assets/tweet_scrapping.png') }}" alt="login selenium" />
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer-navy">
+        <div class="footer-content">
+            <div class="footer-left">
+                <h2>Every Text Has<br>A Voice</h2>
+            </div>
+            <div class="footer-right">
+                <p style="margin: 0; font-size: 0.9rem; opacity: 0.8;">&copy; 2026 moodify, Inc. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

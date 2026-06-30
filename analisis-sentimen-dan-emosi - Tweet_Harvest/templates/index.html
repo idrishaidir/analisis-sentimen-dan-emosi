@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Beranda - moodify</title>
+    
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/logo.png') }}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+    <nav class="navbar-pill">
+        <a href="{{ url_for('index') }}" class="logo">
+            <img src="{{ url_for('static', filename='assets/logo.png') }}" alt="moodify Logo" /> moodify
+        </a>
+        <ul class="nav-links">
+            <li><a href="{{ url_for('index') }}" style="font-weight: 800;">Beranda</a></li>
+            <li><a href="{{ url_for('tutorial') }}">Panduan</a></li>
+            
+            {% if current_user.is_authenticated %}
+                <li><a href="{{ url_for('analisis') }}">Analisis</a></li>
+                <li><a href="{{ url_for('history') }}">Riwayat</a></li>
+            {% endif %}
+        </ul>
+        
+        <ul class="nav-links">
+            {% if current_user.is_authenticated %}
+                <li><span style="font-size: 0.85rem; color: var(--navy-dark);">Halo, {{ current_user.username }}</span></li>
+                <li><a href="{{ url_for('logout') }}" class="nav-btn outline" style="border: 1px solid var(--navy-dark);" onclick="return confirm('Apakah kamu yakin ingin keluar dari akun ini?');">Log Out</a></li>
+            {% else %}
+                <li><a href="{{ url_for('login') }}" class="nav-btn outline">Masuk</a></li>
+                <li><a href="{{ url_for('register') }}" class="nav-btn">Buat Akun</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-text">
+            <h1>Every Text Has<br>A Voice</h1>
+            <p>
+                <strong>Kata mereka apa sih? Tenang, kita bantu analisis—nggak sampai satu jam!</strong>
+                Cukup masukin kata kunci yang kamu penasaranin, dan biar Moodify yang bantu ngerangkum semuanya.
+            </p>
+            <a href="{{ url_for('analisis') }}" class="btn-primary">Let's go!</a>
+        </div>
+        <div class="hero-image">
+            <img src="{{ url_for('static', filename='assets/wordcloud_head.png') }}" alt="Wordcloud Communication">
+        </div>
+    </section>
+
+    <section class="about-section">
+        <h2 class="about-title">Tentang moodify</h2>
+        <div class="about-content">
+            <div class="about-image">
+                <img src="{{ url_for('static', filename='assets/about_illustration.png') }}" alt="Ilustrasi Data">
+            </div>
+            <div class="about-text">
+                <p>Moodify hadir buat bantu kamu memahami apa yang sebenarnya orang rasakan dari sebuah topik. Di tengah derasnya percakapan di media sosial, kita sering cuma lihat sekilas kata-kata tanpa benar-benar tahu makna di baliknya. Padahal, di setiap komentar, opini, atau tweet, selalu ada emosi dan sudut pandang yang tersembunyi. Moodify membantu kamu melihat hal itu dengan cara yang lebih jelas dan mudah dipahami.</p>
+                
+                <p>Dengan hanya memasukkan satu kata kunci, kamu bisa langsung melihat bagaimana respon orang terhadap topik tersebut. Apakah kebanyakan orang merespon dengan positif, negatif, atau netral? Apakah mereka merasa senang, marah, sedih, atau justru biasa saja? Semua itu dirangkum jadi satu tampilan yang bikin kamu lebih cepat menangkap "suasana" dari sebuah pembahasan tanpa harus membaca satu per satu.</p>
+                
+                <p>Semua disajikan dengan tampilan yang simpel, interaktif, dan mudah digunakan. Kamu nggak perlu jadi ahli data atau paham hal teknis untuk bisa memanfaatkannya. Cukup masukkan kata kunci, dan Moodify akan membantu kamu membaca cerita di balik data—karena setiap kata selalu punya makna, dan setiap makna selalu punya perasaan.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="features-section">
+        <div class="features-card">
+            <h2 class="features-title">Mengapa moodify?</h2>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <div class="feature-number">01</div>
+                    <div class="feature-desc">Mudah Digunakan dan<br>sepenuhnya gratis untuk diakses.</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-number">02</div>
+                    <div class="feature-desc">Dapat membaca emosi<br>dan sentimen sekaligus secara akurat.</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-number">03</div>
+                    <div class="feature-desc">Meringkas ribuan opini publik<br>hanya dalam hitungan detik.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer-navy">
+        <div class="footer-content">
+            <div class="footer-left">
+                <h2>Every Text Has<br>A Voice</h2>
+            </div>
+            <div class="footer-right">
+                <p style="margin: 0; font-size: 0.9rem; opacity: 0.8;">&copy; 2026 moodify, Inc. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

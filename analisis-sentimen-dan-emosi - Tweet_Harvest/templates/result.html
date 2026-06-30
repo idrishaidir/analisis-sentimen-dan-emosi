@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hasil Analisis - moodify</title>
+    
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/logo.png') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='result-style.css') }}">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <nav class="navbar-pill">
+        <a href="{{ url_for('index') }}" class="logo">
+            <img src="{{ url_for('static', filename='assets/logo.png') }}" alt="moodify Logo" /> moodify
+        </a>
+        <ul class="nav-links">
+            <li><a href="{{ url_for('index') }}">Beranda</a></li>
+            <li><a href="{{ url_for('analisis') }}">Analisis</a></li>
+            <li><a href="{{ url_for('tutorial') }}">Panduan</a></li>
+            <li><a href="{{ url_for('history') }}">Riwayat</a></li>
+        </ul>
+        <ul class="nav-links">
+            <li><span style="font-size: 0.85rem; color: var(--navy-dark); font-weight: 600;">Halo, {{ current_user.username }}</span></li>
+            <li><a href="{{ url_for('logout') }}" class="nav-btn outline" onclick="return confirm('Apakah kamu yakin ingin keluar dari akun ini?');">Log Out</a></li>
+        </ul>
+    </nav>
+
+    <div class="result-header">
+        <h1>Kami udah olah datanya, ini hasilnya!</h1>
+        <p>Berhasil menganalisis <strong>{{ tweet_count }}</strong> tweet tentang <strong>"{{ keyword }}"</strong>.</p>
+        <a href="{{ url_for('analisis') }}" class="btn-back"><i class="fas fa-arrow-left"></i> Kembali ke Analisis</a>
+    </div>
+
+    <div class="dashboard-container">
+        
+        <div class="chart-card full-width" style="background-color: var(--navy-dark); color: var(--bg-cream); text-align: center;">
+            <h2 class="chart-title" style="color: var(--bg-cream); border-bottom: 1px solid rgba(255,255,255,0.2);">Kata Yang Sering Muncul</h2>
+            <div style="display: flex; justify-content: center; padding: 20px 0;">
+                {% if wordcloud_url %}
+                    <img src="{{ url_for('static', filename=wordcloud_url) }}" alt="Wordcloud" class="wordcloud-img" style="max-width: 800px; border: 4px solid var(--bg-cream);">
+                {% else %}
+                    <p style="color: #ccc; font-style: italic;">Wordcloud tidak tersedia untuk data ini.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <h2 class="chart-title" style="text-align: center;">Sentimen</h2>
+            <div class="chart-container">
+                <canvas id="sentimentChart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <h2 class="chart-title" style="text-align: center;">Emosi</h2>
+            <div class="chart-container">
+                <canvas id="emotionChart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-card full-width" style="padding: 0; background: transparent; box-shadow: none; border: none;">
+            <div class="tabs-container">
+                
+                <div class="tabs-header">
+                    <button class="tab-btn active" onclick="openTab(event, 'labeling')">🏷️ Hasil Pelabelan</button>
+                    <button class="tab-btn" onclick="openTab(event, 'original')">📝 Tweet Murni (Asli)</button>
+                </div>
+
+                <div id="labeling" class="tab-content active">
+                    <div class="table-wrapper">
+                        <table class="tweet-table">
+                            <thead>
+                                <tr>
+                                    <th width="5%">No</th>
+                                    <th width="65%">Teks (Preprocessed)</th>
+                                    <th width="15%">Sentimen</th>
+                                    <th width="15%">Emosi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body-label">
+                                </tbody>
+                        </table>
+                    </div>
+                    <div class="pagination-controls" id="pagination-label"></div>
+                </div>
+
+                <div id="original" class="tab-content">
+                    <div class="table-wrapper">
+                        <table class="tweet-table">
+                            <thead>
+                                <tr>
+                                    <th width="5%">No</th>
+                                    <th width="15%">Waktu</th>
+                                    <th width="15%">Username</th>
+                                    <th width="65%">Tweet Asli (Full Text)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body-original">
+                                </tbody>
+                        </table>
+                    </div>
+                    <div class="pagination-controls" id="pagination-original"></div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const allTweets = {{ tweets | tojson }};
+        const sentimentData = {{ sentiment_counts | tojson }};
+        const emotionData = {{ emotion_counts | tojson }};
+        
+        const colorPalette = {
+            'Positif': '#2ecc71', // Hijau
+            'Negatif': '#e74c3c', // Merah
+            'Netral':  '#95a5a6', // Abu-abu
+            'Marah':   '#e74c3c', // Merah
+            'Takut':   '#34495e', // Biru gelap
+            'Sedih':   '#3498db', // Biru terang
+            'Senang':  '#f1c40f', // Kuning
+            'Cinta':   '#e84393'  // Pink
+        };
+
+        function getColors(dataObject) {
+            return Object.keys(dataObject).map(key => {
+                const formattedKey = key.charAt(0).toUpperCase() + key.slice(1).toLowerCase();
+                return colorPalette[formattedKey] || '#cccccc'; 
+            });
+        }
+
+        new Chart(document.getElementById('sentimentChart').getContext('2d'), {
+            type: 'pie',
+            data: {
+                labels: Object.keys(sentimentData),
+                datasets: [{
+                    data: Object.values(sentimentData),
+                    backgroundColor: getColors(sentimentData),
+                    borderWidth: 2, borderColor: '#ffffff'
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { family: "'Poppins', sans-serif" } } } } }
+        });
+
+        new Chart(document.getElementById('emotionChart').getContext('2d'), {
+            type: 'pie',
+            data: {
+                labels: Object.keys(emotionData),
+                datasets: [{
+                    data: Object.values(emotionData),
+                    backgroundColor: getColors(emotionData),
+                    borderWidth: 2, borderColor: '#ffffff'
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { family: "'Poppins', sans-serif" } } } } }
+        });
+
+        const rowsPerPage = 10;
+        
+        function displayTable(type, page) {
+            const tbody = document.getElementById(type === 'labeling' ? 'table-body-label' : 'table-body-original');
+            const pagination = document.getElementById(type === 'labeling' ? 'pagination-label' : 'pagination-original');
+            
+            tbody.innerHTML = "";
+            pagination.innerHTML = "";
+
+            const start = (page - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+            const paginatedItems = allTweets.slice(start, end);
+            const totalPages = Math.ceil(allTweets.length / rowsPerPage);
+
+            paginatedItems.forEach((tweet, index) => {
+                const row = document.createElement("tr");
+                const num = start + index + 1;
+                
+                if (type === 'labeling') {
+                    const sentimenClass = tweet.sentimen ? tweet.sentimen.toLowerCase() : 'netral';
+                    const emosiClass = tweet.emosi ? tweet.emosi.toLowerCase() : 'netral';
+                    const textBersih = tweet.text ? tweet.text : tweet.full_text;
+
+                    row.innerHTML = `
+                        <td>${num}</td>
+                        <td style="font-size: 0.85rem;">${textBersih}</td>
+                        <td><span class="badge ${sentimenClass}">${tweet.sentimen}</span></td>
+                        <td><span class="badge ${emosiClass}">${tweet.emosi}</span></td>
+                    `;
+                } else {
+                    const time = tweet.created_at ? tweet.created_at.substring(0, 10) : '-';
+                    const username = tweet.username ? '@' + tweet.username : 'Anonim';
+                    
+                    row.innerHTML = `
+                        <td>${num}</td>
+                        <td style="font-size: 0.8rem; color: #666;">${time}</td>
+                        <td style="font-weight: 500;">${username}</td>
+                        <td style="font-size: 0.85rem;">${tweet.full_text}</td>
+                    `;
+                }
+                tbody.appendChild(row);
+            });
+
+            const prevBtn = document.createElement("button");
+            prevBtn.innerText = "Sebelumnya";
+            prevBtn.className = "page-btn";
+            prevBtn.disabled = page === 1;
+            prevBtn.onclick = () => displayTable(type, page - 1);
+            pagination.appendChild(prevBtn);
+
+            const pageInfo = document.createElement("span");
+            pageInfo.innerText = ` Hal ${page} dari ${totalPages || 1} `;
+            pageInfo.style.fontWeight = "600";
+            pagination.appendChild(pageInfo);
+
+            const nextBtn = document.createElement("button");
+            nextBtn.innerText = "Selanjutnya";
+            nextBtn.className = "page-btn";
+            nextBtn.disabled = page === totalPages || totalPages === 0;
+            nextBtn.onclick = () => displayTable(type, page + 1);
+            pagination.appendChild(nextBtn);
+        }
+
+        function openTab(evt, tabName) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(tabName).classList.add('active');
+            evt.currentTarget.classList.add('active');
+        }
+
+        displayTable('labeling', 1);
+        displayTable('original', 1);
+    </script>
+</body>
+</html>

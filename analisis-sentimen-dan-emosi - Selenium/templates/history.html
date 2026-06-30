@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Riwayat Analisis - moodify</title>
+    
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/logo.png') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='history-style.css') }}">
+</head>
+<body>
+    <nav class="navbar-pill">
+        <a href="{{ url_for('index') }}" class="logo">
+            <img src="{{ url_for('static', filename='assets/logo.png') }}" alt="moodify Logo" /> moodify
+        </a>
+        <ul class="nav-links">
+            <li><a href="{{ url_for('index') }}">Beranda</a></li>
+            <li><a href="{{ url_for('tutorial') }}">Panduan</a></li>
+            
+            {% if current_user.is_authenticated %}
+                <li><a href="{{ url_for('analisis') }}">Analisis</a></li>
+                <li><a href="{{ url_for('history') }}" style="font-weight: 800;">Riwayat</a></li>
+            {% endif %}
+        </ul>
+        
+        <ul class="nav-links">
+            <li><span style="font-size: 0.85rem; color: var(--navy-dark); font-weight: 600;">Halo, {{ current_user.username }}</span></li>
+            <li><a href="{{ url_for('logout') }}" class="nav-btn outline" style="border: 1px solid var(--navy-dark);" onclick="return confirm('Apakah kamu yakin ingin keluar dari akun ini?');">Log Out</a></li>
+        </ul>
+    </nav>
+
+    <div class="history-header">
+        <h1>Riwayat Analisis Kamu</h1>
+        <p>Lihat kembali semua hasil penelusuran yang sudah tersimpan di akunmu.</p>
+    </div>
+
+    <div class="history-container">
+        
+        {% with messages = get_flashed_messages(with_categories=true) %} 
+            {% if messages %}
+                <div class="flash-wrapper">
+                    {% for category, message in messages %}
+                        <div class="flash {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %} 
+        {% endwith %}
+
+        {% if history %}
+            <div class="history-grid">
+                {% for item in history %}
+                <div class="history-card">
+                    <div class="history-keyword">{{ item.keyword }}</div>
+                    
+                    <div class="history-meta">
+                        <span><i class="far fa-clock"></i> {{ item.date_created | format_wib }}</span>
+                        <span><i class="fab fa-twitter"></i> {{ item.tweet_count }} Tweet Dianalisis</span>
+                    </div>
+
+                    <div class="card-actions">
+                        <a href="{{ url_for('result', file=item.filename) }}" class="btn-view">
+                            <i class="fas fa-chart-pie"></i> Lihat Hasil
+                        </a>
+                        
+                        <form action="{{ url_for('delete_history', history_id=item.id) }}" method="POST" style="display: flex; flex: 1;" onsubmit="return confirm('Apakah kamu yakin ingin menghapus riwayat ini? File data akan dihapus permanen.');">
+                            <button type="submit" class="btn-delete" title="Hapus Riwayat">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <h3>Belum ada riwayat analisis</h3>
+                <p>Kamu belum pernah menyimpan analisis sentimen apapun di akun ini.</p>
+                <a href="{{ url_for('analisis') }}" class="btn-outline-navy">Mulai Analisis Pertamamu</a>
+            </div>
+        {% endif %}
+    </div>
+
+</body>
+</html>

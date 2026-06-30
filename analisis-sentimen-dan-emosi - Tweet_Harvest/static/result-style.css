@@ -1,0 +1,83 @@
+/* =========================================
+   TEMA: Navy & Cream (result-style.css)
+   ========================================= */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@300;400;500;600&display=swap');
+
+:root {
+    --bg-cream: #F3EFE6;
+    --navy-dark: #2D3250;
+    --card-bg: #FFFFFF;
+    --font-heading: 'Playfair Display', serif;
+    --font-body: 'Poppins', sans-serif;
+}
+
+body { background-color: var(--bg-cream); color: var(--navy-dark); font-family: var(--font-body); margin: 0; padding: 0; min-height: 100vh; display: flex; flex-direction: column; }
+
+/* --- NAVBAR KAPSUL --- */
+.navbar-pill { margin: 20px auto; width: 95%; max-width: 1200px; border: 1px solid var(--navy-dark); border-radius: 50px; display: flex; justify-content: space-between; align-items: center; padding: 10px 30px; box-sizing: border-box; }
+.logo { display: flex; align-items: center; font-size: 1.5rem; font-weight: 700; color: var(--navy-dark); text-decoration: none; }
+.logo img { width: 35px; margin-right: 10px; border-radius: 50%; }
+.nav-links { list-style: none; display: flex; margin: 0; padding: 0; align-items: center; }
+.nav-links li { margin: 0 15px; }
+.nav-links a { color: var(--navy-dark); text-decoration: none; font-weight: 600; font-size: 0.9rem; text-transform: uppercase; transition: 0.3s; }
+.nav-links a:hover { opacity: 0.7; }
+.nav-btn { background-color: var(--navy-dark); color: var(--bg-cream) !important; padding: 8px 25px; border-radius: 30px; }
+.nav-btn.outline { background-color: transparent; color: var(--navy-dark) !important; border: 1px solid var(--navy-dark); }
+
+/* --- HEADER HASIL --- */
+.result-header { text-align: center; margin: 30px auto; padding: 0 20px; }
+.result-header h1 { font-family: var(--font-heading); font-size: 2.5rem; color: var(--navy-dark); margin-bottom: 5px; text-transform: capitalize; }
+.result-header p { font-size: 1.1rem; opacity: 0.8; margin-bottom: 20px; }
+.btn-back { display: inline-block; padding: 10px 25px; background-color: var(--navy-dark); color: var(--bg-cream); text-decoration: none; border-radius: 30px; font-weight: 600; font-size: 0.9rem; transition: 0.3s; }
+.btn-back:hover { opacity: 0.9; transform: translateY(-2px); }
+
+/* --- DASHBOARD GRID --- */
+.dashboard-container { width: 95%; max-width: 1200px; margin: 0 auto 60px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 30px; }
+.chart-card { background-color: var(--card-bg); border: 1px solid #B0B5C1; border-radius: 20px; padding: 30px; box-shadow: 0 10px 25px rgba(45, 50, 80, 0.05); display: flex; flex-direction: column; }
+.chart-card.full-width { grid-column: span 2; }
+.chart-title { font-family: var(--font-heading); font-size: 1.5rem; margin-bottom: 20px; color: var(--navy-dark); border-bottom: 2px solid rgba(45, 50, 80, 0.1); padding-bottom: 10px; }
+.chart-container { position: relative; height: 300px; width: 100%; display: flex; justify-content: center; align-items: center; }
+.wordcloud-img { width: 100%; max-height: 400px; object-fit: contain; border-radius: 12px; }
+
+/* --- TAB & TABEL TWEET (DIKEMBALIKAN KE KONSEP LAMA DENGAN TEMA BARU) --- */
+.tabs-container { margin-top: 10px; background: var(--card-bg); border-radius: 20px; overflow: hidden; border: 1px solid #B0B5C1; }
+.tabs-header { display: flex; background: var(--bg-cream); border-bottom: 1px solid #B0B5C1; }
+.tab-btn { flex: 1; padding: 15px; border: none; background: none; font-size: 1rem; font-weight: 600; color: #777; cursor: pointer; transition: 0.3s; font-family: var(--font-body); }
+.tab-btn:hover { background: rgba(45, 50, 80, 0.05); color: var(--navy-dark); }
+.tab-btn.active { background: var(--card-bg); color: var(--navy-dark); border-bottom: 3px solid var(--navy-dark); }
+
+.tab-content { display: none; padding: 20px; animation: fadeIn 0.5s; }
+.tab-content.active { display: block; }
+.table-wrapper { overflow-x: auto; border-radius: 12px; border: 1px solid #eee; }
+.tweet-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; text-align: left; }
+.tweet-table th { background-color: var(--navy-dark); color: var(--bg-cream); padding: 15px; }
+.tweet-table td { padding: 15px; border-bottom: 1px solid #eee; vertical-align: middle; }
+.tweet-table tr:nth-child(even) { background-color: #fdfafb; }
+.tweet-table tr:hover { background-color: #f1f3f8; }
+
+/* --- PAGINATION --- */
+.pagination-controls { display: flex; justify-content: center; align-items: center; margin-top: 20px; gap: 15px; }
+.page-btn { padding: 8px 20px; border: 1px solid var(--navy-dark); background: transparent; color: var(--navy-dark); cursor: pointer; border-radius: 30px; font-weight: 600; font-family: var(--font-body); transition: 0.3s;}
+.page-btn:hover:not(:disabled) { background: var(--navy-dark); color: var(--bg-cream); }
+.page-btn:disabled { opacity: 0.4; cursor: not-allowed; border-color: #ccc; color: #777; }
+
+/* --- BADGE SENTIMEN & EMOSI --- */
+.badge { padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; color: white; display: inline-block; text-align: center; min-width: 60px; }
+/* Sentimen */
+.badge.positif { background-color: #2ecc71; color: #fff;}
+.badge.negatif { background-color: #e74c3c; color: #fff;}
+.badge.netral { background-color: #95a5a6; color: #fff;}
+/* Emosi */
+.badge.marah { background-color: #e74c3c; color: #fff;}
+.badge.takut { background-color: #34495e; color: #fff;}
+.badge.sedih { background-color: #3498db; color: #fff;}
+.badge.senang { background-color: #f1c40f; color: #333;} /* Teks gelap agar terbaca di kuning */
+.badge.cinta { background-color: #e84393; color: #fff;}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* Responsive */
+@media (max-width: 900px) {
+    .dashboard-container { grid-template-columns: 1fr; }
+    .chart-card.full-width { grid-column: span 1; }
+}

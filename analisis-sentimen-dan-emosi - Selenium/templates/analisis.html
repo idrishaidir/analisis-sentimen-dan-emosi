@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mulai Analisis - moodify</title>
+
+    <link
+      rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='assets/logo.png') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='analisis-style.css') }}"
+    />
+  </head>
+  <body>
+    <div class="loading-overlay" id="loadingOverlay">
+      <div class="spinner"></div>
+      <h2 class="loading-text">Sedang Menganalisis...</h2>
+      <p class="loading-subtext">
+        Mohon tunggu sebentar, kami sedang mengumpulkan<br />dan membaca emosi
+        dari tweet.
+      </p>
+    </div>
+
+    <nav class="navbar-pill">
+      <a href="{{ url_for('index') }}" class="logo">
+        <img
+          src="{{ url_for('static', filename='assets/logo.png') }}"
+          alt="moodify Logo"
+        />
+        moodify
+      </a>
+      <ul class="nav-links">
+        <li><a href="{{ url_for('index') }}">Beranda</a></li>
+        <li>
+          <a href="{{ url_for('analisis') }}" style="font-weight: 800"
+            >Analisis</a
+          >
+        </li>
+        <li><a href="{{ url_for('tutorial') }}">Panduan</a></li>
+        <li><a href="{{ url_for('history') }}">Riwayat</a></li>
+      </ul>
+      <ul class="nav-links">
+        <li>
+          <span
+            style="
+              font-size: 0.85rem;
+              color: var(--navy-dark);
+              font-weight: 600;
+            "
+            >Halo, {{ current_user.username }}</span
+          >
+        </li>
+        <li>
+          <a
+            href="{{ url_for('logout') }}"
+            class="nav-btn outline"
+            style="border: 1px solid var(--navy-dark)"
+            onclick="
+              return confirm('Apakah kamu yakin ingin keluar dari akun ini?');
+            "
+            >Log Out</a
+          >
+        </li>
+      </ul>
+    </nav>
+
+    <div class="analisis-header">
+      <h1>Mulai Analisis Sentimen dan Emosi</h1>
+      <p>Lihat Apa yang Orang Rasakan dari Kata-Kata Mereka.</p>
+    </div>
+
+    <div class="analisis-container">
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %}
+      <div class="flash-wrapper">
+        {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+      {% endif %} {% endwith %}
+
+      <form action="{{ url_for('analisis') }}" method="POST" id="analisisForm">
+        <div class="analisis-card">
+          <div class="form-section">
+            <label class="section-title">Pengaturan Analisis</label>
+            <div class="form-row">
+              <div class="form-col">
+                <label>Jumlah tweet yang ingin dianalisis</label>
+                <input
+                  type="number"
+                  name="limit"
+                  min="10"
+                  max="500"
+                  placeholder="Contoh: 100"
+                  required
+                />
+              </div>
+              <div class="form-col">
+                <label>Masukkan kata kunci</label>
+                <input
+                  type="text"
+                  name="keyword"
+                  placeholder="Contoh: Timnas Indonesia"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tutorial-link-wrapper">
+          <a href="{{ url_for('tutorial') }}"
+            >Mengalami kesulitan? tutorial <i class="fas fa-arrow-right"></i
+          ></a>
+        </div>
+
+        <button type="submit" class="btn-submit-large" id="btnSubmit">
+          Lihat Hasil Analisis Sentimen dan Emosi
+        </button>
+      </form>
+    </div>
+    <script>
+      document
+        .getElementById("analisisForm")
+        .addEventListener("submit", function (e) {
+          if (this.checkValidity()) {
+            document.getElementById("loadingOverlay").classList.add("active");
+
+            const btn = document.getElementById("btnSubmit");
+            btn.innerHTML =
+              '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+            btn.style.opacity = "0.8";
+          }
+        });
+    </script>
+  </body>
+</html>

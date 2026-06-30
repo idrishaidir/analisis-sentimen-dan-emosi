@@ -10,3 +10,4 @@ mysql-connector-python
 flask-login
 Flask-Mail
 Flask-Limiter
+apify-client

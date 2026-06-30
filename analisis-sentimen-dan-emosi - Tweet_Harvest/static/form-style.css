@@ -1,0 +1,271 @@
+body,
+h1,
+h2,
+h3,
+p,
+ul {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  line-height: 1.6;
+  background-color: #ffffff;
+  color: #333;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* =================================== */
+/* Navbar Styles */
+/* =================================== */
+.navbar {
+  background-color: #5d001e; /* Warna maroon */
+  color: white;
+  padding: 1rem 0;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.container-nav {
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: white;
+  text-decoration: none;
+}
+
+.logo img {
+  width: 40px;
+  margin-right: 10px;
+  border-radius: 50%;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+}
+
+.nav-links li {
+  margin-left: 2rem;
+}
+
+.nav-links a {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  padding-bottom: 5px;
+  border-bottom: 2px solid transparent;
+  transition: border-bottom 0.3s;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+  border-bottom: 2px solid white;
+}
+
+/* =================================== */
+/* Form Analysis Styles*/
+/* =================================== */
+.analysis-container {
+  width: 90%;
+  max-width: 700px;
+  margin: 4rem auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.analysis-container h2 {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.analysis-container .subtitle {
+  font-size: 1.2rem;
+  color: #555;
+  margin-bottom: 2rem;
+}
+
+form {
+  text-align: left;
+}
+
+.form-group,
+.form-group-inline {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label,
+.form-group-inline label {
+  display: block;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.form-group .sub-label {
+  font-size: 1rem;
+  font-weight: normal;
+  color: #555;
+  margin-top: 0.5rem;
+}
+
+.label-icon-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.label-icon-wrapper i {
+  font-size: 1.2rem;
+  color: #333;
+}
+
+input[type="text"],
+input[type="date"],
+input[type="number"] {
+  width: 100%;
+  padding: 12px 15px;
+  border: none;
+  background-color: #fbebee;
+  border-radius: 30px;
+  box-sizing: border-box;
+  font-size: 1rem;
+}
+
+.input-with-icon {
+  position: relative;
+}
+
+.input-with-icon input {
+  padding-right: 40px;
+}
+
+.input-with-icon i {
+  position: absolute;
+  top: 50%;
+  right: 15px;
+  transform: translateY(-50%);
+  color: #888;
+  font-size: 1.2rem;
+}
+
+.tutorial-link {
+  display: block;
+  text-align: right;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #555;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.tutorial-link span {
+  transition: margin-left 0.3s;
+}
+
+.tutorial-link:hover span {
+  margin-left: 5px;
+}
+
+.divider {
+  border: none;
+  border-top: 2px solid #eee;
+  margin: 2rem 0;
+}
+
+.submit-link {
+  display: block;
+  width: max-content;
+  margin: 2.5rem auto 0 auto;
+  padding: 10px 20px;
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #333;
+  cursor: pointer;
+  text-decoration: none;
+  border-bottom: 2px solid #ccc;
+  transition: all 0.3s;
+}
+
+.submit-link:hover {
+  color: #5d001e;
+  border-bottom-color: #5d001e;
+}
+
+/* =================================== */
+/* Style untuk Konten Loading*/
+/* =================================== */
+
+#loading-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 50vh;
+  padding: 2rem;
+}
+
+#loading-wrapper h3 {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #333;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+#loading-wrapper p {
+  font-size: 1.1rem;
+  color: #555;
+  max-width: 400px;
+}
+
+.spinner {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 5px solid #fbebee;
+  border-top-color: #5d001e;
+
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =================================== */
+/* Footer Styles */
+/* =================================== */
+.footer {
+  text-align: center;
+  padding: 2rem 0;
+  background-color: #f9f9f9;
+  color: #aaa;
+  border-top: 1px solid #eee;
+  margin-top: 4rem;
+}
