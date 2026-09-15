@@ -189,3 +189,96 @@ body {
 .flash { padding: 12px; border-radius: 15px; font-size: 0.85rem; text-align: center; }
 .flash.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
 .flash.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+
+/* --- HIDE NATIVE BROWSER PASSWORD REVEAL --- */
+/* Menyembunyikan icon mata bawaan dari Microsoft Edge / IE */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+    display: none;
+}
+
+/* (Opsional) Menyembunyikan icon bawaan di browser berbasis Webkit jika ada */
+input[type="password"]::-webkit-contacts-auto-fill-button,
+input[type="password"]::-webkit-credentials-auto-fill-button {
+    visibility: hidden;
+    display: none !important;
+    pointer-events: none;
+    position: absolute;
+    right: 0;
+}
+
+/* ========================================= 
+   MOBILE RESPONSIVE 
+   ========================================= */
+
+@media screen and (max-width: 768px) {
+    .navbar-pill {
+        flex-direction: column;
+        padding: 15px 20px;
+        border-radius: 25px;
+        gap: 15px;
+    }
+
+    .nav-links {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .nav-links li {
+        margin: 5px 8px;
+    }
+
+    .nav-links a {
+        font-size: 0.8rem;
+    }
+
+    .auth-card {
+        max-width: 90%;
+        padding: 30px 20px;
+        border-radius: 15px;
+    }
+
+    .form-group label {
+        font-size: 0.85rem;
+    }
+
+    .input-wrapper input {
+        padding: 10px 15px;
+        font-size: 0.85rem;
+    }
+
+    .btn-submit {
+        font-size: 0.95rem;
+        padding: 10px;
+    }
+
+    .auth-footer {
+        font-size: 0.8rem;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .logo {
+        font-size: 1.2rem;
+    }
+
+    .logo img {
+        width: 28px;
+    }
+
+    .auth-card {
+        max-width: 95%;
+        padding: 25px 15px;
+        border-radius: 12px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .input-wrapper input {
+        padding: 9px 12px;
+        font-size: 0.8rem;
+    }
+}

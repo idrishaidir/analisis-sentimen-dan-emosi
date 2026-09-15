@@ -178,9 +178,173 @@ input:focus {
 
 /* Responsive HP */
 @media (max-width: 768px) {
-    .form-row { flex-direction: column; gap: 20px; }
-    .analisis-card { padding: 30px; }
-    .analisis-header h1 { font-size: 2.2rem; }
+    .navbar-pill {
+        flex-direction: column;
+        padding: 15px 20px;
+        border-radius: 25px;
+        gap: 15px;
+    }
+
+    .nav-links {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .nav-links li {
+        margin: 5px 8px;
+    }
+
+    .nav-links a {
+        font-size: 0.8rem;
+    }
+
+    .analisis-header {
+        margin: 30px auto;
+        padding: 0 15px;
+    }
+
+    .analisis-header h1 { 
+        font-size: 2.2rem; 
+    }
+
+    .analisis-header p {
+        font-size: 1rem;
+    }
+
+    .analisis-container {
+        width: 95%;
+        margin: 0 auto 40px;
+    }
+
+    .analisis-card { 
+        padding: 30px 20px; 
+        border-radius: 15px;
+    }
+
+    .form-section {
+        margin-bottom: 25px;
+    }
+
+    .section-title {
+        font-size: 1rem;
+        margin-bottom: 12px;
+    }
+
+    .form-row { 
+        flex-direction: column; 
+        gap: 15px; 
+    }
+
+    .form-col label {
+        font-size: 0.9rem;
+        margin-bottom: 6px;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="date"] {
+        padding: 12px 15px;
+        font-size: 0.9rem;
+        border-radius: 10px;
+    }
+
+    .tutorial-link-wrapper {
+        margin: 15px 0;
+    }
+
+    .tutorial-link-wrapper a {
+        font-size: 0.9rem;
+    }
+
+    .btn-submit-large {
+        padding: 15px;
+        font-size: 1.1rem;
+        border-radius: 12px;
+    }
+
+    .loading-text {
+        font-size: 1.8rem;
+    }
+
+    .loading-subtext {
+        font-size: 0.95rem;
+    }
+
+    .spinner {
+        width: 60px;
+        height: 60px;
+        border-width: 5px;
+        margin-bottom: 20px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .logo {
+        font-size: 1.2rem;
+    }
+
+    .logo img {
+        width: 28px;
+    }
+
+    .analisis-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .analisis-header p {
+        font-size: 0.9rem;
+    }
+
+    .analisis-card {
+        padding: 20px 15px;
+        border-radius: 12px;
+    }
+
+    .form-section {
+        margin-bottom: 20px;
+    }
+
+    .section-title {
+        font-size: 0.95rem;
+    }
+
+    .form-col label {
+        font-size: 0.85rem;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="date"] {
+        padding: 10px 12px;
+        font-size: 0.85rem;
+        border-radius: 8px;
+    }
+
+    .tutorial-link-wrapper a {
+        font-size: 0.85rem;
+    }
+
+    .btn-submit-large {
+        padding: 12px;
+        font-size: 1rem;
+        border-radius: 10px;
+    }
+
+    .loading-text {
+        font-size: 1.5rem;
+    }
+
+    .loading-subtext {
+        font-size: 0.9rem;
+    }
+
+    .spinner {
+        width: 50px;
+        height: 50px;
+        border-width: 4px;
+        margin-bottom: 15px;
+    }
 }
 
 /* --- LOADING OVERLAY --- */

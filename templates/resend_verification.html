@@ -37,7 +37,7 @@
                         <input type="email" name="email" placeholder="Enter Your Email" required>
                     </div>
                 </div>
-                <button type="submit" class="btn-submit">KIRIM ULANG LINK</button>
+                <button type="submit" class="btn-submit" id="resendBtn">KIRIM ULANG LINK</button>
             </form>
 
             <div class="auth-footer">
@@ -45,5 +45,49 @@
             </div>
         </div>
     </div>
+
+    {% if lockout_seconds %}
+    <script>
+        let timeLeft = {{ lockout_seconds }};
+        const submitBtn = document.getElementById('resendBtn');
+        
+        // Nonaktifkan tombol
+        submitBtn.disabled = true;
+        submitBtn.style.backgroundColor = '#95a5a6';
+        submitBtn.style.cursor = 'not-allowed';
+
+        // Buat elemen alert baru
+        const flashContainer = document.querySelector('.auth-card');
+        const timerAlert = document.createElement('div');
+        timerAlert.className = 'flash error';
+        timerAlert.style.marginBottom = '20px';
+        flashContainer.insertBefore(timerAlert, flashContainer.firstChild);
+
+        const countdown = setInterval(() => {
+            if (timeLeft <= 0) {
+                clearInterval(countdown);
+                timerAlert.style.display = 'none';
+                submitBtn.disabled = false;
+                submitBtn.style.backgroundColor = 'var(--navy-dark)'; 
+                submitBtn.style.cursor = 'pointer';
+                submitBtn.innerHTML = 'KIRIM ULANG LINK';
+            } else {
+                // Kalkulasi Jam, Menit, Detik
+                let hours = Math.floor(timeLeft / 3600);
+                let minutes = Math.floor((timeLeft % 3600) / 60);
+                let seconds = timeLeft % 60;
+                
+                // Format teks (sembunyikan jam jika 0)
+                let timeString = hours > 0 ? 
+                    `${hours}j ${minutes}m ${seconds}s` : 
+                    `${minutes}m ${seconds}s`;
+                    
+                timerAlert.innerHTML = `⚠️ Batas limit tercapai. Coba lagi dalam <b>${timeString}</b>`;
+                submitBtn.innerHTML = `TUNGGU ${timeString}`;
+                timeLeft -= 1;
+            }
+        }, 1000);
+    </script>
+    {% endif %}
 </body>
 </html>

@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: moodify
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.9.18
+      - key: ENVIRONMENT
+        value: production
+      - key: FLASK_ENV
+        value: production

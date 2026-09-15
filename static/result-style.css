@@ -81,3 +81,156 @@ body { background-color: var(--bg-cream); color: var(--navy-dark); font-family: 
     .dashboard-container { grid-template-columns: 1fr; }
     .chart-card.full-width { grid-column: span 1; }
 }
+
+/* ========================================= 
+   MOBILE RESPONSIVE 
+   ========================================= */
+
+@media screen and (max-width: 768px) {
+    .navbar-pill {
+        flex-direction: column;
+        padding: 15px 20px;
+        border-radius: 25px;
+        gap: 15px;
+    }
+
+    .nav-links {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .nav-links li {
+        margin: 5px 8px;
+    }
+
+    .nav-links a {
+        font-size: 0.8rem;
+    }
+
+    .result-header {
+        margin: 20px auto;
+        padding: 0 15px;
+    }
+
+    .result-header h1 {
+        font-size: 2rem;
+    }
+
+    .result-header p {
+        font-size: 1rem;
+    }
+
+    .dashboard-container {
+        width: 95%;
+        margin: 0 auto 40px;
+        gap: 20px;
+    }
+
+    .chart-card {
+        padding: 20px;
+        border-radius: 15px;
+    }
+
+    .chart-title {
+        font-size: 1.3rem;
+    }
+
+    .chart-container {
+        height: 250px;
+    }
+
+    .tabs-header {
+        flex-direction: column;
+    }
+
+    .tab-btn {
+        padding: 12px;
+        font-size: 0.9rem;
+        border-bottom: 1px solid #B0B5C1;
+    }
+
+    .tab-btn.active {
+        border-bottom: 3px solid var(--navy-dark);
+        border-left: 3px solid var(--navy-dark);
+    }
+
+    .tab-content {
+        padding: 15px;
+    }
+
+    .tweet-table {
+        font-size: 0.8rem;
+    }
+
+    .tweet-table th,
+    .tweet-table td {
+        padding: 10px 8px;
+    }
+
+    .badge {
+        padding: 4px 8px;
+        font-size: 0.7rem;
+        min-width: 50px;
+    }
+
+    .pagination-controls {
+        gap: 10px;
+    }
+
+    .page-btn {
+        padding: 6px 15px;
+        font-size: 0.85rem;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .result-header h1 {
+        font-size: 1.6rem;
+    }
+
+    .result-header p {
+        font-size: 0.9rem;
+    }
+
+    .chart-card {
+        padding: 15px;
+        border-radius: 12px;
+    }
+
+    .chart-title {
+        font-size: 1.2rem;
+        margin-bottom: 15px;
+    }
+
+    .chart-container {
+        height: 220px;
+    }
+
+    .wordcloud-img {
+        max-height: 300px;
+    }
+
+    .table-wrapper {
+        font-size: 0.75rem;
+        overflow-x: scroll;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .tweet-table th,
+    .tweet-table td {
+        padding: 8px 6px;
+        white-space: nowrap;
+    }
+
+    .badge {
+        padding: 3px 6px;
+        font-size: 0.65rem;
+        min-width: 45px;
+    }
+
+    .btn-back {
+        padding: 8px 20px;
+        font-size: 0.85rem;
+    }
+}

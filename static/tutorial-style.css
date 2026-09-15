@@ -137,8 +137,106 @@ body {
 
 /* Responsive untuk layar kecil (HP) */
 @media (max-width: 768px) {
-    .step-card { flex-direction: column; padding: 30px; text-align: center; }
+    .navbar-pill {
+        flex-direction: column;
+        padding: 15px 20px;
+        border-radius: 25px;
+        gap: 15px;
+    }
+
+    .nav-links {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .nav-links li {
+        margin: 5px 8px;
+    }
+
+    .nav-links a {
+        font-size: 0.8rem;
+    }
+
+    .tutorial-header {
+        margin: 30px auto;
+        padding: 0 15px;
+    }
+
+    .tutorial-header h1 {
+        font-size: 2.2rem;
+    }
+
+    .tutorial-header p {
+        font-size: 1rem;
+    }
+
+    .tutorial-container {
+        width: 95%;
+        margin: 0 auto 40px;
+        gap: 20px;
+    }
+
+    .step-card { flex-direction: column; padding: 30px 20px; text-align: center; gap: 20px; }
+    
+    .step-text h2 {
+        font-size: 1.6rem;
+    }
+
+    .step-text p {
+        font-size: 0.9rem;
+    }
+
     .footer-content { flex-direction: column; gap: 30px; }
     .footer-left { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.2); padding-right: 0; padding-bottom: 30px; }
-    .footer-right { padding-left: 0; }
+    
+    .footer-left h2 {
+        font-size: 2rem;
+    }
+    
+    .footer-right { padding-left: 0; text-align: center; }
+}
+
+@media screen and (max-width: 480px) {
+    .logo {
+        font-size: 1.2rem;
+    }
+
+    .logo img {
+        width: 28px;
+    }
+
+    .tutorial-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .tutorial-header p {
+        font-size: 0.9rem;
+    }
+
+    .step-card {
+        padding: 25px 15px;
+        border-radius: 18px;
+    }
+
+    .step-text h2 {
+        font-size: 1.4rem;
+        margin-bottom: 10px;
+    }
+
+    .step-text p {
+        font-size: 0.85rem;
+    }
+
+    .step-image img {
+        border-radius: 8px;
+    }
+
+    .footer-navy {
+        padding: 40px 20px 30px;
+    }
+
+    .footer-left h2 {
+        font-size: 1.6rem;
+    }
 }

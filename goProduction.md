@@ -1,0 +1,1 @@
+1. Install Production Dependencies: pip install gunicorn psycopg2-binary python-dotenv

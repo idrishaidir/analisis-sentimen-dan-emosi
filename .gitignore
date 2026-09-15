@@ -2,11 +2,17 @@
 venv/
 
 # Folder
-tweets-data/
+# tweets-data/
+tweets-data/output/*.csv
 
 # alt
 kamus_gaul.csv
 
-app-old.py
-app-old2.py
 __pycache__/
+
+*.pyc
+.env
+cookies/
+*.pkl
+instance/
+*.db

@@ -269,3 +269,84 @@ input[type="number"] {
   border-top: 1px solid #eee;
   margin-top: 4rem;
 }
+
+/* ========================================= 
+   MOBILE RESPONSIVE 
+   ========================================= */
+
+@media screen and (max-width: 768px) {
+  .container-nav {
+    flex-direction: column;
+    padding: 0 15px;
+  }
+
+  .logo {
+    margin-bottom: 15px;
+  }
+
+  .nav-links {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+  }
+
+  .nav-links li {
+    margin: 0;
+  }
+
+  .analysis-container {
+    width: 95%;
+    margin: 2rem auto;
+    padding: 1.5rem;
+  }
+
+  .analysis-container h2 {
+    font-size: 1.8rem;
+  }
+
+  .analysis-container .subtitle {
+    font-size: 1rem;
+  }
+
+  input[type="text"],
+  input[type="date"],
+  input[type="number"] {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+  }
+
+  .tutorial-link {
+    font-size: 0.85rem;
+  }
+
+  .spinner {
+    width: 50px;
+    height: 50px;
+    border-width: 4px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .analysis-container {
+    margin: 1.5rem auto;
+    padding: 1rem;
+  }
+
+  .analysis-container h2 {
+    font-size: 1.5rem;
+  }
+
+  .form-group label,
+  .form-group-inline label {
+    font-size: 0.95rem;
+  }
+
+  .submit-link {
+    font-size: 1rem;
+    padding: 8px 16px;
+  }
+
+  .tutorial-link {
+    font-size: 0.8rem;
+  }
+}

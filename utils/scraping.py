@@ -3,6 +3,7 @@ import time
 import pandas as pd
 import re
 import urllib.parse
+import pickle
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -15,6 +16,48 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 from .preprocessing import preprocessText
 from .models import predict_sentimen, predict_emosi
+
+def save_cookies(driver, filename="x_cookies.pkl"):
+    """Save browser cookies to file for reuse"""
+    try:
+        cookies_dir = "cookies"
+        os.makedirs(cookies_dir, exist_ok=True)
+        cookie_path = os.path.join(cookies_dir, filename)
+        
+        with open(cookie_path, "wb") as file:
+            pickle.dump(driver.get_cookies(), file)
+        print(f"✅ Cookies saved to {cookie_path}")
+        return True
+    except Exception as e:
+        print(f"❌ Failed to save cookies: {e}")
+        return False
+
+def load_cookies(driver, filename="x_cookies.pkl"):
+    """Load browser cookies from file"""
+    try:
+        cookies_dir = "cookies"
+        cookie_path = os.path.join(cookies_dir, filename)
+        
+        if not os.path.exists(cookie_path):
+            print(f"⚠️ No saved cookies found at {cookie_path}")
+            return False
+            
+        with open(cookie_path, "rb") as file:
+            cookies = pickle.load(file)
+            
+        # Add saved cookies to current session
+        for cookie in cookies:
+            try:
+                driver.add_cookie(cookie)
+            except Exception:
+                pass  # Skip invalid cookies
+                
+        driver.refresh()
+        print(f"✅ Cookies loaded from {cookie_path}")
+        return True
+    except Exception as e:
+        print(f"❌ Failed to load cookies: {e}")
+        return False
 
 def analyze_sentiment_emotion(cleaned_path):
     try:
@@ -45,33 +88,28 @@ def scraping_tweets(keyword, limit=100, chrome_profile_path=None):
     
     safe_keyword = re.sub(r"[^\w\s-]", "", keyword).strip().replace(" ", "_")
     
-    print("🚀 Menginisiasi Selenium WebDriver...")
-    # Konfigurasi Chrome untuk mengurangi deteksi otomatisasi
+    print("\n\n🚀 Menginisiasi Selenium WebDriver...")
+    # Detect production vs local environment
+    is_production = os.getenv('ENVIRONMENT') == 'production'
+    
     options = webdriver.ChromeOptions()
-    # options.add_argument('--headless')
-    if chrome_profile_path:
-        options.add_argument(f"--user-data-dir={chrome_profile_path}")
-        # Gunakan profile Chrome yang sudah login agar browser nyata dipakai
-        options.add_argument('--profile-directory=Default')
-    options.add_argument('--disable-gpu')
-    options.add_argument('--window-size=1920,1080')
-    options.add_argument('--start-maximized')
-    options.add_argument('--no-sandbox')
-    options.add_argument('--disable-dev-shm-usage')
-    options.add_argument('--disable-blink-features=AutomationControlled')
-    options.add_argument('--disable-infobars')
-    options.add_argument('--disable-extensions')
-    options.add_argument('--disable-popup-blocking')
-    options.add_argument('--lang=en-US,en')
-    options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36')
-    options.add_experimental_option('excludeSwitches', ['enable-automation'])
-    options.add_experimental_option('useAutomationExtension', False)
-    options.add_experimental_option('prefs', {
-        'credentials_enable_service': False,
-        'profile.password_manager_enabled': False,
-        'intl.accept_languages': 'en-US,en'
-    })
-    options.add_argument('--log-level=3') # Sembunyikan log warning dari console
+    
+    # Production (Render server) configuration
+    if is_production:
+        print("🔧 Running in PRODUCTION mode (headless)")
+        options.add_argument('--headless=new')
+        options.add_argument('--no-sandbox')
+        options.add_argument('--disable-dev-shm-usage')
+        options.add_argument('--disable-gpu')
+        chrome_profile_path = None  # Don't use profile in production
+    else:
+        print("💻 Running in LOCAL development mode")
+        # Local development dengan Chrome profile
+        if chrome_profile_path:
+            options.add_argument(f"--user-data-dir={chrome_profile_path}")
+            options.add_argument('--profile-directory=Default')
+    
+    # Common options untuk production & local
 
     driver = None
     try:
@@ -108,29 +146,62 @@ def scraping_tweets(keyword, limit=100, chrome_profile_path=None):
         except Exception:
             pass
 
-        # 1. Buka Halaman Login X
-        print("🔐 Membuka halaman login X...")
+        print("\n🔐 Membuka halaman login X...")
         driver.get("https://x.com/i/flow/login")
+        time.sleep(3)
         
-        # --- LOGIN MANUAL ---
-        print("\n" + "!"*50)
-        print("⚠️ HARAP LOGIN SECARA MANUAL DI BROWSER YANG TERBUKA.")
-        print("Setelah berhasil login dan masuk ke beranda X,")
-        print("kembalilah ke terminal ini dan TEKAN ENTER untuk lanjut!")
-        print("!"*50 + "\n")
+        # Try to load saved cookies first
+        cookies_loaded = load_cookies(driver, "x_cookies.pkl")
         
-        # Program akan berhenti di sini sampai Anda menekan Enter
-        input("Tekan ENTER setelah login berhasil...")
+        if cookies_loaded:
+            print("✅ Cookies loaded! Checking if still logged in...")
+            time.sleep(2)
+            
+            # Verify if cookies are still valid
+            driver.get("https://x.com/home")
+            time.sleep(3)
+            
+            if "home" in driver.current_url:
+                print("✅ Login berhasil menggunakan saved cookies!")
+            else:
+                print("⚠️ Cookies expired atau invalid. Need manual login.")
+                cookies_loaded = False
+                driver.get("https://x.com/i/flow/login")
+                time.sleep(2)
         
-        # 5. Cek apakah sudah di beranda
+        # If cookies tidak ada atau expired, manual login
+        if not cookies_loaded:
+            print("\n" + "!"*50)
+            print("⚠️ HARAP LOGIN SECARA MANUAL DI BROWSER YANG TERBUKA.")
+            print("⚠️ Login ini hanya perlu dilakukan SEKALI.")
+            print("⚠️ Cookies akan disimpan untuk penggunaan berikutnya.")
+            print("!"*50 + "\n")
+            
+            print("⏳ Menunggu pengguna login via browser...")
+            
+            try:
+                WebDriverWait(driver, 300).until(
+                    EC.url_contains("x.com/home")
+                )
+                print("✅ Login berhasil!")
+                
+                # Save cookies untuk next time
+                save_cookies(driver, "x_cookies.pkl")
+                print("💾 Cookies disimpan untuk session berikutnya.")
+                
+                time.sleep(3)
+                
+            except TimeoutException:
+                print("❌ Waktu login habis (lebih dari 5 menit).")
+                driver.quit()
+                return False, "Waktu login habis. Silakan coba lagi."
+        
         print("✅ Melanjutkan proses scraping...")
         
-        # 6. Membuka Halaman Pencarian
         search_query = f"{keyword}"
         print(f"🔍 Mencari tweet: {search_query}")
         
         encoded_query = urllib.parse.quote_plus(search_query)
-        # Gunakan f=live agar hasil yang diambil adalah tweet terbaru (bukan yang populer saja)
         search_url = f"https://x.com/search?q={encoded_query}&src=typed_query&f=live"
         driver.get(search_url)
 
