@@ -24,7 +24,8 @@ img {
 /* Navbar Styles */
 /* =================================== */
 .navbar {
-  background-color: #5d001e; /* Warna maroon */
+  background-color: #5d001e;
+  /* Warna maroon */
   color: white;
   padding: 1rem 0;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
@@ -253,6 +254,7 @@ input[type="number"] {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
@@ -274,24 +276,45 @@ input[type="number"] {
    MOBILE RESPONSIVE 
    ========================================= */
 
+/* Tablet Landscape (max-width: 1024px) */
+@media screen and (max-width: 1024px) {
+  .container-nav {
+    width: 95%;
+  }
+
+  .nav-links a {
+    font-size: 0.9rem;
+  }
+
+  .analysis-container {
+    max-width: 650px;
+  }
+}
+
 @media screen and (max-width: 768px) {
   .container-nav {
     flex-direction: column;
     padding: 0 15px;
+    width: 100%;
   }
 
   .logo {
-    margin-bottom: 15px;
+    margin-bottom: 10px;
   }
 
   .nav-links {
     flex-wrap: wrap;
     justify-content: center;
-    gap: 15px;
+    gap: 12px;
   }
 
   .nav-links li {
-    margin: 0;
+    margin: 0 5px;
+  }
+
+  .nav-links a {
+    font-size: 0.85rem;
+    padding: 5px 0;
   }
 
   .analysis-container {
@@ -324,9 +347,30 @@ input[type="number"] {
     height: 50px;
     border-width: 4px;
   }
+
+  .footer {
+    padding: 1.5rem 0;
+  }
 }
 
 @media screen and (max-width: 480px) {
+  .logo {
+    font-size: 1.2rem;
+  }
+
+  .logo img {
+    width: 30px;
+    margin-right: 8px;
+  }
+
+  .nav-links {
+    gap: 10px;
+  }
+
+  .nav-links a {
+    font-size: 0.8rem;
+  }
+
   .analysis-container {
     margin: 1.5rem auto;
     padding: 1rem;
@@ -334,6 +378,12 @@ input[type="number"] {
 
   .analysis-container h2 {
     font-size: 1.5rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .analysis-container .subtitle {
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
   }
 
   .form-group label,
@@ -341,12 +391,56 @@ input[type="number"] {
     font-size: 0.95rem;
   }
 
+  input[type="text"],
+  input[type="date"],
+  input[type="number"] {
+    padding: 9px 10px;
+    font-size: 0.85rem;
+  }
+
   .submit-link {
     font-size: 1rem;
     padding: 8px 16px;
+    margin-top: 2rem;
   }
 
   .tutorial-link {
+    font-size: 0.8rem;
+  }
+
+  #loading-wrapper h3 {
+    font-size: 1.5rem;
+  }
+
+  #loading-wrapper p {
+    font-size: 1rem;
+  }
+
+  .spinner {
+    width: 45px;
+    height: 45px;
+    border-width: 3px;
+  }
+}
+
+/* Extra Small Mobile (max-width: 360px) */
+@media screen and (max-width: 360px) {
+  .logo {
+    font-size: 1.1rem;
+  }
+
+  .analysis-container {
+    padding: 0.8rem;
+  }
+
+  .analysis-container h2 {
+    font-size: 1.4rem;
+  }
+
+  input[type="text"],
+  input[type="date"],
+  input[type="number"] {
+    padding: 8px 8px;
     font-size: 0.8rem;
   }
 }

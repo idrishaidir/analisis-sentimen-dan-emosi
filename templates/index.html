@@ -10,41 +10,18 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='navbar-style.css') }}" />
 </head>
 
 <body>
-    <nav class="navbar-pill">
-        <a href="{{ url_for('index') }}" class="logo">
-            <img src="{{ url_for('static', filename='assets/logo.png') }}" alt="moodify Logo" /> moodify
-        </a>
-        <ul class="nav-links">
-            <li><a href="{{ url_for('index') }}" style="font-weight: 800;">Beranda</a></li>
-            <li><a href="{{ url_for('tutorial') }}">Panduan</a></li>
-
-            {% if current_user.is_authenticated %}
-            <li><a href="{{ url_for('analisis') }}">Analisis</a></li>
-            <li><a href="{{ url_for('history') }}">Riwayat</a></li>
-            {% endif %}
-        </ul>
-
-        <ul class="nav-links">
-            {% if current_user.is_authenticated %}
-            <li><span style="font-size: 0.85rem; color: var(--navy-dark); font-weight: 600;">Halo, {{
-                    current_user.username }}</span></li>
-            <li><a href="{{ url_for('logout') }}" class="nav-btn" style="border: 1px solid var(--navy-dark);"
-                    onclick="return confirm('Apakah kamu yakin ingin keluar dari akun ini?');">Log Out</a></li>
-            {% else %}
-            <li><a href="{{ url_for('login') }}" class="nav-btn outline">Masuk</a></li>
-            <li><a href="{{ url_for('register') }}" class="nav-btn">Buat Akun</a></li>
-            {% endif %}
-        </ul>
-    </nav>
+    {% set active_page = 'index' %}
+    {% include 'navbar.html' %}
 
     <section class="hero">
         <div class="hero-text">
             <h1>Every Text Has<br>A Voice</h1>
             <p>
-                <strong>Kata mereka apa sih? Tenang, kita bantu analisis—nggak sampai satu jam!</strong>
+                <strong>Kata mereka apa sih? Tenang, kita bantu analisis nggak sampai satu jam!</strong>
                 Cukup masukin kata kunci yang kamu penasaranin, dan biar Moodify yang bantu ngerangkum semuanya.
             </p>
             <a href="{{ url_for('analisis') }}" class="btn-primary">Let's go!</a>
@@ -112,6 +89,7 @@
             </div>
         </div>
     </footer>
+
 </body>
 
 </html>

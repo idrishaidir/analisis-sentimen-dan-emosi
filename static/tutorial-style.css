@@ -37,16 +37,58 @@ body {
     background-color: transparent;
 }
 
-.logo { display: flex; align-items: center; font-size: 1.5rem; font-weight: 700; color: var(--navy-dark); text-decoration: none; font-family: var(--font-body); }
-.logo img { width: 35px; margin-right: 10px; border-radius: 50%; }
+.logo {
+    display: flex;
+    align-items: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--navy-dark);
+    text-decoration: none;
+    font-family: var(--font-body);
+}
 
-.nav-links { list-style: none; display: flex; margin: 0; padding: 0; align-items: center; }
-.nav-links li { margin: 0 15px; }
-.nav-links a { color: var(--navy-dark); text-decoration: none; font-weight: 600; font-size: 0.9rem; text-transform: uppercase; transition: all 0.3s ease; }
-.nav-links a:hover { opacity: 0.7; }
+.logo img {
+    width: 35px;
+    margin-right: 10px;
+    border-radius: 50%;
+}
 
-.nav-btn { background-color: var(--navy-dark); color: var(--bg-cream) !important; padding: 8px 25px; border-radius: 30px; }
-.nav-btn.outline { background-color: transparent; color: var(--navy-dark) !important; }
+.nav-links {
+    list-style: none;
+    display: flex;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+}
+
+.nav-links li {
+    margin: 0 15px;
+}
+
+.nav-links a {
+    color: var(--navy-dark);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+}
+
+.nav-links a:hover {
+    opacity: 0.7;
+}
+
+.nav-btn {
+    background-color: var(--navy-dark);
+    color: var(--bg-cream) !important;
+    padding: 8px 25px;
+    border-radius: 30px;
+}
+
+.nav-btn.outline {
+    background-color: transparent;
+    color: var(--navy-dark) !important;
+}
 
 /* --- TUTORIAL HEADER --- */
 .tutorial-header {
@@ -89,7 +131,7 @@ body {
     gap: 40px;
     box-shadow: 0 10px 25px rgba(45, 50, 80, 0.1);
     /* Memberikan efek border tipis yang elegan */
-    border: 3px solid rgba(243, 239, 230, 0.1); 
+    border: 3px solid rgba(243, 239, 230, 0.1);
 }
 
 .step-text {
@@ -118,7 +160,7 @@ body {
     height: auto;
     border-radius: 12px;
     border: 2px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
 /* --- FOOTER --- */
@@ -130,31 +172,123 @@ body {
     border-radius: 40px 40px 0 0;
 }
 
-.footer-content { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; }
-.footer-left { flex: 1; border-right: 1px solid rgba(255,255,255,0.2); padding-right: 40px; }
-.footer-left h2 { font-family: var(--font-heading); font-size: 2.5rem; line-height: 1.2; margin: 0; }
-.footer-right { flex: 1; padding-left: 40px; display: flex; flex-direction: column; justify-content: flex-end; }
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+}
+
+.footer-left {
+    flex: 1;
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+    padding-right: 40px;
+}
+
+.footer-left h2 {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    line-height: 1.2;
+    margin: 0;
+}
+
+.footer-right {
+    flex: 1;
+    padding-left: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
 
 /* Responsive untuk layar kecil (HP) */
-@media (max-width: 768px) {
+/* Tablet Landscape (max-width: 1024px) */
+@media screen and (max-width: 1024px) {
     .navbar-pill {
-        flex-direction: column;
-        padding: 15px 20px;
-        border-radius: 25px;
-        gap: 15px;
-    }
-
-    .nav-links {
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 10px;
-    }
-
-    .nav-links li {
-        margin: 5px 8px;
+        width: 95%;
+        padding: 10px 25px;
     }
 
     .nav-links a {
+        font-size: 0.85rem;
+    }
+
+    .step-card {
+        padding: 35px;
+        gap: 35px;
+    }
+
+    .step-text h2 {
+        font-size: 1.8rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .navbar-pill {
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 15px 20px;
+        border-radius: 25px;
+        justify-content: space-between;
+        align-items: center;
+        width: 92%;
+    }
+
+    .hamburger {
+        display: block;
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: var(--navy-dark);
+        cursor: pointer;
+        padding: 5px;
+        flex: 0 0 auto;
+    }
+
+    .logo {
+        margin-bottom: 0;
+        flex: 0 0 auto;
+        font-size: 1.3rem;
+    }
+
+    .nav-menu {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        gap: 20px;
+        align-items: flex-start;
+        flex-basis: 100%;
+        margin-top: 15px;
+    }
+
+    .nav-menu.active {
+        display: flex;
+    }
+
+    .nav-links {
+        flex-direction: column;
+        gap: 12px;
+        width: 100%;
+        align-items: flex-start;
+    }
+
+    .nav-links li {
+        margin: 0;
+    }
+
+    .nav-links a {
+        font-size: 0.8rem;
+        padding: 5px 0;
+    }
+
+    .nav-user {
+        border-top: 1px solid rgba(45, 50, 80, 0.1);
+        padding-top: 12px;
+        margin-top: 12px;
+        width: 100%;
+    }
+
+    .nav-btn {
+        padding: 6px 20px;
         font-size: 0.8rem;
     }
 
@@ -165,6 +299,7 @@ body {
 
     .tutorial-header h1 {
         font-size: 2.2rem;
+        margin-bottom: 8px;
     }
 
     .tutorial-header p {
@@ -177,27 +312,64 @@ body {
         gap: 20px;
     }
 
-    .step-card { flex-direction: column; padding: 30px 20px; text-align: center; gap: 20px; }
-    
+    .step-card {
+        flex-direction: column;
+        padding: 30px 20px;
+        text-align: center;
+        gap: 20px;
+        border-radius: 20px;
+    }
+
     .step-text h2 {
         font-size: 1.6rem;
+        margin-bottom: 10px;
     }
 
     .step-text p {
         font-size: 0.9rem;
+        line-height: 1.5;
     }
 
-    .footer-content { flex-direction: column; gap: 30px; }
-    .footer-left { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.2); padding-right: 0; padding-bottom: 30px; }
-    
+    .step-image {
+        width: 100%;
+    }
+
+    .step-image img {
+        max-width: 100%;
+        height: auto;
+    }
+
+    .footer-content {
+        flex-direction: column;
+        gap: 30px;
+    }
+
+    .footer-left {
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        padding-right: 0;
+        padding-bottom: 30px;
+        text-align: center;
+    }
+
     .footer-left h2 {
         font-size: 2rem;
+        margin-bottom: 10px;
     }
-    
-    .footer-right { padding-left: 0; text-align: center; }
+
+    .footer-right {
+        padding-left: 0;
+        text-align: center;
+    }
 }
 
 @media screen and (max-width: 480px) {
+    .navbar-pill {
+        width: 90%;
+        padding: 12px 15px;
+        gap: 10px;
+    }
+
     .logo {
         font-size: 1.2rem;
     }
@@ -206,17 +378,40 @@ body {
         width: 28px;
     }
 
+    .nav-links a {
+        font-size: 0.75rem;
+        padding: 4px 8px;
+    }
+
+    .nav-btn {
+        padding: 5px 15px;
+        font-size: 0.75rem;
+    }
+
+    .tutorial-header {
+        margin: 25px auto;
+        padding: 0 15px;
+    }
+
     .tutorial-header h1 {
         font-size: 1.8rem;
+        margin-bottom: 8px;
     }
 
     .tutorial-header p {
         font-size: 0.9rem;
+        line-height: 1.4;
+    }
+
+    .tutorial-container {
+        width: 95%;
+        gap: 15px;
     }
 
     .step-card {
         padding: 25px 15px;
         border-radius: 18px;
+        gap: 15px;
     }
 
     .step-text h2 {
@@ -226,17 +421,51 @@ body {
 
     .step-text p {
         font-size: 0.85rem;
+        line-height: 1.4;
     }
 
     .step-image img {
         border-radius: 8px;
+        max-height: 250px;
     }
 
     .footer-navy {
         padding: 40px 20px 30px;
+        margin-top: 50px;
     }
 
     .footer-left h2 {
         font-size: 1.6rem;
+    }
+
+    .footer-right p {
+        font-size: 0.85rem;
+    }
+}
+
+/* Extra Small Mobile (max-width: 360px) */
+@media screen and (max-width: 360px) {
+    .navbar-pill {
+        padding: 10px 12px;
+    }
+
+    .tutorial-header h1 {
+        font-size: 1.6rem;
+    }
+
+    .step-card {
+        padding: 20px 12px;
+    }
+
+    .step-text h2 {
+        font-size: 1.2rem;
+    }
+
+    .step-text p {
+        font-size: 0.8rem;
+    }
+
+    .footer-left h2 {
+        font-size: 1.5rem;
     }
 }

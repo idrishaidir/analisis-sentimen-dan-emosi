@@ -52,8 +52,8 @@ app.config['REMEMBER_COOKIE_DURATION'] = timedelta(days=7)
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = [EMAIL_ADDRESS]'
-app.config['MAIL_PASSWORD'] = 'kentang'
+app.config['MAIL_USERNAME'] = 'kentang@gmail.com'
+app.config['MAIL_PASSWORD'] = 'kentangtintung'
 mail = Mail(app)
 
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:@localhost/moodify_db'
@@ -595,84 +595,3 @@ if __name__ == "__main__":
     print("📂 Current working directory:", os.getcwd())
     print("📄 File path:", os.path.abspath(__file__))
     app.run(debug=True)
-
-@app.route("/forgot-password", methods=["GET", "POST"])
-def forgot_password():
-    if request.method == "POST":
-        email = request.form.get("email")
-        user = User.query.filter_by(email=email).first()
-
-        if not user:
-            flash("❌ Email tidak terdaftar dalam sistem!", "error")
-            return redirect(url_for("forgot_password"))
-
-        token = secrets.token_hex(16)
-        user.reset_token = token
-        db.session.commit()
-
-        msg = Message('Reset password akun moodify kamu 🗝️', 
-                    sender='noreply@moodify.com', 
-                    recipients=[email])
-
-        link = url_for('reset_password', token=token, _external=True)
-
-        msg.html = f"""
-        <div style="font-family: 'Poppins', Arial, sans-serif; background-color: #F3EFE6; padding: 40px 20px;">
-            <div style="max-width: 600px; margin: auto; background-color: #ffffff; border: 1px solid #B0B5C1; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(45, 50, 80, 0.05);">
-                
-                <div style="background-color: #2D3250; padding: 30px; text-align: center;">
-                    <h1 style="font-family: 'Playfair Display', Georgia, serif; color: #F3EFE6; margin: 0; font-size: 28px; font-weight: 700;">moodify</h1>
-                </div>
-                
-                <div style="padding: 40px 30px; color: #2D3250; line-height: 1.6;">
-                    <p style="font-size: 18px; font-weight: 600;">Hii, {user.username}! 👋</p>
-                    <p>Ada permintaan untuk mereset password akun <b>moodify</b> kamu nih. Kalau ini memang kamu, silakan klik tombol di bawah untuk membuat password baru ya.</p>
-                    
-                    <div style="text-align: center; margin: 40px 0;">
-                        <a href="{link}" style="background-color: #2D3250; color: #F3EFE6; padding: 15px 30px; text-decoration: none; border-radius: 30px; font-weight: 600; display: inline-block;">
-                            Atur Ulang Password 🛠️
-                        </a>
-                    </div>
-                    
-                    <p style="font-size: 14px; color: #666;">Kalau kamu merasa tidak meminta ini, abaikan saja email ini ya. Keamanan akunmu lowkey tetap aman kok. 😉</p>
-                    <p style="font-size: 14px; color: #666;">Atau copas link ini ke browser:<br>
-                    <a href="{link}" style="color: #2D3250; font-weight: 600; word-break: break-all;">{link}</a></p>
-                    
-                    <hr style="border: 0; border-top: 1px solid #B0B5C1; margin: 30px 0;">
-                    
-                    <p style="font-size: 12px; color: #888; text-align: center; margin: 0;">
-                        dikirim oleh tim moodify dengan penuh perhatian 🕊️<br>
-                        &copy; 2026 moodify, Inc.
-                    </p>
-                </div>
-            </div>
-        </div>
-        """
-        mail.send(msg)
-
-        flash("📧 Link reset password telah dikirim ke email kamu. Silakan periksa inbox/spam!", "success")
-        return redirect(url_for("login"))
-
-    return render_template("forgot_password.html")
-
-
-@app.route("/reset-password/<token>", methods=["GET", "POST"])
-def reset_password(token):
-    user = User.query.filter_by(reset_token=token).first()
-    
-    if not user:
-        flash("⚠️ Token reset tidak valid atau sudah kadaluarsa.", "error")
-        return redirect(url_for("login"))
-
-    if request.method == "POST":
-        password_baru = request.form.get("password")
-        
-        hashed_pw = generate_password_hash(password_baru, method='pbkdf2:sha256')
-        user.password = hashed_pw
-        user.reset_token = None 
-        db.session.commit()
-
-        flash("🎉 Password berhasil diperbarui! Silakan login dengan password baru.", "success")
-        return redirect(url_for("login"))
-
-    return render_template("reset_password.html", token=token)

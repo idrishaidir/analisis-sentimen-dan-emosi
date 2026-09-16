@@ -46,6 +46,10 @@ body {
 
 .logo img { width: 35px; margin-right: 10px; border-radius: 50%; }
 
+.hamburger {
+    display: none;
+}
+
 .nav-links {
     list-style: none;
     display: flex;
@@ -278,27 +282,104 @@ body {
    MOBILE RESPONSIVE 
    ========================================= */
 
+/* Tablet Landscape (max-width: 1024px) */
+@media screen and (max-width: 1024px) {
+    .navbar-pill {
+        width: 95%;
+        padding: 10px 25px;
+    }
+
+    .nav-links a {
+        font-size: 0.85rem;
+    }
+
+    .hero {
+        padding: 0 25px;
+        margin: 50px auto;
+    }
+
+    .hero-text h1 {
+        font-size: 3.5rem;
+    }
+
+    .about-content {
+        gap: 40px;
+    }
+
+    .features-card {
+        padding: 50px 40px;
+    }
+}
+
 /* Tablet & Mobile (max-width: 768px) */
 @media screen and (max-width: 768px) {
     /* Navbar */
     .navbar-pill {
-        flex-direction: column;
+        flex-direction: row;
+        flex-wrap: wrap;
         padding: 15px 20px;
         border-radius: 25px;
-        gap: 15px;
+        justify-content: space-between;
+        align-items: center;
+        width: 92%;
+    }
+
+    .hamburger {
+        display: block;
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: var(--navy-dark);
+        cursor: pointer;
+        padding: 5px;
+        flex: 0 0 auto;
+    }
+
+    .logo {
+        margin-bottom: 0;
+        flex: 0 0 auto;
+        font-size: 1.3rem;
+    }
+
+    .nav-menu {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        gap: 20px;
+        align-items: flex-start;
+        flex-basis: 100%;
+        margin-top: 15px;
+    }
+
+    .nav-menu.active {
+        display: flex;
     }
 
     .nav-links {
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 10px;
+        flex-direction: column;
+        gap: 12px;
+        width: 100%;
+        align-items: flex-start;
     }
 
     .nav-links li {
-        margin: 5px 8px;
+        margin: 0;
     }
 
     .nav-links a {
+        font-size: 0.8rem;
+        padding: 5px 0;
+    }
+
+    .nav-user {
+        border-top: 1px solid rgba(45, 50, 80, 0.1);
+        padding-top: 12px;
+        margin-top: 12px;
+        width: 100%;
+    }
+
+    .nav-btn {
+        padding: 6px 20px;
         font-size: 0.8rem;
     }
 
@@ -314,29 +395,36 @@ body {
     .hero-text {
         padding-right: 0;
         margin-bottom: 30px;
+        max-width: 100%;
     }
 
     .hero-text h1 {
         font-size: 2.5rem;
         line-height: 1.2;
+        margin-bottom: 15px;
     }
 
     .hero-text p {
-        font-size: 0.95rem;
+        font-size: 0.9rem;
+        max-width: 100%;
+        line-height: 1.7;
     }
 
     .hero-image {
         width: 100%;
         max-width: 350px;
+        text-align: center;
     }
 
     /* About Section */
     .about-section {
         padding: 40px 20px;
+        margin: 60px auto;
     }
 
     .about-title {
         font-size: 2rem;
+        margin-bottom: 35px;
     }
 
     .about-content {
@@ -346,19 +434,31 @@ body {
 
     .about-image {
         max-width: 100%;
+        padding: 30px;
+    }
+
+    .about-image::before {
+        display: none; /* Hide decorative element on mobile */
+    }
+
+    .about-text {
+        font-size: 0.9rem;
+        text-align: left;
     }
 
     .about-text p {
-        font-size: 0.95rem;
+        font-size: 0.9rem;
+        margin-bottom: 15px;
     }
 
     /* Features Section */
     .features-section {
         padding: 40px 20px;
+        margin: 60px auto;
     }
 
     .features-card {
-        padding: 40px 25px;
+        padding: 35px 20px;
         border-radius: 20px;
     }
 
@@ -369,18 +469,27 @@ body {
 
     .features-grid {
         flex-direction: column;
-        gap: 30px;
+        gap: 25px;
+    }
+
+    .feature-number {
+        font-size: 1.8rem;
+    }
+
+    .feature-desc {
+        font-size: 0.9rem;
     }
 
     /* Footer */
     .footer-navy {
         padding: 40px 20px 30px;
         margin-top: 60px;
+        border-radius: 30px 30px 0 0;
     }
 
     .footer-content {
         flex-direction: column;
-        gap: 30px;
+        gap: 25px;
     }
 
     .footer-left {
@@ -388,6 +497,7 @@ body {
         border-bottom: 1px solid rgba(255,255,255,0.2);
         padding-right: 0;
         padding-bottom: 20px;
+        text-align: center;
     }
 
     .footer-left h2 {
@@ -402,6 +512,12 @@ body {
 
 /* Mobile Small (max-width: 480px) */
 @media screen and (max-width: 480px) {
+    .navbar-pill {
+        width: 90%;
+        padding: 12px 15px;
+        gap: 10px;
+    }
+
     .logo {
         font-size: 1.2rem;
     }
@@ -410,28 +526,110 @@ body {
         width: 28px;
     }
 
+    .nav-links a {
+        font-size: 0.75rem;
+        padding: 4px 8px;
+    }
+
+    .nav-btn {
+        padding: 5px 15px;
+        font-size: 0.75rem;
+    }
+
+    .hero {
+        margin: 20px auto;
+        padding: 0 15px;
+    }
+
     .hero-text h1 {
         font-size: 2rem;
+        margin-bottom: 12px;
+    }
+
+    .hero-text p {
+        font-size: 0.85rem;
+        line-height: 1.6;
     }
 
     .btn-primary {
-        padding: 12px 30px;
-        font-size: 0.95rem;
+        padding: 10px 25px;
+        font-size: 0.9rem;
+    }
+
+    .about-section {
+        padding: 30px 15px;
+        margin: 40px auto;
     }
 
     .about-title {
-        font-size: 1.8rem;
+        font-size: 1.7rem;
+        margin-bottom: 25px;
+    }
+
+    .about-image {
+        padding: 20px;
+        border-radius: 30px;
+    }
+
+    .about-text {
+        font-size: 0.85rem;
+    }
+
+    .about-text p {
+        font-size: 0.85rem;
+        margin-bottom: 12px;
+    }
+
+    .features-section {
+        padding: 30px 15px;
+        margin: 40px auto;
+    }
+
+    .features-card {
+        padding: 25px 15px;
+        border-radius: 15px;
     }
 
     .features-title {
         font-size: 1.5rem;
+        margin-bottom: 25px;
     }
 
     .feature-number {
-        font-size: 1.8rem;
+        font-size: 1.6rem;
+        margin-bottom: 10px;
+    }
+
+    .feature-desc {
+        font-size: 0.85rem;
+        line-height: 1.4;
+    }
+
+    .footer-navy {
+        padding: 30px 15px 25px;
+        margin-top: 40px;
     }
 
     .footer-left h2 {
         font-size: 1.6rem;
+    }
+
+    .footer-right p {
+        font-size: 0.8rem;
+    }
+}
+
+/* Extra Small Mobile (max-width: 360px) */
+@media screen and (max-width: 360px) {
+    .navbar-pill {
+        padding: 10px 12px;
+    }
+
+    .hero-text h1 {
+        font-size: 1.8rem;
+    }
+
+    .about-title, .features-title {
+        font-size: 1.5rem;
     }
 }

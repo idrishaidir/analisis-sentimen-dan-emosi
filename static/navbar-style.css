@@ -1,0 +1,250 @@
+/* =========================================
+   NAVBAR GLOBAL STYLES
+   ========================================= */
+.navbar-pill {
+    margin: 20px auto;
+    width: 95%;
+    max-width: 1200px;
+    border: 1px solid var(--navy-dark, #2D3250);
+    border-radius: 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 30px;
+    box-sizing: border-box;
+    background-color: transparent;
+    z-index: 1000;
+    position: relative;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--navy-dark, #2D3250);
+    text-decoration: none;
+    font-family: var(--font-body, "Poppins", sans-serif);
+    white-space: nowrap;
+}
+
+.logo img {
+    width: 35px;
+    margin-right: 10px;
+    border-radius: 50%;
+}
+
+.hamburger {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--navy-dark, #2D3250);
+    cursor: pointer;
+    padding: 5px;
+}
+
+.nav-menu {
+    display: flex;
+    align-items: center;
+    flex: 1;
+}
+
+.nav-menu>.nav-links:first-child {
+    margin: 0 auto;
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+    gap: 15px;
+}
+
+.nav-links li {
+    margin: 0;
+}
+
+.nav-links a {
+    color: var(--navy-dark, #2D3250);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    transition: 0.3s;
+}
+
+.nav-links a:hover {
+    opacity: 0.7;
+}
+
+.nav-links a.active {
+    font-weight: 800;
+}
+
+.user-greet {
+    font-size: 0.85rem;
+    color: var(--navy-dark, #2D3250);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.nav-links a.nav-btn,
+.nav-btn {
+    background-color: var(--navy-dark, #2D3250);
+    color: var(--bg-cream, #F3EFE6) !important;
+    padding: 8px 25px !important;
+    border-radius: 30px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.nav-links a.nav-btn.outline,
+.nav-btn.outline {
+    background-color: transparent;
+    color: var(--navy-dark, #2D3250) !important;
+    border: 1px solid var(--navy-dark, #2D3250);
+}
+
+/* =========================================
+   MOBILE RESPONSIVE NAVBAR
+   ========================================= */
+
+@media screen and (max-width: 1024px) {
+    .navbar-pill {
+        width: 95%;
+        padding: 10px 25px;
+    }
+
+    .nav-links a {
+        font-size: 0.85rem;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .navbar-pill {
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 15px 20px;
+        border-radius: 25px;
+        justify-content: space-between;
+        align-items: center;
+        width: 92%;
+    }
+
+    .logo {
+        margin-bottom: 0;
+        flex: 0 0 auto;
+        font-size: 1.3rem;
+    }
+
+    .hamburger {
+        display: block;
+        flex: 0 0 auto;
+    }
+
+    .nav-menu {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        gap: 20px;
+        align-items: flex-start;
+        flex-basis: 100%;
+        margin-top: 15px;
+        justify-content: flex-start;
+    }
+
+    .nav-menu.active {
+        display: flex;
+    }
+
+    .nav-menu>.nav-links:first-child {
+        margin: 0;
+    }
+
+    .nav-links {
+        flex-direction: column;
+        gap: 12px;
+        width: 100%;
+        align-items: flex-start;
+    }
+
+    .nav-links li {
+        margin: 0;
+    }
+
+    .nav-links a {
+        font-size: 1.1rem;
+        padding: 8px 0;
+    }
+
+    .nav-user {
+        border-top: 1px solid rgba(45, 50, 80, 0.1);
+        padding-top: 12px;
+        margin-top: 12px;
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .user-greet {
+        font-size: 1rem;
+        padding-bottom: 5px;
+    }
+
+    .nav-btn {
+        padding: 8px 25px;
+        font-size: 1rem;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .navbar-pill {
+        width: 90%;
+        padding: 12px 15px;
+        gap: 10px;
+    }
+
+    .logo {
+        font-size: 1.2rem;
+    }
+
+    .logo img {
+        width: 28px;
+    }
+
+    .nav-links a {
+        font-size: 0.95rem;
+    }
+
+    .nav-btn {
+        padding: 6px 18px;
+        font-size: 0.9rem;
+    }
+
+    .logo {
+        font-size: 1.2rem;
+    }
+
+    .logo img {
+        width: 28px;
+    }
+
+    .nav-links a {
+        font-size: 0.75rem;
+    }
+
+    /* .nav-btn {
+        padding: 5px 15px;
+        font-size: 0.75rem;
+    } */
+}
+
+@media screen and (max-width: 360px) {
+    .navbar-pill {
+        padding: 10px 12px;
+    }
+}

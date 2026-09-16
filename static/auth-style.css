@@ -211,26 +211,58 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
    MOBILE RESPONSIVE 
    ========================================= */
 
+/* Tablet Landscape (max-width: 1024px) */
+@media screen and (max-width: 1024px) {
+    .navbar-pill {
+        width: 95%;
+        padding: 10px 25px;
+    }
+
+    .nav-links a {
+        font-size: 0.85rem;
+    }
+
+    .auth-card {
+        max-width: 450px;
+    }
+}
+
 @media screen and (max-width: 768px) {
     .navbar-pill {
         flex-direction: column;
         padding: 15px 20px;
         border-radius: 25px;
-        gap: 15px;
+        gap: 12px;
+        width: 92%;
+    }
+
+    .logo {
+        margin-bottom: 5px;
     }
 
     .nav-links {
         flex-wrap: wrap;
         justify-content: center;
-        gap: 10px;
+        gap: 8px;
+        width: 100%;
     }
 
     .nav-links li {
-        margin: 5px 8px;
+        margin: 3px 6px;
     }
 
     .nav-links a {
         font-size: 0.8rem;
+        padding: 5px 10px;
+    }
+
+    .nav-btn {
+        padding: 6px 20px;
+        font-size: 0.8rem;
+    }
+
+    .auth-wrapper {
+        padding: 15px 0;
     }
 
     .auth-card {
@@ -241,6 +273,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
 
     .form-group label {
         font-size: 0.85rem;
+        margin-bottom: 6px;
     }
 
     .input-wrapper input {
@@ -255,16 +288,42 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
 
     .auth-footer {
         font-size: 0.8rem;
+        margin-top: 12px;
+    }
+
+    .flash-wrapper {
+        max-width: 90%;
+    }
+
+    .flash {
+        font-size: 0.8rem;
+        padding: 10px;
     }
 }
 
 @media screen and (max-width: 480px) {
+    .navbar-pill {
+        width: 90%;
+        padding: 12px 15px;
+        gap: 10px;
+    }
+
     .logo {
         font-size: 1.2rem;
     }
 
     .logo img {
         width: 28px;
+    }
+
+    .nav-links a {
+        font-size: 0.75rem;
+        padding: 4px 8px;
+    }
+
+    .nav-btn {
+        padding: 5px 15px;
+        font-size: 0.75rem;
     }
 
     .auth-card {
@@ -277,8 +336,42 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
         margin-bottom: 15px;
     }
 
+    .form-group label {
+        font-size: 0.8rem;
+    }
+
     .input-wrapper input {
         padding: 9px 12px;
         font-size: 0.8rem;
+    }
+
+    .btn-submit {
+        padding: 9px;
+        font-size: 0.9rem;
+    }
+
+    .auth-footer {
+        font-size: 0.75rem;
+    }
+
+    .flash {
+        font-size: 0.75rem;
+        padding: 8px;
+    }
+}
+
+/* Extra Small Mobile (max-width: 360px) */
+@media screen and (max-width: 360px) {
+    .navbar-pill {
+        padding: 10px 12px;
+    }
+
+    .auth-card {
+        padding: 20px 12px;
+    }
+
+    .input-wrapper input {
+        padding: 8px 10px;
+        font-size: 0.75rem;
     }
 }

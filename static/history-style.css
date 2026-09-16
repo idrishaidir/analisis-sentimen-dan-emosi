@@ -39,6 +39,8 @@ body {
 .logo { display: flex; align-items: center; font-size: 1.5rem; font-weight: 700; color: var(--navy-dark); text-decoration: none; }
 .logo img { width: 35px; margin-right: 10px; border-radius: 50%; }
 
+.hamburger { display: none; }
+
 .nav-links { list-style: none; display: flex; margin: 0; padding: 0; align-items: center; }
 .nav-links li { margin: 0 15px; }
 .nav-links a { color: var(--navy-dark); text-decoration: none; font-weight: 600; font-size: 0.9rem; text-transform: uppercase; transition: 0.3s; }
@@ -208,26 +210,93 @@ body {
 .flash.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
 .flash.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
 
-/* Responsive */
-@media (max-width: 768px) {
+/* ========================================= 
+   MOBILE RESPONSIVE 
+   ========================================= */
+
+/* Tablet Landscape (max-width: 1024px) */
+@media screen and (max-width: 1024px) {
     .navbar-pill {
-        flex-direction: column;
-        padding: 15px 20px;
-        border-radius: 25px;
-        gap: 15px;
-    }
-
-    .nav-links {
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 10px;
-    }
-
-    .nav-links li {
-        margin: 5px 8px;
+        width: 95%;
+        padding: 10px 25px;
     }
 
     .nav-links a {
+        font-size: 0.85rem;
+    }
+
+    .history-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .navbar-pill {
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 15px 20px;
+        border-radius: 25px;
+        justify-content: space-between;
+        align-items: center;
+        width: 92%;
+    }
+
+    .hamburger {
+        display: block;
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: var(--navy-dark);
+        cursor: pointer;
+        padding: 5px;
+        flex: 0 0 auto;
+    }
+
+    .logo {
+        margin-bottom: 0;
+        flex: 0 0 auto;
+        font-size: 1.3rem;
+    }
+
+    .nav-menu {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        gap: 20px;
+        align-items: flex-start;
+        flex-basis: 100%;
+        margin-top: 15px;
+    }
+
+    .nav-menu.active {
+        display: flex;
+    }
+
+    .nav-links {
+        flex-direction: column;
+        gap: 12px;
+        width: 100%;
+        align-items: flex-start;
+    }
+
+    .nav-links li {
+        margin: 0;
+    }
+
+    .nav-links a {
+        font-size: 0.8rem;
+        padding: 5px 0;
+    }
+
+    .nav-user {
+        border-top: 1px solid rgba(45, 50, 80, 0.1);
+        padding-top: 12px;
+        margin-top: 12px;
+        width: 100%;
+    }
+
+    .nav-btn {
+        padding: 6px 20px;
         font-size: 0.8rem;
     }
 
@@ -259,41 +328,58 @@ body {
         border-radius: 15px;
     }
 
-    .card-header h3 {
+    .history-keyword {
         font-size: 1.3rem;
+        margin-bottom: 12px;
     }
 
-    .card-info {
-        font-size: 0.85rem;
+    .history-meta {
+        font-size: 0.8rem;
+        margin-bottom: 20px;
     }
 
-    .card-footer {
-        flex-direction: column;
-        gap: 10px;
+    .card-actions {
+        gap: 8px;
     }
 
     .btn-view, .btn-delete {
-        width: 100%;
-        text-align: center;
-        padding: 10px;
+        padding: 9px;
         font-size: 0.85rem;
     }
 
-    .empty-state h2 {
-        font-size: 1.8rem;
+    .empty-state {
+        padding: 40px 20px;
+        border-radius: 15px;
+    }
+
+    .empty-state h3 {
+        font-size: 1.6rem;
+        margin-bottom: 8px;
     }
 
     .empty-state p {
-        font-size: 1rem;
+        font-size: 0.9rem;
+        margin-bottom: 20px;
     }
 
-    .btn-primary {
+    .btn-outline-navy {
         padding: 10px 25px;
         font-size: 0.9rem;
+    }
+
+    .flash {
+        font-size: 0.85rem;
+        padding: 12px;
     }
 }
 
 @media screen and (max-width: 480px) {
+    .navbar-pill {
+        width: 90%;
+        padding: 12px 15px;
+        gap: 10px;
+    }
+
     .logo {
         font-size: 1.2rem;
     }
@@ -302,8 +388,19 @@ body {
         width: 28px;
     }
 
+    .nav-links a {
+        font-size: 0.75rem;
+        padding: 4px 8px;
+    }
+
+    .nav-btn {
+        padding: 5px 15px;
+        font-size: 0.75rem;
+    }
+
     .history-header h1 {
         font-size: 1.8rem;
+        margin-bottom: 8px;
     }
 
     .history-header p {
@@ -315,30 +412,84 @@ body {
         border-radius: 12px;
     }
 
-    .card-header h3 {
+    .history-keyword {
         font-size: 1.2rem;
     }
 
-    .card-info {
+    .history-meta {
+        font-size: 0.75rem;
+        gap: 6px;
+    }
+
+    .history-meta span {
+        gap: 5px;
+    }
+
+    .history-meta i {
+        width: 14px;
+    }
+
+    .btn-view, .btn-delete {
+        width: 100%;
+        text-align: center;
+        padding: 8px;
         font-size: 0.8rem;
+    }
+
+    .card-actions {
+        flex-direction: column;
         gap: 8px;
     }
 
-    .info-badge {
-        padding: 5px 10px;
-        font-size: 0.75rem;
+    .btn-view {
+        flex: 1;
     }
 
-    .empty-state h2 {
+    .btn-delete {
+        flex: 1;
+    }
+
+    .empty-state {
+        padding: 30px 15px;
+        border-radius: 12px;
+    }
+
+    .empty-state h3 {
         font-size: 1.5rem;
+        margin-bottom: 8px;
     }
 
     .empty-state p {
-        font-size: 0.9rem;
+        font-size: 0.85rem;
+        margin-bottom: 15px;
     }
 
-    .btn-primary {
+    .btn-outline-navy {
         padding: 8px 20px;
         font-size: 0.85rem;
+    }
+
+    .flash {
+        font-size: 0.8rem;
+        padding: 10px;
+    }
+}
+
+/* Extra Small Mobile (max-width: 360px) */
+@media screen and (max-width: 360px) {
+    .navbar-pill {
+        padding: 10px 12px;
+    }
+
+    .history-header h1 {
+        font-size: 1.6rem;
+    }
+
+    .history-keyword {
+        font-size: 1.1rem;
+    }
+
+    .empty-state h3 {
+        font-size: 1.4rem;
     }
 }

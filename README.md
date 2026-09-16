@@ -123,8 +123,10 @@ Ada dua file yang **wajib** Anda periksa:
 ### 6. Jalankan Aplikasi
 
 Setelah semua dependensi terinstal dan konfigurasi selesai, jalankan aplikasi Flask:
+> ini cara menjalankan sistem untuk development
 
 ```bash
+$env:ENVIRONMENT="development"
 flask run
 ```
 

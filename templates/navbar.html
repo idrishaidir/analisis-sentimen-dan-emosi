@@ -1,0 +1,60 @@
+<nav class="navbar-pill">
+    <a href="{{ url_for('index') }}" class="logo">
+        <img src="{{ url_for('static', filename='assets/logo.png') }}" alt="moodify Logo" /> moodify
+    </a>
+
+    <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div class="nav-menu" id="navMenu">
+        <ul class="nav-links">
+            <li><a href="{{ url_for('index') }}" {% if active_page=='index' %}class="active" {% endif %}>Beranda</a>
+            </li>
+            <li><a href="{{ url_for('tutorial') }}" {% if active_page=='tutorial' %}class="active" {% endif
+                    %}>Panduan</a></li>
+            {% if current_user.is_authenticated %}
+            <li><a href="{{ url_for('analisis') }}" {% if active_page=='analisis' %}class="active" {% endif
+                    %}>Analisis</a></li>
+            <li><a href="{{ url_for('history') }}" {% if active_page=='history' %}class="active" {% endif %}>Riwayat</a>
+            </li>
+            {% endif %}
+        </ul>
+        <ul class="nav-links nav-user">
+            {% if current_user.is_authenticated %}
+            <li><span class="user-greet">Halo, {{ current_user.username }}</span></li>
+            <li><a href="{{ url_for('logout') }}" class="nav-btn"
+                    onclick="return confirm('Apakah kamu yakin ingin keluar dari akun ini?');">Log Out</a></li>
+            {% else %}
+            <li><a href="{{ url_for('login') }}" class="nav-btn outline">Masuk</a></li>
+            <li><a href="{{ url_for('register') }}" class="nav-btn">Buat Akun</a></li>
+            {% endif %}
+        </ul>
+    </div>
+</nav>
+
+<script>
+    // Hanya inisialisasi jika hamburger btn dan nav menu ditemukan di halaman
+    document.addEventListener("DOMContentLoaded", function () {
+        const hamburgerBtn = document.getElementById("hamburgerBtn");
+        const navMenu = document.getElementById("navMenu");
+
+        if (hamburgerBtn && navMenu) {
+            hamburgerBtn.addEventListener("click", function () {
+                navMenu.classList.toggle("active");
+                hamburgerBtn.innerHTML = navMenu.classList.contains("active")
+                    ? '<i class="fas fa-times"></i>'
+                    : '<i class="fas fa-bars"></i>';
+            });
+
+            // Opsional: Tutup menu ketika sebuah link diklik
+            const navLinks = navMenu.querySelectorAll("a");
+            navLinks.forEach(link => {
+                link.addEventListener("click", function () {
+                    navMenu.classList.remove("active");
+                    hamburgerBtn.innerHTML = '<i class="fas fa-bars"></i>';
+                });
+            });
+        }
+    });
+</script>
