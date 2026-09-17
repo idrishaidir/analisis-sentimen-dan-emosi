@@ -1,41 +1,86 @@
-import torch
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
+import os
+import time
+import requests
 
-print("🔍 Loading models...")
-# Model sentimen dan emosi
+print("Loading models configuration via HF Inference API...")
 sentiment_model_name = "Ha1dir/sentimen-indobert"
 emotion_model_name = "Ha1dir/emosi-indobert"
 
-# Memuat model dan tokenizer
-tokenizer_sen = AutoTokenizer.from_pretrained(sentiment_model_name)
-model_sen = AutoModelForSequenceClassification.from_pretrained(sentiment_model_name)
-tokenizer_emo = AutoTokenizer.from_pretrained(emotion_model_name)
-model_emo = AutoModelForSequenceClassification.from_pretrained(emotion_model_name)
-print("✅ Models loaded successfully!")
+HF_TOKEN = os.getenv("HF_TOKEN")
+API_URL_SEN = f"https://api-inference.huggingface.co/models/{sentiment_model_name}"
+API_URL_EMO = f"https://api-inference.huggingface.co/models/{emotion_model_name}"
+
+def query_hf_api(url, payload, retries=3):
+    headers = {"Authorization": f"Bearer {HF_TOKEN}"} if HF_TOKEN else {}
+    for attempt in range(retries):
+        try:
+            response = requests.post(url, headers=headers, json=payload, timeout=20)
+            result = response.json()
+            
+            # Jika model sedang loading/dipanaskan (cold start), tunggu sesuai estimated_time
+            if isinstance(result, dict) and "estimated_time" in result:
+                wait_time = result["estimated_time"]
+                print(f"Model di server HF sedang dipanaskan, menunggu {wait_time} detik...")
+                time.sleep(min(wait_time, 15))
+                continue
+                
+            return result
+        except Exception as e:
+            print(f"Error calling HF API: {e}")
+            time.sleep(2)
+    return None
 
 def predict_sentimen(text):
     if not text or text.strip() == "":
         return "Netral"
     
-    inputs = tokenizer_sen(text, return_tensors="pt", truncation=True, padding=True, max_length=128)
-    with torch.no_grad():
-        outputs = model_sen(**inputs)
-        probs = torch.nn.functional.softmax(outputs.logits, dim=-1)
-        label_id = torch.argmax(probs, dim=1).item()
-
     sentiment_labels = ["Positif", "Negatif", "Netral"]
-    return sentiment_labels[label_id]
-
+    result = query_hf_api(API_URL_SEN, {"inputs": text})
+    
+    try:
+        # Expected format: [[{"label": "LABEL_0", "score": 0.99}, ...]]
+        predictions = result[0]
+        best_pred = max(predictions, key=lambda x: x.get("score", 0.0))
+        label_str = best_pred.get("label", "LABEL_2")
+        
+        if label_str.isdigit():
+            label_id = int(label_str)
+        elif "LABEL_" in label_str:
+            label_id = int(label_str.replace("LABEL_", ""))
+        else:
+            for label in sentiment_labels:
+                if label.lower() == label_str.lower():
+                    return label
+            return "Netral"
+            
+        return sentiment_labels[label_id]
+    except Exception as e:
+        print("Gagal mem-parsing hasil sentimen:", e)
+        return "Netral"
 
 def predict_emosi(text):
     if not text or text.strip() == "":
         return "Netral"
         
-    inputs = tokenizer_emo(text, return_tensors="pt", truncation=True, padding=True, max_length=128)
-    with torch.no_grad():
-        outputs = model_emo(**inputs)
-        probs = torch.nn.functional.softmax(outputs.logits, dim=-1)
-        label_id = torch.argmax(probs, dim=1).item()
-
     emotion_labels = ["Marah", "Takut", "Sedih", "Senang", "Cinta", "Netral"]
-    return emotion_labels[label_id]
+    result = query_hf_api(API_URL_EMO, {"inputs": text})
+    
+    try:
+        predictions = result[0]
+        best_pred = max(predictions, key=lambda x: x.get("score", 0.0))
+        label_str = best_pred.get("label", "LABEL_5")
+        
+        if label_str.isdigit():
+            label_id = int(label_str)
+        elif "LABEL_" in label_str:
+            label_id = int(label_str.replace("LABEL_", ""))
+        else:
+            for label in emotion_labels:
+                if label.lower() == label_str.lower():
+                    return label
+            return "Netral"
+            
+        return emotion_labels[label_id]
+    except Exception as e:
+        print("Gagal mem-parsing hasil emosi:", e)
+        return "Netral"
