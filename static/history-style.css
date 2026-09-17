@@ -36,18 +36,61 @@ body {
     box-sizing: border-box;
 }
 
-.logo { display: flex; align-items: center; font-size: 1.5rem; font-weight: 700; color: var(--navy-dark); text-decoration: none; }
-.logo img { width: 35px; margin-right: 10px; border-radius: 50%; }
+.logo {
+    display: flex;
+    align-items: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--navy-dark);
+    text-decoration: none;
+}
 
-.hamburger { display: none; }
+.logo img {
+    width: 35px;
+    margin-right: 10px;
+    border-radius: 50%;
+}
 
-.nav-links { list-style: none; display: flex; margin: 0; padding: 0; align-items: center; }
-.nav-links li { margin: 0 15px; }
-.nav-links a { color: var(--navy-dark); text-decoration: none; font-weight: 600; font-size: 0.9rem; text-transform: uppercase; transition: 0.3s; }
-.nav-links a:hover { opacity: 0.7; }
+.hamburger {
+    display: none;
+}
 
-.nav-btn { background-color: var(--navy-dark); color: var(--bg-cream) !important; padding: 8px 25px; border-radius: 30px; }
-.nav-btn.outline { background-color: transparent; color: var(--navy-dark) !important; }
+.nav-links {
+    list-style: none;
+    display: flex;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+}
+
+.nav-links li {
+    margin: 0 15px;
+}
+
+.nav-links a {
+    color: var(--navy-dark);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    transition: 0.3s;
+}
+
+.nav-links a:hover {
+    opacity: 0.7;
+}
+
+.nav-btn {
+    background-color: var(--navy-dark);
+    color: var(--bg-cream) !important;
+    padding: 8px 25px;
+    border-radius: 30px;
+}
+
+.nav-btn.outline {
+    background-color: transparent;
+    color: var(--navy-dark) !important;
+}
 
 /* --- HEADER RIWAYAT --- */
 .history-header {
@@ -133,7 +176,8 @@ body {
 
 /* --- TOMBOL AKSI DALAM KARTU --- */
 .card-actions {
-    margin-top: auto; /* Mendorong tombol ke paling bawah */
+    margin-top: auto;
+    /* Mendorong tombol ke paling bawah */
     display: flex;
     gap: 10px;
 }
@@ -151,12 +195,15 @@ body {
     transition: 0.3s;
 }
 
-.btn-view:hover { opacity: 0.9; }
+.btn-view:hover {
+    opacity: 0.9;
+}
 
 .btn-delete {
     flex: 1;
     background-color: transparent;
-    color: #d9534f; /* Warna merah halus */
+    color: #d9534f;
+    /* Warna merah halus */
     border: 1px solid #d9534f;
     border-radius: 12px;
     cursor: pointer;
@@ -186,7 +233,10 @@ body {
     margin-bottom: 10px;
 }
 
-.empty-state p { margin-bottom: 25px; opacity: 0.8; }
+.empty-state p {
+    margin-bottom: 25px;
+    opacity: 0.8;
+}
 
 .btn-outline-navy {
     display: inline-block;
@@ -205,10 +255,29 @@ body {
 }
 
 /* Flash Messages */
-.flash-wrapper { margin-bottom: 20px; }
-.flash { padding: 15px; border-radius: 12px; text-align: center; font-weight: 500; font-size: 0.9rem;}
-.flash.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-.flash.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+.flash-wrapper {
+    margin-bottom: 20px;
+}
+
+.flash {
+    padding: 15px;
+    border-radius: 12px;
+    text-align: center;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.flash.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.flash.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
 
 /* ========================================= 
    MOBILE RESPONSIVE 
@@ -305,8 +374,8 @@ body {
         padding: 0 15px;
     }
 
-    .history-header h1 { 
-        font-size: 2.2rem; 
+    .history-header h1 {
+        font-size: 2.2rem;
     }
 
     .history-header p {
@@ -318,7 +387,7 @@ body {
         margin: 0 auto 40px;
     }
 
-    .history-grid { 
+    .history-grid {
         grid-template-columns: 1fr;
         gap: 20px;
     }
@@ -342,7 +411,8 @@ body {
         gap: 8px;
     }
 
-    .btn-view, .btn-delete {
+    .btn-view,
+    .btn-delete {
         padding: 9px;
         font-size: 0.85rem;
     }
@@ -429,10 +499,11 @@ body {
         width: 14px;
     }
 
-    .btn-view, .btn-delete {
-        width: 100%;
+    .btn-view,
+    .btn-delete {
+        /* width: 100%; */
         text-align: center;
-        padding: 8px;
+        padding: 9px;
         font-size: 0.8rem;
     }
 
@@ -442,10 +513,15 @@ body {
     }
 
     .btn-view {
+        width: 95.5%;
+        margin-right: auto;
+        margin-left: auto;
         flex: 1;
     }
 
     .btn-delete {
+        margin-right: auto;
+        margin-left: auto;
         flex: 1;
     }
 

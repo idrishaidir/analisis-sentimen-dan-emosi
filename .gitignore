@@ -15,4 +15,4 @@ __pycache__/
 cookies/
 *.pkl
 instance/
-*.db
+CREDENTIAL.md

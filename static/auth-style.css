@@ -1,6 +1,3 @@
-/* =========================================
-   Tema: Navy & Cream (auth-style.css)
-   ========================================= */
 :root {
     --bg-cream: #F3EFE6;
     --navy-dark: #2D3250;
@@ -20,7 +17,6 @@ body {
     min-height: 100vh;
 }
 
-/* --- NAVBAR KAPSUL --- */
 .navbar-pill {
     margin: 20px auto;
     width: 95%;
@@ -44,10 +40,10 @@ body {
     font-family: var(--font-body);
 }
 
-.logo img { 
-    width: 35px; 
-    margin-right: 10px; 
-    border-radius: 50%; 
+.logo img {
+    width: 35px;
+    margin-right: 10px;
+    border-radius: 50%;
 }
 
 .nav-links {
@@ -58,7 +54,9 @@ body {
     align-items: center;
 }
 
-.nav-links li { margin: 0 15px; }
+.nav-links li {
+    margin: 0 15px;
+}
 
 .nav-links a {
     color: var(--navy-dark);
@@ -69,9 +67,10 @@ body {
     transition: all 0.3s ease;
 }
 
-.nav-links a:hover { opacity: 0.7; }
+.nav-links a:hover {
+    opacity: 0.7;
+}
 
-/* Tombol Navbar Khusus */
 .nav-btn {
     background-color: var(--navy-dark);
     color: var(--bg-cream) !important;
@@ -84,7 +83,6 @@ body {
     color: var(--navy-dark) !important;
 }
 
-/* --- CARD FORM (Login & Register) --- */
 .auth-wrapper {
     flex: 1;
     display: flex;
@@ -97,7 +95,7 @@ body {
 .auth-card {
     background-color: var(--card-blue);
     width: 100%;
-    max-width: 420px; /* Ukuran tengah untuk login & register */
+    max-width: 420px;
     padding: 40px;
     border-radius: 20px;
     border: 1px solid #B0B5C1;
@@ -105,7 +103,9 @@ body {
     box-sizing: border-box;
 }
 
-.form-group { margin-bottom: 20px; }
+.form-group {
+    margin-bottom: 20px;
+}
 
 .form-group label {
     display: block;
@@ -115,7 +115,9 @@ body {
     margin-bottom: 8px;
 }
 
-.input-wrapper { position: relative; }
+.input-wrapper {
+    position: relative;
+}
 
 .input-wrapper input {
     width: 100%;
@@ -169,7 +171,9 @@ body {
     transition: opacity 0.3s;
 }
 
-.btn-submit:hover { opacity: 0.9; }
+.btn-submit:hover {
+    opacity: 0.9;
+}
 
 .auth-footer {
     text-align: center;
@@ -184,20 +188,36 @@ body {
     text-decoration: none;
 }
 
-/* --- NOTIFIKASI FLASH --- */
-.flash-wrapper { width: 100%; max-width: 420px; margin-bottom: 15px; }
-.flash { padding: 12px; border-radius: 15px; font-size: 0.85rem; text-align: center; }
-.flash.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-.flash.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+.flash-wrapper {
+    width: 100%;
+    max-width: 420px;
+    margin-bottom: 15px;
+}
 
-/* --- HIDE NATIVE BROWSER PASSWORD REVEAL --- */
-/* Menyembunyikan icon mata bawaan dari Microsoft Edge / IE */
+.flash {
+    padding: 12px;
+    border-radius: 15px;
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+.flash.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.flash.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
 input[type="password"]::-ms-reveal,
 input[type="password"]::-ms-clear {
     display: none;
 }
 
-/* (Opsional) Menyembunyikan icon bawaan di browser berbasis Webkit jika ada */
 input[type="password"]::-webkit-contacts-auto-fill-button,
 input[type="password"]::-webkit-credentials-auto-fill-button {
     visibility: hidden;
@@ -207,11 +227,6 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
     right: 0;
 }
 
-/* ========================================= 
-   MOBILE RESPONSIVE 
-   ========================================= */
-
-/* Tablet Landscape (max-width: 1024px) */
 @media screen and (max-width: 1024px) {
     .navbar-pill {
         width: 95%;
@@ -360,7 +375,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
     }
 }
 
-/* Extra Small Mobile (max-width: 360px) */
+
 @media screen and (max-width: 360px) {
     .navbar-pill {
         padding: 10px 12px;

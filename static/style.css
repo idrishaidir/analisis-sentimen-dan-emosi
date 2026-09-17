@@ -44,7 +44,11 @@ body {
     font-family: var(--font-body);
 }
 
-.logo img { width: 35px; margin-right: 10px; border-radius: 50%; }
+.logo img {
+    width: 35px;
+    margin-right: 10px;
+    border-radius: 50%;
+}
 
 .hamburger {
     display: none;
@@ -58,7 +62,9 @@ body {
     align-items: center;
 }
 
-.nav-links li { margin: 0 15px; }
+.nav-links li {
+    margin: 0 15px;
+}
 
 .nav-links a {
     color: var(--navy-dark);
@@ -69,7 +75,9 @@ body {
     transition: all 0.3s ease;
 }
 
-.nav-links a:hover { opacity: 0.7; }
+.nav-links a:hover {
+    opacity: 0.7;
+}
 
 .nav-btn {
     background-color: var(--navy-dark);
@@ -114,7 +122,10 @@ body {
     max-width: 450px;
 }
 
-.hero-text p strong { display: block; margin-bottom: 5px; }
+.hero-text p strong {
+    display: block;
+    margin-bottom: 5px;
+}
 
 .btn-primary {
     background-color: var(--navy-dark);
@@ -127,7 +138,10 @@ body {
     display: inline-block;
 }
 
-.btn-primary:hover { opacity: 0.8; transform: translateY(-2px); }
+.btn-primary:hover {
+    opacity: 0.8;
+    transform: translateY(-2px);
+}
 
 .hero-image {
     flex: 1;
@@ -193,7 +207,9 @@ body {
     text-align: justify;
 }
 
-.about-text p { margin-bottom: 20px; }
+.about-text p {
+    margin-bottom: 20px;
+}
 
 /* --- FITUR (MENGAPA MOODIFY) SECTION --- */
 .features-section {
@@ -223,14 +239,16 @@ body {
     gap: 30px;
 }
 
-.feature-item { flex: 1; }
+.feature-item {
+    flex: 1;
+}
 
 .feature-number {
     font-family: var(--font-body);
     font-size: 2rem;
     font-weight: 400;
     margin-bottom: 15px;
-    border-bottom: 1px solid rgba(255,255,255,0.3);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
     padding-bottom: 10px;
     display: inline-block;
 }
@@ -247,7 +265,8 @@ body {
     color: white;
     padding: 60px 30px 40px;
     margin-top: 100px;
-    border-radius: 40px 40px 0 0; /* Lengkungan atas */
+    border-radius: 40px 40px 0 0;
+    /* Lengkungan atas */
 }
 
 .footer-content {
@@ -259,7 +278,7 @@ body {
 
 .footer-left {
     flex: 1;
-    border-right: 1px solid rgba(255,255,255,0.2);
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
     padding-right: 40px;
 }
 
@@ -276,6 +295,40 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
+}
+
+/* --- ANIMASI KENTANG --- */
+.kentang-text {
+    display: inline-block;
+    /* color: #fbbf24; */
+    color: #F8FAFC;
+    /* opacity: 0.85; */
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.kentang-text:hover {
+    transform: scale(1.15) rotate(-5deg);
+    text-shadow: 0 4px 12px rgba(255, 255, 255, 0.6);
+}
+
+.kentang-icon {
+    display: inline-block;
+    color: #38BDF8;
+    margin-left: 6px;
+    animation: floatRocket 2s ease-in-out infinite;
+}
+
+@keyframes floatRocket {
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(-5px) rotate(12deg);
+    }
 }
 
 /* ========================================= 
@@ -313,6 +366,7 @@ body {
 
 /* Tablet & Mobile (max-width: 768px) */
 @media screen and (max-width: 768px) {
+
     /* Navbar */
     .navbar-pill {
         flex-direction: row;
@@ -438,12 +492,13 @@ body {
     }
 
     .about-image::before {
-        display: none; /* Hide decorative element on mobile */
+        display: none;
+        /* Hide decorative element on mobile */
     }
 
     .about-text {
         font-size: 0.9rem;
-        text-align: left;
+        text-align: justify;
     }
 
     .about-text p {
@@ -494,7 +549,7 @@ body {
 
     .footer-left {
         border-right: none;
-        border-bottom: 1px solid rgba(255,255,255,0.2);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
         padding-right: 0;
         padding-bottom: 20px;
         text-align: center;
@@ -506,6 +561,10 @@ body {
 
     .footer-right {
         padding-left: 0;
+        text-align: center;
+    }
+
+    .kentang-text {
         text-align: center;
     }
 }
@@ -629,7 +688,8 @@ body {
         font-size: 1.8rem;
     }
 
-    .about-title, .features-title {
+    .about-title,
+    .features-title {
         font-size: 1.5rem;
     }
 }

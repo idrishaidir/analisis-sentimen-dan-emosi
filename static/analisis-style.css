@@ -1,6 +1,3 @@
-/* =========================================
-   TEMA: Navy & Cream (analisis-style.css)
-   ========================================= */
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@300;400;500;600&display=swap');
 
 :root {
@@ -21,7 +18,6 @@ body {
     flex-direction: column;
 }
 
-/* --- NAVBAR KAPSUL --- */
 .navbar-pill {
     margin: 20px auto;
     width: 95%;
@@ -35,20 +31,62 @@ body {
     box-sizing: border-box;
 }
 
-.logo { display: flex; align-items: center; font-size: 1.5rem; font-weight: 700; color: var(--navy-dark); text-decoration: none; }
-.logo img { width: 35px; margin-right: 10px; border-radius: 50%; }
+.logo {
+    display: flex;
+    align-items: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--navy-dark);
+    text-decoration: none;
+}
 
-.hamburger { display: none; }
+.logo img {
+    width: 35px;
+    margin-right: 10px;
+    border-radius: 50%;
+}
 
-.nav-links { list-style: none; display: flex; margin: 0; padding: 0; align-items: center; }
-.nav-links li { margin: 0 15px; }
-.nav-links a { color: var(--navy-dark); text-decoration: none; font-weight: 600; font-size: 0.9rem; text-transform: uppercase; transition: 0.3s; }
-.nav-links a:hover { opacity: 0.7; }
+.hamburger {
+    display: none;
+}
 
-.nav-btn { background-color: var(--navy-dark); color: var(--bg-cream) !important; padding: 8px 25px; border-radius: 30px; }
-.nav-btn.outline { background-color: transparent; color: var(--navy-dark) !important; }
+.nav-links {
+    list-style: none;
+    display: flex;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+}
 
-/* --- HEADER ANALISIS --- */
+.nav-links li {
+    margin: 0 15px;
+}
+
+.nav-links a {
+    color: var(--navy-dark);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    transition: 0.3s;
+}
+
+.nav-links a:hover {
+    opacity: 0.7;
+}
+
+.nav-btn {
+    background-color: var(--navy-dark);
+    color: var(--bg-cream) !important;
+    padding: 8px 25px;
+    border-radius: 30px;
+}
+
+.nav-btn.outline {
+    background-color: transparent;
+    color: var(--navy-dark) !important;
+}
+
 .analisis-header {
     text-align: center;
     margin: 40px auto;
@@ -67,7 +105,6 @@ body {
     opacity: 0.8;
 }
 
-/* --- FORM ANALISIS --- */
 .analisis-container {
     width: 95%;
     max-width: 900px;
@@ -113,7 +150,6 @@ body {
     opacity: 0.9;
 }
 
-/* Styling Input */
 input[type="text"],
 input[type="number"],
 input[type="date"] {
@@ -132,7 +168,6 @@ input:focus {
     outline: 3px solid rgba(243, 239, 230, 0.4);
 }
 
-/* --- BAGIAN BAWAH FORM --- */
 .tutorial-link-wrapper {
     text-align: right;
     margin: 20px 0;
@@ -172,13 +207,29 @@ input:focus {
     box-shadow: 0 10px 20px rgba(45, 50, 80, 0.2);
 }
 
-/* Flash Messages */
-.flash-wrapper { margin-bottom: 20px; }
-.flash { padding: 15px; border-radius: 12px; text-align: center; font-weight: 500; }
-.flash.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-.flash.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+.flash-wrapper {
+    margin-bottom: 20px;
+}
 
-/* Responsive HP */
+.flash {
+    padding: 15px;
+    border-radius: 12px;
+    text-align: center;
+    font-weight: 500;
+}
+
+.flash.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.flash.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
 /* Tablet Landscape (max-width: 1024px) */
 @media screen and (max-width: 1024px) {
     .navbar-pill {
@@ -270,8 +321,8 @@ input:focus {
         padding: 0 15px;
     }
 
-    .analisis-header h1 { 
-        font-size: 2.2rem; 
+    .analisis-header h1 {
+        font-size: 2.2rem;
     }
 
     .analisis-header p {
@@ -283,8 +334,8 @@ input:focus {
         margin: 0 auto 40px;
     }
 
-    .analisis-card { 
-        padding: 30px 20px; 
+    .analisis-card {
+        padding: 30px 20px;
         border-radius: 15px;
     }
 
@@ -297,9 +348,9 @@ input:focus {
         margin-bottom: 12px;
     }
 
-    .form-row { 
-        flex-direction: column; 
-        gap: 15px; 
+    .form-row {
+        flex-direction: column;
+        gap: 15px;
     }
 
     .form-col label {
@@ -473,8 +524,12 @@ input:focus {
 /* --- LOADING OVERLAY --- */
 .loading-overlay {
     position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(243, 239, 230, 0.95); /* Warna cream transparan */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(243, 239, 230, 0.95);
+    /* Warna cream transparan */
     z-index: 9999;
     display: flex;
     flex-direction: column;
@@ -491,28 +546,32 @@ input:focus {
 }
 
 .spinner {
-    width: 70px; 
+    width: 70px;
     height: 70px;
-    border: 6px solid rgba(45, 50, 80, 0.1); 
+    border: 6px solid rgba(45, 50, 80, 0.1);
     border-top-color: var(--navy-dark);
     border-radius: 50%;
     animation: spin 1s linear infinite;
     margin-bottom: 25px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
-@keyframes spin { 100% { transform: rotate(360deg); } }
+@keyframes spin {
+    100% {
+        transform: rotate(360deg);
+    }
+}
 
-.loading-text { 
-    font-family: var(--font-heading); 
-    font-size: 2.2rem; 
-    color: var(--navy-dark); 
+.loading-text {
+    font-family: var(--font-heading);
+    font-size: 2.2rem;
+    color: var(--navy-dark);
     margin-bottom: 10px;
 }
 
-.loading-subtext { 
-    font-family: var(--font-body); 
-    color: #555; 
+.loading-subtext {
+    font-family: var(--font-body);
+    color: #555;
     font-size: 1.1rem;
     text-align: center;
 }
