@@ -11,14 +11,15 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
+import undetected_chromedriver as uc
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 
 from .preprocessing import preprocessText
 from .models import predict_sentimen, predict_emosi
 
-def save_cookies(driver, filename="x_cookies.pkl"):
-    """Save browser cookies to file for reuse"""
+def save_cookies(driver, filename="session_state.bin"):
+    """Save browser session state to file for reuse"""
     try:
         cookies_dir = "cookies"
         os.makedirs(cookies_dir, exist_ok=True)
@@ -32,11 +33,25 @@ def save_cookies(driver, filename="x_cookies.pkl"):
         print(f"❌ Failed to save cookies: {e}")
         return False
 
-def load_cookies(driver, filename="x_cookies.pkl"):
-    """Load browser cookies from file"""
+import base64
+
+def load_cookies(driver, filename="session_state.bin"):
+    """Load browser session state from file or Environment Variable"""
     try:
         cookies_dir = "cookies"
+        os.makedirs(cookies_dir, exist_ok=True)
         cookie_path = os.path.join(cookies_dir, filename)
+        
+        # Cek apakah ada cookie dari Environment Variable (Render Production)
+        env_cookie = os.getenv("TWITTER_COOKIES_B64")
+        if env_cookie:
+            print("🚀 Mendekode cookies rahasia dari Environment Variable...")
+            try:
+                cookie_bytes = base64.b64decode(env_cookie)
+                with open(cookie_path, "wb") as file:
+                    file.write(cookie_bytes)
+            except Exception as e:
+                print(f"⚠️ Gagal mendekode cookies dari ENV: {e}")
         
         if not os.path.exists(cookie_path):
             print(f"⚠️ No saved cookies found at {cookie_path}")
@@ -48,12 +63,13 @@ def load_cookies(driver, filename="x_cookies.pkl"):
         # Add saved cookies to current session
         for cookie in cookies:
             try:
+                # Add domain to cookie if missing
+                if 'domain' not in cookie:
+                    cookie['domain'] = '.x.com'
                 driver.add_cookie(cookie)
-            except Exception:
-                pass  # Skip invalid cookies
+            except Exception as e:
+                print(f"⚠️ Cookie warning: {e}")
                 
-        driver.refresh()
-        print(f"✅ Cookies loaded from {cookie_path}")
         return True
     except Exception as e:
         print(f"❌ Failed to load cookies: {e}")
@@ -81,22 +97,23 @@ def analyze_sentiment_emotion(cleaned_path):
         return False, f"Error saat analisis: {e}"
 
 
-def scraping_tweets(keyword, limit=100, chrome_profile_path=None):
+def scraping_tweets(keyword, limit=50, chrome_profile_path=None):
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) 
     output_dir = os.path.join(base_dir, "tweets-data", "output")
     os.makedirs(output_dir, exist_ok=True)
     
     safe_keyword = re.sub(r"[^\w\s-]", "", keyword).strip().replace(" ", "_")
     
-    print("\n\n🚀 Menginisiasi Selenium WebDriver...")
+    print("🚀 Menginisiasi Selenium WebDriver...")
+    
     # Detect production vs local environment
     is_production = os.getenv('ENVIRONMENT') == 'production'
     
-    options = webdriver.ChromeOptions()
+    options = uc.ChromeOptions()
     
     # Production (Render server) configuration
     if is_production:
-        print("🔧 Running in PRODUCTION mode (headless)")
+        print("💻 Running in PRODUCTION mode (headless)")
         options.add_argument('--headless=new')
         options.add_argument('--no-sandbox')
         options.add_argument('--disable-dev-shm-usage')
@@ -104,16 +121,15 @@ def scraping_tweets(keyword, limit=100, chrome_profile_path=None):
         chrome_profile_path = None  # Don't use profile in production
     else:
         print("💻 Running in LOCAL development mode")
-        # Local development dengan Chrome profile
-        if chrome_profile_path:
-            options.add_argument(f"--user-data-dir={chrome_profile_path}")
-            options.add_argument('--profile-directory=Default')
+        # Tidak lagi menggunakan --user-data-dir karena kita sudah memakai cookies pickle (session_state.bin)
+        # Hal ini mencegah crash "DevToolsActivePort" jika folder profile terkunci.
     
     # Common options untuk production & local
+    options.add_argument("--disable-blink-features=AutomationControlled")
 
     driver = None
     try:
-        driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+        driver = uc.Chrome(options=options)
         wait = WebDriverWait(driver, 15)
 
         # Sembunyikan properti webdriver dari deteksi
@@ -151,19 +167,24 @@ def scraping_tweets(keyword, limit=100, chrome_profile_path=None):
         time.sleep(3)
         
         # Try to load saved cookies first
-        cookies_loaded = load_cookies(driver, "x_cookies.pkl")
+        cookies_loaded = load_cookies(driver, "session_state.bin")
         
         if cookies_loaded:
-            print("✅ Cookies loaded! Checking if still logged in...")
+            print("🚀 Cookies loaded! Checking if still logged in...")
             time.sleep(2)
             
-            # Verify if cookies are still valid
-            driver.get("https://x.com/home")
+            # Refresh to let cookies take effect
+            driver.refresh()
             time.sleep(3)
             
-            if "home" in driver.current_url:
+            # Check if login was successful using cookies
+            try:
+                # Look for an element that only appears when logged in
+                WebDriverWait(driver, 5).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='AppTabBar_Home_Link']"))
+                )
                 print("✅ Login berhasil menggunakan saved cookies!")
-            else:
+            except TimeoutException:
                 print("⚠️ Cookies expired atau invalid. Need manual login.")
                 cookies_loaded = False
                 driver.get("https://x.com/i/flow/login")
@@ -172,21 +193,20 @@ def scraping_tweets(keyword, limit=100, chrome_profile_path=None):
         # If cookies tidak ada atau expired, manual login
         if not cookies_loaded:
             print("\n" + "!"*50)
-            print("⚠️ HARAP LOGIN SECARA MANUAL DI BROWSER YANG TERBUKA.")
-            print("⚠️ Login ini hanya perlu dilakukan SEKALI.")
-            print("⚠️ Cookies akan disimpan untuk penggunaan berikutnya.")
+            print("🚨 HARAP LOGIN SECARA MANUAL DI BROWSER YANG TERBUKA.")
+            print("🚨 Login ini hanya perlu dilakukan SEKALI.")
+            print("🚨 Script akan menunggu maksimal 5 menit...")
             print("!"*50 + "\n")
             
-            print("⏳ Menunggu pengguna login via browser...")
-            
             try:
+                # Tunggu sampai elemen 'Home' atau indikator login sukses muncul (max 5 menit)
                 WebDriverWait(driver, 300).until(
-                    EC.url_contains("x.com/home")
+                    EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='AppTabBar_Home_Link']"))
                 )
-                print("✅ Login berhasil!")
+                print("✅ Login manual berhasil!")
                 
-                # Save cookies untuk next time
-                save_cookies(driver, "x_cookies.pkl")
+                # Save cookies for next time
+                save_cookies(driver, "session_state.bin")
                 print("💾 Cookies disimpan untuk session berikutnya.")
                 
                 time.sleep(3)

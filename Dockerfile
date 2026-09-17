@@ -40,20 +40,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of the application
 COPY . .
 
-# Hugging Face Spaces requires running as a non-root user (UID 1000)
-RUN useradd -m -u 1000 user
-RUN chown -R user:user /app
-USER user
-
-# Set environment variables required for Hugging Face & Flask
-ENV HOME=/home/user \
-    PATH=/home/user/.local/bin:$PATH \
-    PORT=7860 \
-    FLASK_ENV=production \
+# Set environment variables
+ENV FLASK_ENV=production \
     ENVIRONMENT=production
 
-# Hugging Face Spaces routes traffic to port 7860
-EXPOSE 7860
-
-# Run Gunicorn binding to port 7860
-CMD ["gunicorn", "-b", "0.0.0.0:7860", "--timeout", "120", "app:app"]
+# Run Gunicorn binding to the PORT environment variable provided by Render
+CMD gunicorn -b 0.0.0.0:$PORT --timeout 120 app:app

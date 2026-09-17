@@ -15,3 +15,8 @@ cookies/
 *.pkl
 instance/
 CREDENTIAL.md
+cookie_b64.txt
+cookies.json
+
+PRODUCTION.md
+convert_cookies.py
