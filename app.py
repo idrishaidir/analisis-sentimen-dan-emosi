@@ -94,6 +94,9 @@ class AnalysisHistory(db.Model):
     tweet_count = db.Column(db.Integer, nullable=False)
     date_created = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
+with app.app_context():
+    db.create_all()
+
 @app.route("/register", methods=["GET", "POST"])
 @limiter.limit("3 per hour", methods=["POST"])
 def register():
