@@ -15,6 +15,11 @@ def query_hf_api(url, payload, retries=3):
     for attempt in range(retries):
         try:
             response = requests.post(url, headers=headers, json=payload, timeout=20)
+            
+            # Deteksi jika limit habis (429 Too Many Requests)
+            if response.status_code == 429:
+                raise ValueError("Limit kuota AI Hugging Face telah habis. Silakan tunggu sekitar 1 jam lagi.")
+                
             result = response.json()
             
             # Jika model sedang loading/dipanaskan (cold start), tunggu sesuai estimated_time
@@ -25,6 +30,9 @@ def query_hf_api(url, payload, retries=3):
                 continue
                 
             return result
+        except ValueError as ve:
+            # Jika errornya karena limit, langsung lempar ke atas agar proses scraping berhenti
+            raise ve
         except Exception as e:
             print(f"Error calling HF API: {e}")
             time.sleep(2)
@@ -36,6 +44,9 @@ def predict_sentimen(text):
     
     sentiment_labels = ["Positif", "Negatif", "Netral"]
     result = query_hf_api(API_URL_SEN, {"inputs": text})
+    
+    if result is None:
+        return "Netral"
     
     try:
         # Expected format: [[{"label": "LABEL_0", "score": 0.99}, ...]]
@@ -64,6 +75,9 @@ def predict_emosi(text):
         
     emotion_labels = ["Marah", "Takut", "Sedih", "Senang", "Cinta", "Netral"]
     result = query_hf_api(API_URL_EMO, {"inputs": text})
+    
+    if result is None:
+        return "Netral"
     
     try:
         predictions = result[0]
