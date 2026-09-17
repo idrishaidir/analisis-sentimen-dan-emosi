@@ -1,26 +1,11 @@
 FROM python:3.9-slim
 
-# Install system dependencies, wget, gnupg, and libraries needed for Google Chrome
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     wget \
     gnupg \
     unzip \
     curl \
-    libglib2.0-0 \
-    libnss3 \
-    libgconf-2-4 \
-    libfontconfig1 \
-    libxrender1 \
-    libxext6 \
-    libxi6 \
-    libxcursor1 \
-    libxdamage1 \
-    libxrandr2 \
-    libxss1 \
-    libxcomposite1 \
-    libasound2 \
-    libatk1.0-0 \
-    libgtk-3-0 \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Google Chrome Stable
