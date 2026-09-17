@@ -6,7 +6,6 @@ venv/
 tweets-data/output/*.csv
 
 # alt
-kamus_gaul.csv
 
 __pycache__/
 
