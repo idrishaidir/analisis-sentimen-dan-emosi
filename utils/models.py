@@ -16,8 +16,9 @@ sentiment_model_name = "Ha1dir/sentimen-indobert"
 emotion_model_name = "Ha1dir/emosi-indobert"
 
 HF_TOKEN = os.getenv("HF_TOKEN")
-API_URL_SEN = f"https://api-inference.huggingface.co/models/{sentiment_model_name}"
-API_URL_EMO = f"https://api-inference.huggingface.co/models/{emotion_model_name}"
+# Hugging Face recently deprecated the api-inference domain. Migrated to router.huggingface.co
+API_URL_SEN = f"https://router.huggingface.co/hf-inference/models/{sentiment_model_name}"
+API_URL_EMO = f"https://router.huggingface.co/hf-inference/models/{emotion_model_name}"
 
 def query_hf_api(url, payload, retries=3):
     headers = {"Authorization": f"Bearer {HF_TOKEN}"} if HF_TOKEN else {}
