@@ -1,54 +1,13 @@
 import os
 import re
-import csv
-import time
-import base64
-import pickle
-import shutil
-import urllib.parse
 import pandas as pd
-import subprocess
+import shutil
+from apify_client import ApifyClient
 
 from .preprocessing import preprocessText
 from .models import predict_sentimen, predict_emosi
 
-
-def extract_auth_token():
-    """Extract auth_token from Base64 Environment Variable or local pickle file."""
-    cookies_dir = "cookies"
-    os.makedirs(cookies_dir, exist_ok=True)
-    cookie_path = os.path.join(cookies_dir, "session_state.bin")
-    
-    # Cek apakah ada cookie dari Environment Variable (Render Production)
-    env_cookie = os.getenv("TWITTER_COOKIES_B64")
-    if env_cookie:
-        print("🚀 Mendekode cookies dari Environment Variable...")
-        try:
-            cookie_bytes = base64.b64decode(env_cookie)
-            with open(cookie_path, "wb") as file:
-                file.write(cookie_bytes)
-        except Exception as e:
-            print(f"⚠️ Gagal mendekode cookies dari ENV: {e}")
-            
-    if not os.path.exists(cookie_path):
-        print("⚠️ No saved cookies found!")
-        return None
-        
-    try:
-        with open(cookie_path, "rb") as file:
-            cookies = pickle.load(file)
-            
-        # Cari auth_token
-        for cookie in cookies:
-            if cookie.get('name') == 'auth_token':
-                return cookie.get('value')
-    except Exception as e:
-        print(f"❌ Failed to parse cookies: {e}")
-        
-    return None
-
 def analyze_sentiment_emotion(csv_path):
-    # (Kode fungsi ini tetap sama seperti sebelumnya)
     try:
         print(f"🔍 Mulai analisis file: {csv_path}")
         df = pd.read_csv(csv_path, encoding='utf-8')
@@ -56,7 +15,7 @@ def analyze_sentiment_emotion(csv_path):
         if "text" not in df.columns:
             return False, "Kolom 'text' tidak ditemukan dalam file CSV."
 
-        print(f"⚙️ Melakukan prediksi sentimen & emosi...")
+        print(f"⚙️ Melakukan prediksi sentimen & emosi dengan IndoBERT...")
         df['sentimen'] = df['text'].apply(predict_sentimen)
         df['emosi'] = df['text'].apply(predict_emosi)
         
@@ -79,79 +38,59 @@ def scraping_tweets(keyword, limit=50, chrome_profile_path=None):
     os.makedirs(output_dir, exist_ok=True)
     
     safe_keyword = re.sub(r"[^\w\s-]", "", keyword).strip().replace(" ", "_")
-    filename = f"{safe_keyword}.csv"
-    relative_output = os.path.join("output", filename)
-    absolute_output = os.path.join(output_dir, filename)
+    output_filename = f"{safe_keyword}_cleaned.csv"
+    cleaned_path = os.path.join(output_dir, output_filename)
     
-    print("\n🚀 Menyiapkan proses tweet-harvest...")
-    
-    auth_token = extract_auth_token()
-    if not auth_token:
-        # Fallback jika di-set langsung lewat .env
-        auth_token = os.getenv("TWITTER_AUTH_TOKEN")
-        if not auth_token:
-            return False, "Cookies (auth_token) tidak ditemukan! Harap perbarui TWITTER_COOKIES_B64."
+    # Dapatkan Apify Token dari Environment Variables
+    apify_token = os.getenv("APIFY_API_TOKEN")
+    if not apify_token:
+        return False, "APIFY_API_TOKEN tidak ditemukan! Harap tambahkan di Environment Variable."
 
-    # Render Linux menggunakan 'tweet-harvest' global, Windows menggunakan 'npx.cmd'
-    is_production = os.getenv('ENVIRONMENT') == 'production'
-    
-    # Hanya gunakan keyword, TANPA since/until date sesuai dengan penemuan terbarumu!
-    search_query = f"{keyword} lang:id"
-    
-    if is_production:
-        command = [
-            "tweet-harvest",
-            "-o", relative_output, "-s", search_query,
-            "--tab", "LATEST", "-l", str(limit),
-            "--token", auth_token
-        ]
-    else:
-        command = [
-            r"C:\Program Files\nodejs\npx.cmd", "-y", "tweet-harvest@latest",
-            "-o", relative_output, "-s", search_query,
-            "--tab", "LATEST", "-l", str(limit),
-            "--token", auth_token
-        ]
-    
-    print("🚀 Menjalankan:", " ".join(command))
+    print(f"🚀 Memulai Apify Cloud Scraper untuk kata kunci: '{keyword}'")
     
     try:
-        # Jalankan tweet-harvest
-        subprocess.run(command, check=True, cwd=base_dir) 
+        # Inisialisasi client Apify
+        client = ApifyClient(apify_token)
+
+        # Siapkan input untuk actor 'apidojo/tweet-scraper'
+        run_input = {
+            "searchTerms": [f"{keyword} lang:id"],
+            "sort": "Latest",
+            "maxItems": int(limit)
+        }
+
+        print("☁️ Mengirim perintah ke server Apify... (Mohon tunggu beberapa detik)")
         
-        # Cek ketersediaan file
-        for i in range(10):
-            if os.path.exists(absolute_output):
-                break
-            time.sleep(1)
-            
-        if not os.path.exists(absolute_output):
-            return False, f"File hasil scraping tidak ditemukan. Bot mungkin dicegat oleh Twitter."
-            
-        print(f"✅ File ditemukan: {absolute_output}")
+        # Panggil Actor dan tunggu sampai selesai
+        run = client.actor("apidojo/tweet-scraper").call(run_input=run_input)
         
-        # Deteksi delimiter otomatis
-        try:
-            df = pd.read_csv(absolute_output, encoding="utf-8-sig", delimiter=";")
-            if "full_text" not in df.columns:
-                df = pd.read_csv(absolute_output, encoding="utf-8-sig", delimiter=",")
-        except pd.errors.EmptyDataError:
+        print("✅ Proses di Apify selesai. Mengambil hasil data...")
+        
+        tweets_data = []
+        for item in client.dataset(run["defaultDatasetId"]).iterate_items():
+            # Ekstrak data yang penting saja sesuai format AI kita
+            tweets_data.append({
+                "created_at": item.get("createdAt", "Unknown Date"),
+                "username": item.get("author", {}).get("userName", "Unknown"),
+                "full_text": item.get("text", "")
+            })
+        
+        if not tweets_data:
             return False, "Tidak ada tweet yang ditemukan untuk kata kunci tersebut."
-            
-        if "full_text" not in df.columns:
-            possible_text_col = df.columns[0]
-            df.rename(columns={possible_text_col: "full_text"}, inplace=True)
-            
-        print("⚙️ Preprocessing teks...")
+
+        print(f"📦 Berhasil mengambil {len(tweets_data)} tweet! Memulai Preprocessing teks...")
+        
+        # Konversi ke Pandas DataFrame
+        df = pd.DataFrame(tweets_data)
+        
+        # Lakukan pembersihan (Preprocessing)
         df["text"] = df["full_text"].astype(str).apply(preprocessText)
         
-        cleaned_path = os.path.join(output_dir, f"{safe_keyword}_cleaned.csv")
+        # Simpan sementara ke CSV
         df.to_csv(cleaned_path, index=False, encoding="utf-8")
         
-        # 9. Lanjut ke Model AI
+        # Lanjut panggil Model AI (IndoBERT)
         return analyze_sentiment_emotion(cleaned_path)
         
-    except subprocess.CalledProcessError as e:
-        return False, f"Gagal menjalankan tweet-harvest: {e}"
     except Exception as e:
-        return False, f"Terjadi kesalahan internal: {e}"
+        return False, f"Terjadi kesalahan saat menghubungi Apify API: {e}"
