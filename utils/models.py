@@ -2,23 +2,27 @@ import os
 import time
 import requests
 import socket
-import urllib3.util.connection as urllib3_cn
 
-# HACK: Paksa Requests (urllib3) untuk selalu menggunakan IPv4
-# Render sering mengalami bug DNS IPv6 ([Errno -5] No address associated with hostname) pada image linux-slim
-def allowed_gai_family():
-    return socket.AF_INET
-
-urllib3_cn.allowed_gai_family = allowed_gai_family
+# HACK: Paksa socket Python menggunakan IPv4 secara global
+# Ini jauh lebih ampuh daripada nge-patch urllib3 karena requests mungkin memanggil socket langsung
+_orig_getaddrinfo = socket.getaddrinfo
+def patched_getaddrinfo(*args, **kwargs):
+    if len(args) >= 3:
+        args = list(args)
+        args[2] = socket.AF_INET
+    elif 'family' in kwargs:
+        kwargs['family'] = socket.AF_INET
+    return _orig_getaddrinfo(*args, **kwargs)
+socket.getaddrinfo = patched_getaddrinfo
 
 print("Loading models configuration via HF Inference API...")
 sentiment_model_name = "Ha1dir/sentimen-indobert"
 emotion_model_name = "Ha1dir/emosi-indobert"
 
 HF_TOKEN = os.getenv("HF_TOKEN")
-# Hugging Face recently deprecated the api-inference domain. Migrated to router.huggingface.co
-API_URL_SEN = f"https://router.huggingface.co/hf-inference/models/{sentiment_model_name}"
-API_URL_EMO = f"https://router.huggingface.co/hf-inference/models/{emotion_model_name}"
+# Kembalikan ke URL asli Hugging Face
+API_URL_SEN = f"https://api-inference.huggingface.co/models/{sentiment_model_name}"
+API_URL_EMO = f"https://api-inference.huggingface.co/models/{emotion_model_name}"
 
 def query_hf_api(url, payload, retries=3):
     headers = {"Authorization": f"Bearer {HF_TOKEN}"} if HF_TOKEN else {}
@@ -29,6 +33,11 @@ def query_hf_api(url, payload, retries=3):
             # Deteksi jika limit habis (429 Too Many Requests)
             if response.status_code == 429:
                 raise ValueError("Limit kuota AI Hugging Face telah habis. Silakan tunggu sekitar 1 jam lagi.")
+                
+            if response.status_code != 200:
+                print(f"HF API Error: {response.status_code} - {response.text[:500]}")
+                time.sleep(2)
+                continue
                 
             result = response.json()
             
