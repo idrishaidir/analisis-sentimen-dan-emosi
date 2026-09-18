@@ -52,27 +52,32 @@ def scraping_tweets(keyword, limit=50, chrome_profile_path=None):
         # Inisialisasi client Apify
         client = ApifyClient(apify_token)
 
-        # Siapkan input untuk actor 'apidojo/tweet-scraper'
+        # Siapkan input untuk actor alternatif yang ramah Free Plan
         run_input = {
             "searchTerms": [f"{keyword} lang:id"],
-            "sort": "Latest",
-            "maxItems": int(limit)
+            "maxTweets": int(limit)
         }
 
         print("☁️ Mengirim perintah ke server Apify... (Mohon tunggu beberapa detik)")
         
-        # Panggil Actor dan tunggu sampai selesai
-        run = client.actor("apidojo/tweet-scraper").call(run_input=run_input)
+        # Panggil Actor alternatif (microworlds/twitter-scraper)
+        run = client.actor("microworlds/twitter-scraper").call(run_input=run_input)
         
         print("✅ Proses di Apify selesai. Mengambil hasil data...")
         
         tweets_data = []
         for item in client.dataset(run["defaultDatasetId"]).iterate_items():
-            # Ekstrak data yang penting saja sesuai format AI kita
+            # Actor microworlds biasanya mengembalikan 'full_text' langsung, atau 'text'
+            tweet_text = item.get("full_text") or item.get("text") or ""
+            
+            # Jika JSON memiliki struktur user/author berbeda, kita ambil dengan aman
+            author_data = item.get("user") or item.get("author") or {}
+            username = author_data.get("screen_name") or author_data.get("userName") or "Unknown"
+            
             tweets_data.append({
-                "created_at": item.get("createdAt", "Unknown Date"),
-                "username": item.get("author", {}).get("userName", "Unknown"),
-                "full_text": item.get("text", "")
+                "created_at": item.get("created_at") or item.get("createdAt") or "Unknown Date",
+                "username": username,
+                "full_text": tweet_text
             })
         
         if not tweets_data:
