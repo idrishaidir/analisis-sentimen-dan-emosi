@@ -52,33 +52,48 @@ def scraping_tweets(keyword, limit=50, chrome_profile_path=None):
         # Inisialisasi client Apify
         client = ApifyClient(apify_token)
 
-        # Siapkan input untuk actor alternatif yang ramah Free Plan
+        # Siapkan input untuk actor 'kaitoeasyapi/twitter-x-data-tweet-scraper-pay-per-result-cheapest'
+        # Memasukkan beberapa variasi parameter agar pasti cocok dengan format pembuatnya
+        search_query = f"{keyword} lang:id"
         run_input = {
-            "searchTerms": [f"{keyword} lang:id"],
+            "searchTerms": [search_query],
+            "query": search_query,
+            "maxItems": int(limit),
             "maxTweets": int(limit)
         }
 
         print("☁️ Mengirim perintah ke server Apify... (Mohon tunggu beberapa detik)")
         
-        # Panggil Actor alternatif (microworlds/twitter-scraper)
-        run = client.actor("microworlds/twitter-scraper").call(run_input=run_input)
+        # Panggil Actor pilihanmu
+        run = client.actor("kaitoeasyapi/twitter-x-data-tweet-scraper-pay-per-result-cheapest").call(run_input=run_input)
         
         print("✅ Proses di Apify selesai. Mengambil hasil data...")
         
         tweets_data = []
         for item in client.dataset(run["defaultDatasetId"]).iterate_items():
-            # Actor microworlds biasanya mengembalikan 'full_text' langsung, atau 'text'
-            tweet_text = item.get("full_text") or item.get("text") or ""
-            
-            # Jika JSON memiliki struktur user/author berbeda, kita ambil dengan aman
+            # Ekstrak Teks Tweet (Sangat Kokoh)
+            tweet_text = item.get("full_text") or item.get("text") or item.get("content") or ""
+            if not tweet_text and "tweet" in item and isinstance(item["tweet"], dict):
+                tweet_text = item["tweet"].get("full_text") or item["tweet"].get("text") or ""
+                
+            # Ekstrak Username (Sangat Kokoh)
             author_data = item.get("user") or item.get("author") or {}
-            username = author_data.get("screen_name") or author_data.get("userName") or "Unknown"
+            if not author_data and "core" in item:  # Raw Twitter GraphQL format
+                try:
+                    author_data = item["core"]["user_results"]["result"]["legacy"]
+                except KeyError:
+                    pass
+            username = author_data.get("screen_name") or author_data.get("userName") or author_data.get("username") or "Unknown"
             
-            tweets_data.append({
-                "created_at": item.get("created_at") or item.get("createdAt") or "Unknown Date",
-                "username": username,
-                "full_text": tweet_text
-            })
+            # Ekstrak Tanggal
+            created_at = item.get("created_at") or item.get("createdAt") or item.get("date") or "Unknown Date"
+            
+            if tweet_text:
+                tweets_data.append({
+                    "created_at": created_at,
+                    "username": username,
+                    "full_text": tweet_text
+                })
         
         if not tweets_data:
             return False, "Tidak ada tweet yang ditemukan untuk kata kunci tersebut."
