@@ -1,291 +1,142 @@
 import os
-import time
-import pandas as pd
 import re
-import urllib.parse
+import csv
+import time
+import base64
 import pickle
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
-
-import undetected_chromedriver as uc
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
+import shutil
+import urllib.parse
+import pandas as pd
+import subprocess
 
 from .preprocessing import preprocessText
 from .models import predict_sentimen, predict_emosi
 
-def save_cookies(driver, filename="session_state.bin"):
-    """Save browser session state to file for reuse"""
-    try:
-        cookies_dir = "cookies"
-        os.makedirs(cookies_dir, exist_ok=True)
-        cookie_path = os.path.join(cookies_dir, filename)
-        
-        with open(cookie_path, "wb") as file:
-            pickle.dump(driver.get_cookies(), file)
-        print(f"✅ Cookies saved to {cookie_path}")
-        return True
-    except Exception as e:
-        print(f"❌ Failed to save cookies: {e}")
-        return False
 
-import base64
-
-def load_cookies(driver, filename="session_state.bin"):
-    """Load browser session state from file or Environment Variable"""
-    try:
-        cookies_dir = "cookies"
-        os.makedirs(cookies_dir, exist_ok=True)
-        cookie_path = os.path.join(cookies_dir, filename)
-        
-        # Cek apakah ada cookie dari Environment Variable (Render Production)
-        env_cookie = os.getenv("TWITTER_COOKIES_B64")
-        if env_cookie:
-            print("🚀 Mendekode cookies rahasia dari Environment Variable...")
-            try:
-                cookie_bytes = base64.b64decode(env_cookie)
-                with open(cookie_path, "wb") as file:
-                    file.write(cookie_bytes)
-            except Exception as e:
-                print(f"⚠️ Gagal mendekode cookies dari ENV: {e}")
-        
-        if not os.path.exists(cookie_path):
-            print(f"⚠️ No saved cookies found at {cookie_path}")
-            return False
+def extract_auth_token():
+    """Extract auth_token from Base64 Environment Variable or local pickle file."""
+    cookies_dir = "cookies"
+    os.makedirs(cookies_dir, exist_ok=True)
+    cookie_path = os.path.join(cookies_dir, "session_state.bin")
+    
+    # Cek apakah ada cookie dari Environment Variable (Render Production)
+    env_cookie = os.getenv("TWITTER_COOKIES_B64")
+    if env_cookie:
+        print("🚀 Mendekode cookies dari Environment Variable...")
+        try:
+            cookie_bytes = base64.b64decode(env_cookie)
+            with open(cookie_path, "wb") as file:
+                file.write(cookie_bytes)
+        except Exception as e:
+            print(f"⚠️ Gagal mendekode cookies dari ENV: {e}")
             
+    if not os.path.exists(cookie_path):
+        print("⚠️ No saved cookies found!")
+        return None
+        
+    try:
         with open(cookie_path, "rb") as file:
             cookies = pickle.load(file)
             
-        # Add saved cookies to current session
+        # Cari auth_token
         for cookie in cookies:
-            try:
-                # Add domain to cookie if missing
-                if 'domain' not in cookie:
-                    cookie['domain'] = '.x.com'
-                driver.add_cookie(cookie)
-            except Exception as e:
-                print(f"⚠️ Cookie warning: {e}")
-                
-        return True
+            if cookie.get('name') == 'auth_token':
+                return cookie.get('value')
     except Exception as e:
-        print(f"❌ Failed to load cookies: {e}")
-        return False
-
-def analyze_sentiment_emotion(cleaned_path):
-    try:
-        print(f"🔍 Membaca file: {cleaned_path}")
-        df = pd.read_csv(cleaned_path)
-        if "text" not in df.columns:
-            return False, "Kolom 'text' tidak ditemukan!"
-
-        df["text"] = df["text"].fillna("")
-
-        print("⚙️ Melakukan prediksi sentimen & emosi...")
-        df["sentimen"] = df["text"].apply(predict_sentimen)
-        df["emosi"] = df["text"].apply(predict_emosi)
-
-        labeled_path = cleaned_path.replace("_cleaned.csv", "_label.csv")
-        df.to_csv(labeled_path, index=False, encoding="utf-8")
+        print(f"❌ Failed to parse cookies: {e}")
         
-        print(f"✅ Hasil tersimpan di: {labeled_path}")
+    return None
+
+def analyze_sentiment_emotion(csv_path):
+    # (Kode fungsi ini tetap sama seperti sebelumnya)
+    try:
+        print(f"🔍 Mulai analisis file: {csv_path}")
+        df = pd.read_csv(csv_path, encoding='utf-8')
+        
+        if "text" not in df.columns:
+            return False, "Kolom 'text' tidak ditemukan dalam file CSV."
+
+        print(f"⚙️ Melakukan prediksi sentimen & emosi...")
+        df['sentimen'] = df['text'].apply(predict_sentimen)
+        df['emosi'] = df['text'].apply(predict_emosi)
+        
+        labeled_path = csv_path.replace('_cleaned.csv', '_labeled.csv')
+        df.to_csv(labeled_path, index=False, encoding='utf-8')
+        
         return True, labeled_path
+
     except Exception as e:
         return False, f"Error saat analisis: {e}"
 
-
 def scraping_tweets(keyword, limit=50, chrome_profile_path=None):
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) 
-    output_dir = os.path.join(base_dir, "tweets-data", "output")
+    tweets_dir = os.path.join(base_dir, "tweets-data")
+    output_dir = os.path.join(tweets_dir, "output")
+    
+    # Hapus folder output lama jika ada agar bersih
+    if os.path.exists(output_dir):
+        shutil.rmtree(output_dir)
     os.makedirs(output_dir, exist_ok=True)
     
     safe_keyword = re.sub(r"[^\w\s-]", "", keyword).strip().replace(" ", "_")
+    filename = f"{safe_keyword}.csv"
+    relative_output = os.path.join("output", filename)
+    absolute_output = os.path.join(output_dir, filename)
     
-    print("🚀 Menginisiasi Selenium WebDriver...")
+    print("\n🚀 Menyiapkan proses tweet-harvest...")
     
-    # Detect production vs local environment
+    auth_token = extract_auth_token()
+    if not auth_token:
+        # Fallback jika di-set langsung lewat .env
+        auth_token = os.getenv("TWITTER_AUTH_TOKEN")
+        if not auth_token:
+            return False, "Cookies (auth_token) tidak ditemukan! Harap perbarui TWITTER_COOKIES_B64."
+
+    # Render Linux menggunakan 'npx', Windows menggunakan 'npx.cmd'
     is_production = os.getenv('ENVIRONMENT') == 'production'
+    npx_cmd = "npx" if is_production else r"C:\Program Files\nodejs\npx.cmd"
     
-    options = uc.ChromeOptions()
+    # Hanya gunakan keyword, TANPA since/until date sesuai dengan penemuan terbarumu!
+    search_query = f"{keyword} lang:id"
     
-    # Production (Render server) configuration
-    if is_production:
-        print("💻 Running in PRODUCTION mode (headless)")
-        options.add_argument('--headless=new')
-        options.add_argument('--no-sandbox')
-        options.add_argument('--disable-dev-shm-usage')
-        options.add_argument('--disable-gpu')
-        # Ekstra optimasi memori untuk Render (Free Tier 512MB)
-        options.add_argument('--disable-extensions')
-        options.add_argument('--disable-software-rasterizer')
-        options.add_argument('--window-size=800,600')
-        options.add_argument('--blink-settings=imagesEnabled=false')
-        options.add_argument('--js-flags="--max-old-space-size=128"')
-        chrome_profile_path = None  # Don't use profile in production
-    else:
-        print("💻 Running in LOCAL development mode")
-        # Tidak lagi menggunakan --user-data-dir karena kita sudah memakai cookies pickle (session_state.bin)
-        # Hal ini mencegah crash "DevToolsActivePort" jika folder profile terkunci.
+    command = [
+        npx_cmd, "-y", "tweet-harvest@latest",
+        "-o", relative_output, "-s", search_query,
+        "--tab", "LATEST", "-l", str(limit),
+        "--token", auth_token
+    ]
     
-    # Common options untuk production & local
-    options.add_argument("--disable-blink-features=AutomationControlled")
-
-    driver = None
+    print("🚀 Menjalankan:", " ".join(command))
+    
     try:
-        driver = uc.Chrome(options=options)
-        wait = WebDriverWait(driver, 15)
-
-        # Sembunyikan properti webdriver dari deteksi
-        try:
-            driver.execute_cdp_cmd('Page.addScriptToEvaluateOnNewDocument', {
-                'source': '''
-                    Object.defineProperty(navigator, 'webdriver', {
-                        get: () => undefined
-                    });
-                    window.navigator.chrome = {
-                        runtime: {}
-                    };
-                    Object.defineProperty(navigator, 'permissions', {
-                        get: () => ({
-                            query: (parameters) => (
-                                parameters.name === 'notifications' ?
-                                Promise.resolve({ state: Notification.permission }) :
-                                Promise.resolve({ state: 'denied' })
-                            )
-                        })
-                    });
-                    Object.defineProperty(navigator, 'languages', {
-                        get: () => ['en-US', 'en']
-                    });
-                    Object.defineProperty(navigator, 'plugins', {
-                        get: () => [1, 2, 3, 4, 5]
-                    });
-                '''
-            })
-        except Exception:
-            pass
-
-        # Buka halaman login hanya untuk inisialisasi domain (syarat mutlak sebelum inject cookie)
-        print("\n🚀 Membuka halaman X untuk inisialisasi...")
-        driver.get("https://x.com/404") # Gunakan halaman 404 yang sangat ringan daripada halaman login!
-        time.sleep(2)
+        # Jalankan tweet-harvest
+        subprocess.run(command, check=True, cwd=base_dir) 
         
-        # Try to load saved cookies first
-        cookies_loaded = load_cookies(driver, "session_state.bin")
-        
-        if cookies_loaded:
-            print("🚀 Cookies loaded! Bypassing verification to save RAM...")
-            # Kita TIDAK melakukan refresh atau memuat x.com/home karena itu akan membuat RAM penuh (OOM).
-            # Langsung lanjut ke halaman pencarian nanti!
-        else:
-            # If cookies tidak ada atau expired, manual login (HANYA BERLAKU DI LOKAL)
-            if not is_production:
-                print("\n" + "!"*50)
-                print("🚨 HARAP LOGIN SECARA MANUAL DI BROWSER YANG TERBUKA.")
-                print("🚨 Script akan menunggu maksimal 5 menit...")
-                print("!"*50 + "\n")
-                
-                driver.get("https://x.com/i/flow/login")
-                
-                try:
-                    WebDriverWait(driver, 300).until(
-                        EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='AppTabBar_Home_Link']"))
-                    )
-                    print("✅ Login manual berhasil!")
-                    save_cookies(driver, "session_state.bin")
-                except TimeoutException:
-                    print("⚠️ Waktu login habis.")
-                    driver.quit()
-                    return False, "Waktu login habis."
-            else:
-                print("⚠️ COOKIES TIDAK DITEMUKAN DI PRODUCTION!")
-                driver.quit()
-                return False, "Cookies tidak valid. Hubungi admin."
-        
-        print("✅ Melanjutkan proses scraping...")
-        
-        search_query = f"{keyword}"
-        print(f"🔍 Mencari tweet: {search_query}")
-        
-        encoded_query = urllib.parse.quote_plus(search_query)
-        search_url = f"https://x.com/search?q={encoded_query}&src=typed_query&f=live"
-        driver.get(search_url)
-
-        limit = int(limit)
-
-        def scrape_current_page():
-            page_tweets = []
-            seen = set()
-            scroll_attempts = 0
-
-            while len(page_tweets) < limit and scroll_attempts < 15:
-                time.sleep(3)
-                articles = driver.find_elements(By.XPATH, '//article[@data-testid="tweet"]')
-
-                new_tweets_found = 0
-                for article in articles:
-                    if len(page_tweets) >= limit:
-                        break
-
-                    try:
-                        text_elem = article.find_element(By.XPATH, './/div[@data-testid="tweetText"]')
-                        tweet_text = text_elem.text.strip()
-
-                        if not tweet_text or tweet_text in seen:
-                            continue
-
-                        user_elem = article.find_element(By.XPATH, './/div[@data-testid="User-Name"]')
-                        username_text = user_elem.text.split('\n')[0] if '\n' in user_elem.text else "Unknown"
-
-                        try:
-                            time_elem = article.find_element(By.XPATH, './/time')
-                            created_at = time_elem.get_attribute("datetime")
-                        except:
-                            created_at = "Unknown Date"
-
-                        page_tweets.append({
-                            "created_at": created_at,
-                            "username": username_text,
-                            "full_text": tweet_text
-                        })
-                        seen.add(tweet_text)
-                        new_tweets_found += 1
-                    except Exception:
-                        continue
-
-                if new_tweets_found == 0:
-                    scroll_attempts += 1
-                else:
-                    scroll_attempts = 0
-
-                driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-
-            return page_tweets
-
-        print("⏳ Mulai mengumpulkan data... (Proses ini mungkin memakan waktu)")
-        tweets_data = scrape_current_page()
-
-        if not tweets_data:
-            print("⚠️ Tidak ada hasil dengan filter tanggal. Mencoba ulang tanpa since/until...")
-            search_query = f"{keyword} lang:id"
-            encoded_query = urllib.parse.quote_plus(search_query)
-            fallback_url = f"https://x.com/search?q={encoded_query}&src=typed_query&f=live"
-            driver.get(fallback_url)
-            tweets_data = scrape_current_page()
-
-        if not tweets_data:
-            return False, "Tidak ada tweet yang ditemukan untuk periode tersebut atau bot dicegat oleh X."
+        # Cek ketersediaan file
+        for i in range(10):
+            if os.path.exists(absolute_output):
+                break
+            time.sleep(1)
             
-        print(f"✅ Berhasil mengambil {len(tweets_data)} tweet menggunakan Selenium.")
+        if not os.path.exists(absolute_output):
+            return False, f"File hasil scraping tidak ditemukan. Bot mungkin dicegat oleh Twitter."
+            
+        print(f"✅ File ditemukan: {absolute_output}")
         
-        # 8. Konversi ke DataFrame dan Preprocessing
-        df = pd.DataFrame(tweets_data)
-        
+        # Deteksi delimiter otomatis
+        try:
+            df = pd.read_csv(absolute_output, encoding="utf-8-sig", delimiter=";")
+            if "full_text" not in df.columns:
+                df = pd.read_csv(absolute_output, encoding="utf-8-sig", delimiter=",")
+        except pd.errors.EmptyDataError:
+            return False, "Tidak ada tweet yang ditemukan untuk kata kunci tersebut."
+            
+        if "full_text" not in df.columns:
+            possible_text_col = df.columns[0]
+            df.rename(columns={possible_text_col: "full_text"}, inplace=True)
+            
         print("⚙️ Preprocessing teks...")
-        df["text"] = df["full_text"].apply(preprocessText)
+        df["text"] = df["full_text"].astype(str).apply(preprocessText)
         
         cleaned_path = os.path.join(output_dir, f"{safe_keyword}_cleaned.csv")
         df.to_csv(cleaned_path, index=False, encoding="utf-8")
@@ -293,12 +144,7 @@ def scraping_tweets(keyword, limit=50, chrome_profile_path=None):
         # 9. Lanjut ke Model AI
         return analyze_sentiment_emotion(cleaned_path)
         
-    except TimeoutException:
-        return False, "Gagal/Timeout saat login. Pastikan kredensial benar dan internet stabil."
+    except subprocess.CalledProcessError as e:
+        return False, f"Gagal menjalankan tweet-harvest: {e}"
     except Exception as e:
-        return False, f"Terjadi kesalahan pada Selenium: {e}"
-    finally:
-        # PENTING: Tutup browser agar memori RAM tidak penuh
-        if driver is not None:
-            driver.quit()
-        print("🛑 Browser Selenium ditutup.")
+        return False, f"Terjadi kesalahan internal: {e}"
