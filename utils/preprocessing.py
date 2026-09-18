@@ -12,6 +12,10 @@ for pkg in ['punkt_tab', 'stopwords']:
     except LookupError:
         nltk.download(pkg)
 
+# LOAD STEMMER GLOBALLY (Sangat penting agar tidak Out Of Memory / Timeout)
+factory = StemmerFactory()
+global_stemmer = factory.create_stemmer()
+
 # --- Memuat kamus_gaul.csv ---
 def load_kamus():
     """Membaca kamus_gaul.csv dari direktori root proyek."""
@@ -61,9 +65,7 @@ def filteringText(tokens):
     return [word for word in tokens if word not in stop_words]
 
 def stemmingText(tokens):
-    factory = StemmerFactory()
-    stemmer = factory.create_stemmer()
-    return [stemmer.stem(word) for word in tokens]
+    return [global_stemmer.stem(word) for word in tokens]
 
 def toSentence(tokens):
     return " ".join(tokens)
