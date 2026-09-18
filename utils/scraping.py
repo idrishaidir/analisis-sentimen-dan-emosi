@@ -67,10 +67,14 @@ def scraping_tweets(keyword, limit=50, chrome_profile_path=None):
         # Panggil Actor pilihanmu
         run = client.actor("kaitoeasyapi/twitter-x-data-tweet-scraper-pay-per-result-cheapest").call(run_input=run_input)
         
-        print("✅ Proses di Apify selesai. Mengambil hasil data...")
-        
+        # Ekstrak Dataset ID dengan cara yang kebal terhadap perubahan versi apify-client (dict vs object)
+        if isinstance(run, dict):
+            dataset_id = run.get("defaultDatasetId")
+        else:
+            dataset_id = getattr(run, "defaultDatasetId", None) or getattr(run, "default_dataset_id", None)
+            
         tweets_data = []
-        for item in client.dataset(run["defaultDatasetId"]).iterate_items():
+        for item in client.dataset(dataset_id).iterate_items():
             # Ekstrak Teks Tweet (Sangat Kokoh)
             tweet_text = item.get("full_text") or item.get("text") or item.get("content") or ""
             if not tweet_text and "tweet" in item and isinstance(item["tweet"], dict):
