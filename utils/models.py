@@ -1,6 +1,15 @@
 import os
 import time
 import requests
+import socket
+import urllib3.util.connection as urllib3_cn
+
+# HACK: Paksa Requests (urllib3) untuk selalu menggunakan IPv4
+# Render sering mengalami bug DNS IPv6 ([Errno -5] No address associated with hostname) pada image linux-slim
+def allowed_gai_family():
+    return socket.AF_INET
+
+urllib3_cn.allowed_gai_family = allowed_gai_family
 
 print("Loading models configuration via HF Inference API...")
 sentiment_model_name = "Ha1dir/sentimen-indobert"
