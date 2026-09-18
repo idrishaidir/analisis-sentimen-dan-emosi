@@ -19,7 +19,7 @@ def analyze_sentiment_emotion(csv_path):
         df['sentimen'] = df['text'].apply(predict_sentimen)
         df['emosi'] = df['text'].apply(predict_emosi)
         
-        labeled_path = csv_path.replace('_cleaned.csv', '_labeled.csv')
+        labeled_path = csv_path.replace('_cleaned.csv', '_label.csv')
         df.to_csv(labeled_path, index=False, encoding='utf-8')
         
         return True, labeled_path
