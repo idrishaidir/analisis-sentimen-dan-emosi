@@ -168,59 +168,42 @@ def scraping_tweets(keyword, limit=50, chrome_profile_path=None):
         except Exception:
             pass
 
-        print("\n🔐 Membuka halaman login X...")
-        driver.get("https://x.com/i/flow/login")
-        time.sleep(3)
+        # Buka halaman login hanya untuk inisialisasi domain (syarat mutlak sebelum inject cookie)
+        print("\n🚀 Membuka halaman X untuk inisialisasi...")
+        driver.get("https://x.com/404") # Gunakan halaman 404 yang sangat ringan daripada halaman login!
+        time.sleep(2)
         
         # Try to load saved cookies first
         cookies_loaded = load_cookies(driver, "session_state.bin")
         
         if cookies_loaded:
-            print("🚀 Cookies loaded! Checking if still logged in...")
-            time.sleep(2)
-            
-            # Refresh to let cookies take effect
-            driver.refresh()
-            time.sleep(3)
-            
-            # Check if login was successful using cookies
-            try:
-                # Look for an element that only appears when logged in
-                WebDriverWait(driver, 5).until(
-                    EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='AppTabBar_Home_Link']"))
-                )
-                print("✅ Login berhasil menggunakan saved cookies!")
-            except TimeoutException:
-                print("⚠️ Cookies expired atau invalid. Need manual login.")
-                cookies_loaded = False
+            print("🚀 Cookies loaded! Bypassing verification to save RAM...")
+            # Kita TIDAK melakukan refresh atau memuat x.com/home karena itu akan membuat RAM penuh (OOM).
+            # Langsung lanjut ke halaman pencarian nanti!
+        else:
+            # If cookies tidak ada atau expired, manual login (HANYA BERLAKU DI LOKAL)
+            if not is_production:
+                print("\n" + "!"*50)
+                print("🚨 HARAP LOGIN SECARA MANUAL DI BROWSER YANG TERBUKA.")
+                print("🚨 Script akan menunggu maksimal 5 menit...")
+                print("!"*50 + "\n")
+                
                 driver.get("https://x.com/i/flow/login")
-                time.sleep(2)
-        
-        # If cookies tidak ada atau expired, manual login
-        if not cookies_loaded:
-            print("\n" + "!"*50)
-            print("🚨 HARAP LOGIN SECARA MANUAL DI BROWSER YANG TERBUKA.")
-            print("🚨 Login ini hanya perlu dilakukan SEKALI.")
-            print("🚨 Script akan menunggu maksimal 5 menit...")
-            print("!"*50 + "\n")
-            
-            try:
-                # Tunggu sampai elemen 'Home' atau indikator login sukses muncul (max 5 menit)
-                WebDriverWait(driver, 300).until(
-                    EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='AppTabBar_Home_Link']"))
-                )
-                print("✅ Login manual berhasil!")
                 
-                # Save cookies for next time
-                save_cookies(driver, "session_state.bin")
-                print("💾 Cookies disimpan untuk session berikutnya.")
-                
-                time.sleep(3)
-                
-            except TimeoutException:
-                print("❌ Waktu login habis (lebih dari 5 menit).")
+                try:
+                    WebDriverWait(driver, 300).until(
+                        EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='AppTabBar_Home_Link']"))
+                    )
+                    print("✅ Login manual berhasil!")
+                    save_cookies(driver, "session_state.bin")
+                except TimeoutException:
+                    print("⚠️ Waktu login habis.")
+                    driver.quit()
+                    return False, "Waktu login habis."
+            else:
+                print("⚠️ COOKIES TIDAK DITEMUKAN DI PRODUCTION!")
                 driver.quit()
-                return False, "Waktu login habis. Silakan coba lagi."
+                return False, "Cookies tidak valid. Hubungi admin."
         
         print("✅ Melanjutkan proses scraping...")
         
