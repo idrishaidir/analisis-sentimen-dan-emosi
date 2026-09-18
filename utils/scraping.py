@@ -92,19 +92,26 @@ def scraping_tweets(keyword, limit=50, chrome_profile_path=None):
         if not auth_token:
             return False, "Cookies (auth_token) tidak ditemukan! Harap perbarui TWITTER_COOKIES_B64."
 
-    # Render Linux menggunakan 'npx', Windows menggunakan 'npx.cmd'
+    # Render Linux menggunakan 'tweet-harvest' global, Windows menggunakan 'npx.cmd'
     is_production = os.getenv('ENVIRONMENT') == 'production'
-    npx_cmd = "npx" if is_production else r"C:\Program Files\nodejs\npx.cmd"
     
     # Hanya gunakan keyword, TANPA since/until date sesuai dengan penemuan terbarumu!
     search_query = f"{keyword} lang:id"
     
-    command = [
-        npx_cmd, "-y", "tweet-harvest@latest",
-        "-o", relative_output, "-s", search_query,
-        "--tab", "LATEST", "-l", str(limit),
-        "--token", auth_token
-    ]
+    if is_production:
+        command = [
+            "tweet-harvest",
+            "-o", relative_output, "-s", search_query,
+            "--tab", "LATEST", "-l", str(limit),
+            "--token", auth_token
+        ]
+    else:
+        command = [
+            r"C:\Program Files\nodejs\npx.cmd", "-y", "tweet-harvest@latest",
+            "-o", relative_output, "-s", search_query,
+            "--tab", "LATEST", "-l", str(limit),
+            "--token", auth_token
+        ]
     
     print("🚀 Menjalankan:", " ".join(command))
     

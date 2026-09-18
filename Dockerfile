@@ -8,9 +8,10 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Node.js for tweet-harvest (bypassing Chrome OOM entirely)
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+# Install Node.js v20 for tweet-harvest (fixes EBADENGINE)
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs \
+    && npm install -g tweet-harvest@latest \
     && rm -rf /var/lib/apt/lists/*
 
 # Set up working directory
