@@ -118,6 +118,12 @@ def scraping_tweets(keyword, limit=50, chrome_profile_path=None):
         options.add_argument('--no-sandbox')
         options.add_argument('--disable-dev-shm-usage')
         options.add_argument('--disable-gpu')
+        # Ekstra optimasi memori untuk Render (Free Tier 512MB)
+        options.add_argument('--disable-extensions')
+        options.add_argument('--disable-software-rasterizer')
+        options.add_argument('--window-size=800,600')
+        options.add_argument('--blink-settings=imagesEnabled=false')
+        options.add_argument('--js-flags="--max-old-space-size=128"')
         chrome_profile_path = None  # Don't use profile in production
     else:
         print("💻 Running in LOCAL development mode")
